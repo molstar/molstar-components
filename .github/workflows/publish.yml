@@ -4,33 +4,13 @@ on:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to publish (leave empty to use deno.json version)"
-        required: false
-        type: string
-
-permissions:
-  contents: read
-  id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # The OIDC ID token is used for authentication with JSR.
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
-      - name: Verify deno.json
-        run: |
-          echo "Checking deno.json configuration..."
-          deno eval "console.log(JSON.parse(Deno.readTextFileSync('deno.json')))"
-
-      - name: Publish to JSR
-        run: deno publish --allow-dirty
+      - uses: actions/checkout@v5
+      - run: npx jsr publish

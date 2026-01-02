@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { h } from "preact";
-import { useState, useCallback } from "preact/hooks";
+import { useCallback, useState } from "preact/hooks";
 import { StoryManager } from "@molstar/mol-view-stories";
 import { MolViewEditor } from "./MolViewEditor.tsx";
 import { MolstarViewer } from "./MolstarViewer.tsx";
@@ -108,31 +108,31 @@ export function EditorWithViewer({
       { style: viewerContainerStyle },
       mvsData
         ? h(MolstarViewer, {
-            mvsData: mvsData,
-            config: {
-              layoutIsExpanded: false,
-              layoutShowControls: false,
-              layoutShowSequence: false,
-              layoutShowLog: false,
-              layoutShowLeftPanel: false,
-            },
-            style: { height: "100%", width: "100%" },
-          })
+          mvsData: mvsData,
+          config: {
+            layoutIsExpanded: false,
+            layoutShowControls: false,
+            layoutShowSequence: false,
+            layoutShowLog: false,
+            layoutShowLeftPanel: false,
+          },
+          style: { height: "100%", width: "100%" },
+        })
         : h(
-            "div",
-            {
-              style: {
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "1px solid #333",
-                color: "#666",
-                backgroundColor: "#1e1e1e",
-              },
+          "div",
+          {
+            style: {
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "1px solid #333",
+              color: "#666",
+              backgroundColor: "#1e1e1e",
             },
-            "Press Ctrl/Cmd+S to execute code",
-          ),
+          },
+          "Press Ctrl/Cmd+S to execute code",
+        ),
     ),
   );
 }

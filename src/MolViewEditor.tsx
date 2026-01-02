@@ -2,7 +2,7 @@
 import { h } from "preact";
 import type { JSX } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { setupMonacoCodeCompletion, MVSTypes } from "@molstar/mol-view-stories";
+import { MVSTypes, setupMonacoCodeCompletion } from "@molstar/mol-view-stories";
 
 export interface MolViewEditorProps {
   initialCode?: string;

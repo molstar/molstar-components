@@ -1,0 +1,40 @@
+/* Hide Molstar UI controls */
+.msp-btn-link-toggle-expand,
+.msp-viewport-controls,
+.msp-viewport-controls-buttons,
+.msp-layout-controls,
+.msp-layout-top,
+.msp-left-panel-controls,
+.msp-sequence-viewer,
+.msp-log,
+.msp-state-snapshots,
+.msp-transform-wrapper .msp-transform-header-brand {
+    display: none !important;
+}
+
+.msp-animation-viewport-controls,
+.msp-btn-link-toggle-selection-mode {
+    display: none !important;
+}
+
+#viewer-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Constrain Molstar's internal canvas */
+#viewer-container > * {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Prevent Molstar plugin container from expanding */
+.msp-plugin {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden;
+}

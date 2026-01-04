@@ -4,6 +4,7 @@ import type { JSX } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { MVSTypes, setupMonacoCodeCompletion } from "@molstar/mol-view-stories";
 import * as monaco from "monaco-editor";
+import { typescript } from "monaco-editor";
 
 /**
  * Props for the MolViewEditor component.
@@ -128,7 +129,15 @@ export function MolViewEditor({
       editorRef.current = editor;
 
       // Setup Monaco code completion with MVS types
-      setupMonacoCodeCompletion(monaco, MVSTypes);
+      // Create adapter for Monaco 0.55.1's new typescript namespace API
+      const monacoAdapter = {
+        ...monaco,
+        languages: {
+          ...monaco.languages,
+          typescript: typescript,
+        },
+      };
+      setupMonacoCodeCompletion(monacoAdapter as any, MVSTypes);
 
       // Add keyboard shortcuts for save
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {

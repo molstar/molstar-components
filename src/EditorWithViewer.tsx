@@ -6,6 +6,15 @@ import { MolViewEditor } from "./MolViewEditor.tsx";
 import { MolstarViewer } from "./MolstarViewer.tsx";
 
 /**
+ * Log entry for execution history.
+ */
+export interface LogEntry {
+  timestamp: Date;
+  level: "info" | "error" | "success";
+  message: string;
+}
+
+/**
  * Props for the EditorWithViewer component.
  */
 export interface EditorWithViewerProps {
@@ -34,7 +43,7 @@ export interface EditorWithViewerProps {
   /**
    * Whether to automatically execute code as the user types.
    * When enabled, code execution is debounced based on `autoRunDelay`.
-   * @defaultValue false
+   * @defaultValue true
    */
   autoRun?: boolean;
   /**
@@ -49,6 +58,16 @@ export interface EditorWithViewerProps {
    * @defaultValue Empty string
    */
   hiddenCode?: string;
+  /**
+   * Show the execution log panel below the editor.
+   * @defaultValue true
+   */
+  showLog?: boolean;
+  /**
+   * Show the auto-update toggle checkbox.
+   * @defaultValue true
+   */
+  showAutoUpdateToggle?: boolean;
 }
 
 /**
@@ -107,19 +126,38 @@ export function EditorWithViewer({
   layout = "horizontal",
   editorHeight = "600px",
   viewerHeight = "600px",
-  autoRun = false,
+  autoRun = true,
   autoRunDelay = 500,
   hiddenCode = "",
+  showLog = true,
+  showAutoUpdateToggle = true,
 }: EditorWithViewerProps): h.JSX.Element {
   const [mvsData, setMvsData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentCode, setCurrentCode] = useState(initialCode || "");
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(autoRun);
+  const [logExpanded, setLogExpanded] = useState(true);
   const debounceTimerRef = useRef<number | null>(null);
+
+  const addLog = useCallback(
+    (level: "info" | "error" | "success", message: string) => {
+      setLogs((prev) => {
+        const newLogs = [...prev, { timestamp: new Date(), level, message }];
+        // Keep only last 100 entries to prevent memory issues
+        return newLogs.slice(-100);
+      });
+    },
+    [],
+  );
 
   const executeCode = useCallback(
     async (code: string) => {
+      const startTime = Date.now();
+
       try {
         setError(null);
+        addLog("info", "Executing MVS code...");
 
         const storyManager = new StoryManager();
 
@@ -143,13 +181,16 @@ export function EditorWithViewer({
           throw new Error("Failed to generate valid MVS data");
         }
 
+        const duration = Date.now() - startTime;
+        addLog("success", `Code executed successfully (${duration}ms)`);
         setMvsData(mvsDataResult);
       } catch (err: any) {
         const errorMsg = err.message || "Error executing code";
+        addLog("error", errorMsg);
         setError(errorMsg);
       }
     },
-    [hiddenCode],
+    [hiddenCode, addLog],
   );
 
   const handleSave = useCallback(
@@ -163,7 +204,7 @@ export function EditorWithViewer({
     (code: string) => {
       setCurrentCode(code);
 
-      if (autoRun) {
+      if (autoUpdateEnabled) {
         // Clear existing timer
         if (debounceTimerRef.current !== null) {
           clearTimeout(debounceTimerRef.current);
@@ -175,7 +216,7 @@ export function EditorWithViewer({
         }, autoRunDelay) as any;
       }
     },
-    [autoRun, autoRunDelay, executeCode],
+    [autoUpdateEnabled, autoRunDelay, executeCode],
   );
 
   // Execute initial code on mount if autoRun is enabled
@@ -228,6 +269,115 @@ export function EditorWithViewer({
         onSave: handleSave,
         height: editorHeight,
       }),
+      showAutoUpdateToggle &&
+        h(
+          "div",
+          {
+            style: {
+              padding: "10px",
+              backgroundColor: "#2a2a2a",
+              borderTop: "1px solid #333",
+            },
+          },
+          h(
+            "label",
+            {
+              style: {
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                fontSize: "14px",
+              },
+            },
+            h("input", {
+              type: "checkbox",
+              checked: autoUpdateEnabled,
+              onChange: (e: any) => setAutoUpdateEnabled(e.target.checked),
+              style: { cursor: "pointer" },
+            }),
+            h(
+              "span",
+              null,
+              "Auto-update (runs code automatically after typing)",
+            ),
+            !autoUpdateEnabled &&
+              h(
+                "span",
+                {
+                  style: {
+                    marginLeft: "8px",
+                    color: "#888",
+                    fontSize: "12px",
+                  },
+                },
+                "Press Ctrl/Cmd+S to execute",
+              ),
+          ),
+        ),
+      showLog &&
+        logs.length > 0 &&
+        h(
+          "details",
+          {
+            open: logExpanded,
+            onToggle: (e: any) => setLogExpanded(e.target.open),
+            style: {
+              marginTop: "5px",
+              border: "1px solid #333",
+              backgroundColor: "#1a1a1a",
+            },
+          },
+          h(
+            "summary",
+            {
+              style: {
+                padding: "8px 10px",
+                cursor: "pointer",
+                userSelect: "none",
+                fontSize: "14px",
+              },
+            },
+            `Execution Log (${logs.length} ${logs.length === 1 ? "entry" : "entries"}) - Click to ${logExpanded ? "collapse" : "expand"}`,
+          ),
+          h(
+            "div",
+            {
+              style: {
+                maxHeight: "200px",
+                overflowY: "auto",
+                backgroundColor: "#0a0a0a",
+                fontFamily: "monospace",
+                fontSize: "12px",
+              },
+            },
+            logs.map((log, idx) =>
+              h(
+                "div",
+                {
+                  key: idx,
+                  style: {
+                    padding: "4px 10px",
+                    borderBottom: "1px solid #333",
+                    color:
+                      log.level === "error"
+                        ? "#ff6b6b"
+                        : log.level === "success"
+                          ? "#51cf66"
+                          : "#ccc",
+                  },
+                },
+                h(
+                  "span",
+                  { style: { opacity: 0.6 } },
+                  `[${log.timestamp.toLocaleTimeString()}]`,
+                ),
+                " ",
+                log.message,
+              ),
+            ),
+          ),
+        ),
       error &&
         h(
           "div",
@@ -273,7 +423,7 @@ export function EditorWithViewer({
                 backgroundColor: "#1e1e1e",
               },
             },
-            autoRun
+            autoUpdateEnabled
               ? "Start typing to see live updates..."
               : "Press Ctrl/Cmd+S to execute code",
           ),

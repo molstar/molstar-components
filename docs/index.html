@@ -19,12 +19,8 @@
             href="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.css"
         />
 
-        <!-- Monaco Editor CSS -->
-        <link
-            rel="stylesheet"
-            data-name="vs/editor/editor.main"
-            href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.css"
-        />
+        <!-- Bundled Monaco CSS -->
+        <link rel="stylesheet" href="bundle.css" />
 
         <!-- Custom styles for demo -->
         <link rel="stylesheet" href="styles.css" />
@@ -147,81 +143,7 @@
         <!-- Load Molstar from CDN -->
         <script src="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.js"></script>
 
-        <!-- Monaco Editor Loader -->
-        <script>
-            var require = {
-                paths: {
-                    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs",
-                },
-            };
-        </script>
-        <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.nls.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.js"></script>
-
-        <!-- Import Map for ESM modules -->
-        <script type="importmap">
-            {
-                "imports": {
-                    "preact": "https://esm.sh/preact@10.19.3",
-                    "@zachcp/molstar-components": "https://esm.sh/jsr/@zachcp/molstar-components"
-                }
-            }
-        </script>
-
-        <!-- Our application code using JSR components from esm.sh -->
-        <script type="module">
-            import { h, render } from "preact";
-            import {
-                EditorWithViewer,
-                MolstarViewer,
-            } from "@zachcp/molstar-components";
-
-            // Import example data from external file
-            import { exampleMVSData, defaultCode } from "./demo-data.js";
-
-            // Initialize everything when DOM is ready
-            window.addEventListener("load", async () => {
-                try {
-                    // Render simple viewer using MolstarViewer component
-                    const viewerContainer =
-                        document.getElementById("viewer-container");
-
-                    render(
-                        h(MolstarViewer, {
-                            mvsData: exampleMVSData,
-                            config: {
-                                layoutIsExpanded: false,
-                                layoutShowControls: false,
-                                layoutShowSequence: false,
-                                layoutShowLog: false,
-                                layoutShowLeftPanel: false,
-                            },
-                            style: { height: "100%", width: "100%" },
-                        }),
-                        viewerContainer,
-                    );
-
-                    // Render EditorWithViewer component
-                    const editorViewerContainer = document.getElementById(
-                        "editor-viewer-container",
-                    );
-
-                    render(
-                        h(EditorWithViewer, {
-                            initialCode: defaultCode,
-                            layout: "horizontal",
-                            editorHeight: "600px",
-                            viewerHeight: "600px",
-                            autoRun: true,
-                            autoRunDelay: 500,
-                        }),
-                        editorViewerContainer,
-                    );
-                } catch (error) {
-                    console.error("Error rendering components:", error);
-                }
-            });
-        </script>
+        <!-- Bundled application code (includes Preact and Monaco) -->
+        <script type="module" src="./bundle.js"></script>
     </body>
 </html>

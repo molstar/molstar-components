@@ -4,7 +4,12 @@ import type { JSX } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { MVSTypes, setupMonacoCodeCompletion } from "@molstar/mol-view-stories";
 import * as monaco from "monaco-editor";
-import * as typescript from "monaco-editor/typescript";
+
+// Import TypeScript language contribution to register with Monaco
+import "monaco-editor/typescript-contribution";
+
+// Import JavaScript syntax highlighting
+import { conf, language } from "monaco-editor/javascript-language";
 
 /**
  * Props for the MolViewEditor component.
@@ -90,33 +95,49 @@ export function MolViewEditor({
   const editorRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
 
+  // Configure Monaco environment once before first editor creation
+  useEffect(() => {
+    // Register JavaScript language
+    try {
+      monaco.languages.register({ id: "javascript" });
+      monaco.languages.setMonarchTokensProvider("javascript", language as any);
+      monaco.languages.setLanguageConfiguration("javascript", conf as any);
+    } catch (e) {
+      // Language already registered, ignore
+    }
+
+    // Configure Monaco to use bundled workers
+    if (!(window as any).MonacoEnvironment) {
+      (window as any).MonacoEnvironment = {
+        getWorkerUrl: function (_moduleId: string, label: string) {
+          if (label === "typescript" || label === "javascript") {
+            return "./ts.worker.js";
+          }
+          return "./editor.worker.js";
+        },
+      };
+    }
+  }, []);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Handler to prevent Cmd+S from triggering browser save or other actions
-    // Only fires when the editor container has focus
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
-        // Check if the event target is within the editor container
-        if (
-          containerRef.current &&
-          containerRef.current.contains(e.target as Node)
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-          if (onSave && editorRef.current) {
-            onSave(editorRef.current.getValue());
-          }
-        }
-      }
-    };
-
     // Initialize Monaco editor
     const initEditor = () => {
+      // Setup Monaco code completion with MVS types BEFORE creating editor
+      // This configures compiler options, diagnostics, and adds type definitions
+      setupMonacoCodeCompletion(monaco as any, MVSTypes);
+
+      // Create Monaco editor model with explicit JavaScript language
+      const model = monaco.editor.createModel(
+        initialCode,
+        "javascript",
+        monaco.Uri.parse("file:///main.js"),
+      );
+
       // Create Monaco editor
       const editor = monaco.editor.create(containerRef.current!, {
-        value: initialCode,
-        language: "javascript",
+        model: model,
         theme: "vs-dark",
         automaticLayout: true,
         minimap: { enabled: false },
@@ -124,22 +145,16 @@ export function MolViewEditor({
         lineNumbers: "on",
         scrollBeyondLastLine: false,
         wordWrap: "on",
+        glyphMargin: true,
+        folding: true,
+        renderValidationDecorations: "on",
+        showUnused: true,
+        fixedOverflowWidgets: true,
       });
 
       editorRef.current = editor;
 
-      // Setup Monaco code completion with MVS types
-      // Create adapter for Monaco 0.55.1's new API structure
-      const monacoAdapter = {
-        ...monaco,
-        languages: {
-          ...monaco.languages,
-          typescript: typescript,
-        },
-      };
-      setupMonacoCodeCompletion(monacoAdapter as any, MVSTypes);
-
-      // Add keyboard shortcuts for save
+      // Keyboard shortcut for save (Ctrl/Cmd+S)
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
         if (onSave) {
           onSave(editor.getValue());
@@ -156,13 +171,9 @@ export function MolViewEditor({
       setIsReady(true);
     };
 
-    // Add global event listener
-    document.addEventListener("keydown", handleKeyDown, true);
-
     initEditor();
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown, true);
       if (editorRef.current) {
         editorRef.current.dispose();
         editorRef.current = null;

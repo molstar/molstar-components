@@ -73,6 +73,50 @@ async function build() {
     });
 
     console.log("✓ Docs bundle created: docs/bundle.js");
+
+    // Build Monaco editor workers
+    console.log("\nBuilding Monaco editor workers...");
+
+    const workerConfig = {
+      plugins: [
+        ...denoPlugins({
+          configPath,
+        }),
+      ] as any,
+      bundle: true,
+      format: "iife" as const,
+      platform: "browser" as const,
+      target: "es2022",
+      minify: true,
+      loader: {
+        ".ttf": "file",
+        ".woff": "file",
+        ".woff2": "file",
+        ".eot": "file",
+      } as any,
+    };
+
+    // Base editor worker
+    await esbuild.build({
+      ...workerConfig,
+      entryPoints: {
+        "editor.worker": "monaco-editor/workers/editor",
+      },
+      outdir: "./docs",
+    });
+    console.log("  ✓ editor.worker.js");
+
+    // TypeScript/JavaScript worker
+    await esbuild.build({
+      ...workerConfig,
+      entryPoints: {
+        "ts.worker": "monaco-editor/workers/typescript",
+      },
+      outdir: "./docs",
+    });
+    console.log("  ✓ ts.worker.js");
+
+    console.log("✓ Monaco workers built successfully");
   } catch (error) {
     console.error("Build failed:", error);
     Deno.exit(1);

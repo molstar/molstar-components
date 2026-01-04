@@ -4,7 +4,7 @@ import type { JSX } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { MVSTypes, setupMonacoCodeCompletion } from "@molstar/mol-view-stories";
 import * as monaco from "monaco-editor";
-import { typescript } from "monaco-editor";
+import * as typescript from "monaco-editor/typescript";
 
 /**
  * Props for the MolViewEditor component.
@@ -129,7 +129,7 @@ export function MolViewEditor({
       editorRef.current = editor;
 
       // Setup Monaco code completion with MVS types
-      // Create adapter for Monaco 0.55.1's new typescript namespace API
+      // Create adapter for Monaco 0.55.1's new API structure
       const monacoAdapter = {
         ...monaco,
         languages: {

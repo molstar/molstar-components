@@ -1,6 +1,6 @@
 {
   "name": "@zachcp/molstar-components",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "MIT",
   "exports": "./src/mod.ts",
   "imports": {
@@ -9,14 +9,19 @@
     "preact/jsx-runtime": "npm:preact@10.28.1/jsx-runtime",
     "@preact/signals": "npm:@preact/signals@2.5.1",
     "@molstar/mol-view-stories": "jsr:@molstar/mol-view-stories@1.0.3",
-    "monaco-editor": "npm:monaco-editor@0.55.1"
+    "monaco-editor": "npm:monaco-editor@0.55.1/esm/vs/editor/editor.api.js",
+    "monaco-editor/typescript": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/monaco.contribution.js",
+    "esbuild": "npm:esbuild@0.20.2",
+    "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.10.3",
+    "@std/path": "jsr:@std/path@^1.0.0"
   },
   "tasks": {
+    "build": "deno run --allow-all build.ts",
+    "serve": "deno run --allow-net --allow-read jsr:@std/http/file-server -p 8000",
+    "dev": "deno task build && deno task serve",
     "bundle:lib": "deno bundle src/mod.ts -o docs/molstar-components.js --platform browser --minify",
     "bundle:docs": "deno bundle docs/index.ts -o docs/bundle.js --platform browser --minify",
-    "bundle": "deno task bundle:lib && deno task bundle:docs",
-    "serve": "deno run --allow-net --allow-read jsr:@std/http/file-server -p 8000",
-    "dev": "deno task bundle && deno task serve"
+    "bundle": "deno task bundle:lib && deno task bundle:docs"
   },
   "exclude": ["docs/", ".github/"],
   "compilerOptions": {

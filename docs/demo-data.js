@@ -1,53 +1,53 @@
 // Example MVS data for the simple viewer
 export const exampleMVSData = {
-    root: {
-        kind: "root",
+  root: {
+    kind: "root",
+    children: [
+      {
+        kind: "download",
+        params: {
+          url: "https://www.ebi.ac.uk/pdbe/entry-files/1cbs.bcif",
+        },
         children: [
-            {
-                kind: "download",
-                params: {
-                    url: "https://www.ebi.ac.uk/pdbe/entry-files/1cbs.bcif",
-                },
+          {
+            kind: "parse",
+            params: { format: "bcif" },
+            children: [
+              {
+                kind: "structure",
+                params: { type: "model" },
                 children: [
-                    {
-                        kind: "parse",
-                        params: { format: "bcif" },
-                        children: [
-                            {
-                                kind: "structure",
-                                params: { type: "model" },
-                                children: [
-                                    {
-                                        kind: "component",
-                                        params: {
-                                            selector: "polymer",
-                                        },
-                                        children: [
-                                            {
-                                                kind: "representation",
-                                                params: {
-                                                    type: "cartoon",
-                                                },
-                                                children: [
-                                                    {
-                                                        kind: "color",
-                                                        params: {
-                                                            color: "green",
-                                                        },
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                ],
-                            },
-                        ],
+                  {
+                    kind: "component",
+                    params: {
+                      selector: "polymer",
                     },
+                    children: [
+                      {
+                        kind: "representation",
+                        params: {
+                          type: "cartoon",
+                        },
+                        children: [
+                          {
+                            kind: "color",
+                            params: {
+                              color: "green",
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
                 ],
-            },
+              },
+            ],
+          },
         ],
-    },
-    metadata: { title: "Example Structure", version: "1" },
+      },
+    ],
+  },
+  metadata: { title: "Example Structure", version: "1" },
 };
 
 // Default code for the editor

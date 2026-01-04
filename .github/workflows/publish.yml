@@ -1,4 +1,4 @@
-name: Publish to JSR
+name: Publish to JSR /  GH / GH Pages
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
         run: deno task build
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./docs
 

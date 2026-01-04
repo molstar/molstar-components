@@ -101,7 +101,7 @@ async function build() {
       ...workerConfig,
       entryPoints: {
         "editor.worker":
-          "npm:monaco-editor@0.52.2/esm/vs/editor/editor.worker.js",
+          "npm:monaco-editor@0.55.1/esm/vs/editor/editor.worker.js",
       },
       outdir: "./docs",
     });
@@ -112,7 +112,7 @@ async function build() {
       ...workerConfig,
       entryPoints: {
         "ts.worker":
-          "npm:monaco-editor@0.52.2/esm/vs/language/typescript/ts.worker.js",
+          "npm:monaco-editor@0.55.1/esm/vs/language/typescript/ts.worker.js",
       },
       outdir: "./docs",
     });

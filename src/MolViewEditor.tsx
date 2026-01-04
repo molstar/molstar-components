@@ -10,7 +10,7 @@ import * as typescript from "monaco-editor/typescript";
 import {
   conf,
   language,
-} from "npm:monaco-editor@0.52.2/esm/vs/basic-languages/javascript/javascript.js";
+} from "npm:monaco-editor@0.55.1/esm/vs/basic-languages/javascript/javascript.js";
 
 /**
  * Props for the MolViewEditor component.
@@ -96,23 +96,21 @@ export function MolViewEditor({
   const editorRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
 
-  // Configure Monaco environment ONCE at module level before first editor creation
+  // Configure Monaco environment once before first editor creation
   useEffect(() => {
-    // Register JavaScript language manually
+    // Register JavaScript language
     try {
       monaco.languages.register({ id: "javascript" });
       monaco.languages.setMonarchTokensProvider("javascript", language as any);
       monaco.languages.setLanguageConfiguration("javascript", conf as any);
-      console.log("Registered JavaScript language");
     } catch (e) {
-      console.log("JavaScript language already registered or error:", e);
+      // Language already registered, ignore
     }
 
-    // Configure Monaco environment to use bundled workers
+    // Configure Monaco to use bundled workers
     if (!(window as any).MonacoEnvironment) {
       (window as any).MonacoEnvironment = {
         getWorkerUrl: function (_moduleId: string, label: string) {
-          console.log("Monaco requesting worker:", label);
           if (label === "typescript" || label === "javascript") {
             return "./ts.worker.js";
           }
@@ -145,6 +143,9 @@ export function MolViewEditor({
 
     // Initialize Monaco editor
     const initEditor = () => {
+      // Enable eager model sync FIRST for immediate validation
+      typescript.javascriptDefaults.setEagerModelSync(true);
+
       // Configure JavaScript compiler options for better diagnostics
       // Use javascriptDefaults (not typescriptDefaults) for JS language mode
       typescript.javascriptDefaults.setCompilerOptions({
@@ -177,20 +178,11 @@ export function MolViewEditor({
         diagnosticCodesToIgnore: [],
       });
 
-      // Enable eager model sync for immediate validation
-      typescript.javascriptDefaults.setEagerModelSync(true);
-
       // Create Monaco editor model with explicit JavaScript language
       const model = monaco.editor.createModel(
         initialCode,
         "javascript",
         monaco.Uri.parse("file:///main.js"),
-      );
-
-      console.log("Created model with language:", model.getLanguageId());
-      console.log(
-        "Available languages:",
-        monaco.languages.getLanguages().map((l: any) => l.id),
       );
 
       // Create Monaco editor
@@ -213,27 +205,7 @@ export function MolViewEditor({
       editorRef.current = editor;
 
       // Setup Monaco code completion with MVS types
-      // Monaco 0.52.2 has typescript language service in monaco.languages.typescript
-      console.log("Setting up Monaco code completion with MVS types...");
-      console.log("MVSTypes length:", MVSTypes?.length);
       setupMonacoCodeCompletion(monaco as any, MVSTypes);
-
-      // Verify extra libs were added
-      const extraLibs = typescript.javascriptDefaults.getExtraLibs();
-      console.log("Extra libs added:", Object.keys(extraLibs));
-      console.log("Monaco code completion setup complete");
-
-      // Force validate the model after a short delay
-      setTimeout(() => {
-        const model = editor.getModel();
-        if (model) {
-          console.log("Editor model language:", model.getLanguageId());
-          console.log("Triggering validation...");
-          // Trigger validation by making a small change and undoing it
-          editor.trigger("keyboard", "type", { text: " " });
-          editor.trigger("keyboard", "undo", {});
-        }
-      }, 1000);
 
       // Add keyboard shortcuts for save
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {

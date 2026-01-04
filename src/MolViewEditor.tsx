@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { MVSTypes, setupMonacoCodeCompletion } from "@molstar/mol-view-stories";
 import * as monaco from "monaco-editor";
 
-// Import TypeScript language contribution to register with Monaco
-import "monaco-editor/typescript-contribution";
+// Import TypeScript language defaults directly from contribution module
+import * as typescriptModule from "monaco-editor/typescript-contribution";
 
 // Import JavaScript syntax highlighting
 import { conf, language } from "monaco-editor/javascript-language";
@@ -124,9 +124,19 @@ export function MolViewEditor({
 
     // Initialize Monaco editor
     const initEditor = () => {
+      // Create adapter for setupMonacoCodeCompletion
+      // Monaco 0.55.1 exports typescript module separately, need to inject it
+      const monacoWithTypescript = {
+        ...monaco,
+        languages: {
+          ...monaco.languages,
+          typescript: typescriptModule,
+        },
+      };
+
       // Setup Monaco code completion with MVS types BEFORE creating editor
       // This configures compiler options, diagnostics, and adds type definitions
-      setupMonacoCodeCompletion(monaco as any, MVSTypes);
+      setupMonacoCodeCompletion(monacoWithTypescript as any, MVSTypes);
 
       // Create Monaco editor model with explicit JavaScript language
       const model = monaco.editor.createModel(

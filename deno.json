@@ -1,6 +1,6 @@
 {
   "name": "@zachcp/molstar-components",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "license": "MIT",
   "exports": "./src/mod.ts",
   "imports": {
@@ -11,9 +11,9 @@
     "@molstar/mol-view-stories": "jsr:@molstar/mol-view-stories@1.0.3",
     "monaco-editor": "npm:monaco-editor@0.55.1/esm/vs/editor/editor.api.js",
     "monaco-editor/typescript": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/monaco.contribution.js",
-    "esbuild": "npm:esbuild@0.20.2",
-    "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.10.3",
-    "@std/path": "jsr:@std/path@^1.0.0"
+    "esbuild": "npm:esbuild@0.27.2",
+    "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.1",
+    "@std/path": "jsr:@std/path@^1.1.4"
   },
   "tasks": {
     "build": "deno run --allow-all build.ts",

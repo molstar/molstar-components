@@ -49,11 +49,11 @@ jobs:
 
       - name: Create release tarball
         run: |
-          tar -czf molstar-components-${{ github.ref_name }}.tar.gz \
-            -C docs \
+          cd docs
+          tar -czf ../molstar-components-${{ github.ref_name }}.tar.gz \
             molstar-components.js \
             molstar-components.css \
-            assets/
+            $([ -d assets ] && echo "assets/" || echo "")
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

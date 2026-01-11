@@ -1,6 +1,6 @@
 # Demo
 
-This directory contains an interactive demo of the `@zachcp/molstar-components` package.
+This directory contains an interactive demo of the `@molstar/molstar-components` package.
 
 ## Development
 

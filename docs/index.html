@@ -33,7 +33,7 @@
             </div>
             <div class="flex-none gap-2">
                 <a
-                    href="https://jsr.io/@zachcp/molstar-components"
+                    href="https://jsr.io/@molstar/molstar-components"
                     target="_blank"
                     class="btn btn-ghost btn-sm"
                     title="View on JSR"
@@ -57,7 +57,7 @@
                     </svg>
                 </a>
                 <a
-                    href="https://github.com/zachcp/molstar-components"
+                    href="https://github.com/molstar/molstar-components"
                     target="_blank"
                     class="btn btn-ghost btn-sm"
                     title="View on GitHub"
@@ -82,7 +82,9 @@
             <div class="hero mb-8">
                 <div class="hero-content text-center">
                     <div class="max-w-2xl">
-                        <h1 class="text-5xl font-bold">Molstar Components</h1>
+                        <h1 class="text-5xl font-bold">
+                            Molstar MolViewSpec Components
+                        </h1>
                         <p class="py-6">
                             Interactive molecular visualization with
                             <code class="badge badge-secondary"
@@ -111,8 +113,11 @@
                     <p>
                         Using
                         <code class="badge badge-sm">MolstarViewer</code> from
-                        <code>@zachcp/molstar-components</code>
+                        <code>@molstar/molstar-components</code>. This component
+                        accepts MolViewSpec data as part of its `props` and will
+                        update when that data changes.
                     </p>
+
                     <div class="h-[500px] bg-base-300 rounded-lg">
                         <div id="viewer-container"></div>
                     </div>
@@ -126,7 +131,10 @@
                     <p>
                         Using
                         <code class="badge badge-sm">EditorWithViewer</code>
-                        from <code>@zachcp/molstar-components</code>
+                        from <code>@molstar/molstar-components</code>. This
+                        component combined an Editor with the Viewer above. The
+                        editor evaluate JS code to produce MolViewSpec data
+                        which reactivly updated the Viewer.
                     </p>
                     <p class="text-sm opacity-60">
                         Edit code and see live updates (500ms debounce)

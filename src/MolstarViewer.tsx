@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any no-window
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import type { JSX } from "preact";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties, JSX } from "react";
 
 /**
  * Configuration options for the Molstar viewer.
@@ -67,7 +67,7 @@ export interface MolstarViewerProps {
    * Custom CSS styles for the viewer container.
    * @defaultValue `{ position: "relative", width: "100%", height: "500px" }`
    */
-  style?: JSX.CSSProperties;
+  style?: CSSProperties;
 
   /**
    * CSS class name for the viewer container.
@@ -151,7 +151,7 @@ export function MolstarViewer({
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const defaultStyle: JSX.CSSProperties = {
+  const defaultStyle: CSSProperties = {
     position: "relative",
     width: "100%",
     height: "500px",
@@ -269,10 +269,29 @@ export function MolstarViewer({
     loadMVSDataHelper(viewerRef.current);
   }, [mvsData, isInitialized]);
 
+  // Overlays must be siblings of the Molstar container, not children.
+  // React 19 is strict about DOM ownership: if React renders children into a
+  // div and Molstar also injects its canvas there, reconciliation throws
+  // "Node.removeChild: The node to be removed is not a child of this node".
+  // Solution: give Molstar a dedicated inner div React never touches, and
+  // render overlays as separate sibling divs inside the outer wrapper.
+  const wrapperStyle: CSSProperties = { ...defaultStyle, position: "relative" };
+
   return (
-    <div ref={containerRef} className={className} style={defaultStyle}>
+    <div className={className} style={wrapperStyle}>
+      {/* Molstar owns this div entirely — React renders no children into it */}
+      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
       {!isInitialized && (
-        <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#666",
+          }}
+        >
           Initializing viewer...
         </div>
       )}

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "lib": ["dom", "dom.iterable", "es2022"],
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "paths": {
+      "monaco-editor/typescript-contribution": ["./node_modules/monaco-editor/esm/vs/language/typescript/monaco.contribution.js"],
+      "monaco-editor/javascript-language": ["./node_modules/monaco-editor/esm/vs/basic-languages/javascript/javascript.js"]
+    }
+  },
+  "include": ["src", "docs"]
+}

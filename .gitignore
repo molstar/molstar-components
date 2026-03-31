@@ -14,3 +14,5 @@ docs/molstar-components.css
 
 # Release tarballs created by CI
 molstar-components-*.tar.gz
+
+.idea/

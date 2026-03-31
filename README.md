@@ -19,6 +19,17 @@ This bundles your local source files and serves them at
 `docs/molstar-components.dev.js`, allowing you to test changes by refreshing the
 browser.
 
+## Updating molstar
+
+When bumping the `molstar` version in `deno.json`, regenerate the Monaco editor
+type definitions to match:
+
+```bash
+deno task mvs-types
+```
+
+This re-bundles the molstar type declarations and updates `src/utils/mvs-types.ts`.
+
 ## Publishing
 
 ```bash

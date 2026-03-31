@@ -1,5 +1,6 @@
 // Entry point for docs demo
-import { h, render } from "preact";
+import { createElement } from "react";
+import { createRoot } from "react-dom/client";
 import { EditorWithViewer, MolstarViewer } from "../src/mod.ts";
 import { exampleMVSData, defaultCode } from "./demo-data.js";
 
@@ -9,8 +10,8 @@ window.addEventListener("load", async () => {
     // Render simple viewer using MolstarViewer component
     const viewerContainer = document.getElementById("viewer-container");
     if (viewerContainer) {
-      render(
-        h(MolstarViewer, {
+      createRoot(viewerContainer).render(
+        createElement(MolstarViewer, {
           mvsData: exampleMVSData,
           config: {
             layoutIsExpanded: false,
@@ -21,7 +22,6 @@ window.addEventListener("load", async () => {
           },
           style: { height: "100%", width: "100%" },
         }),
-        viewerContainer,
       );
     }
 
@@ -30,8 +30,8 @@ window.addEventListener("load", async () => {
       "editor-viewer-container",
     );
     if (editorViewerContainer) {
-      render(
-        h(EditorWithViewer, {
+      createRoot(editorViewerContainer).render(
+        createElement(EditorWithViewer, {
           initialCode: defaultCode,
           layout: "horizontal",
           editorHeight: "600px",
@@ -39,7 +39,6 @@ window.addEventListener("load", async () => {
           autoRun: true,
           autoRunDelay: 500,
         }),
-        editorViewerContainer,
       );
     }
   } catch (error) {

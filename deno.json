@@ -1,24 +1,27 @@
 {
   "name": "@molstar/molstar-components",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "license": "MIT",
   "exports": "./src/mod.ts",
   "imports": {
-    "preact": "npm:preact@10.28.1",
-    "preact/hooks": "npm:preact@10.28.1/hooks",
-    "preact/jsx-runtime": "npm:preact@10.28.1/jsx-runtime",
-    "@preact/signals": "npm:@preact/signals@2.5.1",
-    "@molstar/mol-view-stories": "jsr:@molstar/mol-view-stories@1.0.4",
+    "react": "npm:react@19.2.3",
+    "react/jsx-runtime": "npm:react@19.2.3/jsx-runtime",
+    "react-dom": "npm:react-dom@19.2.3",
+    "react-dom/client": "npm:react-dom@19.2.3/client",
+    "@types/react": "npm:@types/react@19.2.14",
+    "jotai": "npm:jotai@2.12.2",
     "monaco-editor": "npm:monaco-editor@0.55.1/esm/vs/editor/editor.api.js",
     "monaco-editor/typescript-contribution": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/monaco.contribution.js",
     "monaco-editor/javascript-language": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/javascript/javascript.js",
     "monaco-editor/workers/editor": "npm:monaco-editor@0.55.1/esm/vs/editor/editor.worker.js",
     "monaco-editor/workers/typescript": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/ts.worker.js",
+    "molstar/lib/extensions/mvs/mvs-data.js": "npm:molstar@5.5.0/lib/extensions/mvs/mvs-data.js",
     "esbuild": "npm:esbuild@0.27.2",
     "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.1",
     "@std/path": "jsr:@std/path@^1.1.4"
   },
   "tasks": {
+    "mvs-types": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-sys npm:rollup@4 -c scripts/rollup-mvs-data-bundle.config.mjs && deno run --allow-read --allow-write scripts/process-mvs-types.mjs",
     "clean": "rm -f docs/bundle.js docs/bundle.js.map docs/bundle.css docs/molstar-components.js docs/molstar-components.js.map docs/molstar-components.css docs/editor.worker.js docs/ts.worker.js && rm -rf docs/assets",
     "build": "deno task clean && deno run --allow-all build.ts",
     "serve": "deno run --allow-net --allow-read jsr:@std/http/file-server --host 127.0.0.1 -p 8000 docs",
@@ -28,7 +31,7 @@
   "nodeModulesDir": "auto",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "preact",
+    "jsxImportSource": "react",
     "lib": ["dom", "dom.iterable", "es2022"]
   }
 }

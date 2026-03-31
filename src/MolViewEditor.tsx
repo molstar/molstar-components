@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
-import { h } from "preact";
-import type { JSX } from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
-import { MVSTypes, setupMonacoCodeCompletion } from "@molstar/mol-view-stories";
+import { useEffect, useRef, useState } from "react";
+import type { JSX } from "react";
+import { MVSTypes } from "./utils/mvs-types.ts";
+import { setupMonacoCodeCompletion } from "./utils/monaco-utils.ts";
 import * as monaco from "monaco-editor";
 
 // Import TypeScript language defaults directly from contribution module
@@ -63,8 +63,7 @@ let editorCounter = 0;
  *
  * This component provides a Monaco-based code editor with syntax highlighting,
  * autocompletion for MVS (Mol* View Stories) types, and keyboard shortcuts.
- * It integrates with the @molstar/mol-view-stories library to provide
- * intelligent code completion for building molecular visualizations.
+ * It provides intelligent code completion for building molecular visualizations.
  *
  * The component expects the Monaco editor to be loaded from a CDN and available
  * on the global window object.
@@ -222,8 +221,10 @@ export function MolViewEditor({
     }
   }, [initialCode, isReady]);
 
-  return h("div", {
-    ref: containerRef,
-    style: { width: "100%", height, border: "1px solid #333" },
-  });
+  return (
+    <div
+      ref={containerRef}
+      style={{ width: "100%", height, border: "1px solid #333" }}
+    />
+  );
 }

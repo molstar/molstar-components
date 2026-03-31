@@ -32,7 +32,7 @@ async function build() {
       minify: true,
       target: "es2022",
       jsx: "automatic",
-      jsxImportSource: "preact",
+      jsxImportSource: "react",
       loader: {
         ".ttf": "file",
         ".woff": "file",
@@ -61,7 +61,7 @@ async function build() {
       minify: true,
       target: "es2022",
       jsx: "automatic",
-      jsxImportSource: "preact",
+      jsxImportSource: "react",
       loader: {
         ".ttf": "file",
         ".woff": "file",

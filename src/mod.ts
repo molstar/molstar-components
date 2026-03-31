@@ -1,5 +1,5 @@
 /**
- * Molstar Components - Preact components for molecular visualization
+ * Molstar Components - React components for molecular visualization
  *
  * This package provides ready-to-use Preact components for integrating the Molstar
  * molecular viewer into your web applications. It includes components for displaying

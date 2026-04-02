@@ -39,3 +39,11 @@
     max-width: 100% !important;
     overflow: hidden;
 }
+
+/* Fix dialog centering: Tailwind v3 CDN and v4 bundle both set centering transforms
+   (v3 via `transform`, v4 via individual `translate` property). They stack, causing
+   a -100% double-translation. Reset both explicitly. */
+[data-slot="dialog-content"] {
+    translate: none !important;
+    transform: translate(-50%, -50%) !important;
+}

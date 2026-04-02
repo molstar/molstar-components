@@ -1,0 +1,12 @@
+/* Tailwind v4 entry point for state-builder-ui component styles.
+   Used only for: the library's own docs page.
+   Consumers with Tailwind v4: add @source pointing to this library's
+   state-builder-ui directory instead of importing this file.
+   Run via: deno run npm:@tailwindcss/cli@4 -i docs/tailwind-entry.css -o docs/state-builder-ui.css */
+@import "tailwindcss";
+
+/* Explicitly scope scanning to the state-builder-ui source */
+@source "../src/state-builder-ui";
+
+/* Component-level CSS variables and utilities defined in state-builder-ui */
+@import "../src/state-builder-ui/styles.css";

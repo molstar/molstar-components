@@ -117,6 +117,31 @@ async function build() {
     console.log("  ✓ ts.worker.js");
 
     console.log("✓ Monaco workers built successfully");
+
+    // Generate Tailwind CSS for state-builder-ui components
+    console.log("\nBuilding Tailwind CSS for state-builder-ui...");
+    const cssCmd = new Deno.Command("deno", {
+      args: [
+        "run",
+        "--allow-read",
+        "--allow-write",
+        "--allow-env",
+        "--allow-sys",
+        "--allow-net",
+        "--allow-ffi",
+        "npm:@tailwindcss/cli@4",
+        "-i", "./docs/tailwind-entry.css",
+        "-o", "./docs/state-builder-ui.css",
+        "--minify",
+      ],
+      stdout: "inherit",
+      stderr: "inherit",
+    });
+    const cssResult = await cssCmd.output();
+    if (!cssResult.success) {
+      throw new Error("Tailwind CSS build failed");
+    }
+    console.log("✓ Tailwind CSS built: docs/state-builder-ui.css");
   } catch (error) {
     console.error("Build failed:", error);
     Deno.exit(1);

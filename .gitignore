@@ -11,8 +11,10 @@ docs/ts.worker.js
 docs/molstar-components.js
 docs/molstar-components.js.map
 docs/molstar-components.css
+docs/state-builder-ui.css
 
 # Release tarballs created by CI
 molstar-components-*.tar.gz
 
 .idea/
+.vite/

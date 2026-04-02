@@ -1,8 +1,70 @@
 // Entry point for docs demo
 import { createElement } from "react";
 import { createRoot } from "react-dom/client";
-import { EditorWithViewer, MolstarViewer } from "../src/mod.ts";
+import { EditorWithViewer, MolstarViewer, BuilderWithViewer, BuilderWithEditorAndViewer } from "../src/mod.ts";
+import { mvsTreeToUINodes } from "../src/state-builder/index.ts";
+import type { RawMVSTree } from "../src/state-builder/index.ts";
 import { exampleMVSData, defaultCode } from "./demo-data.js";
+
+const DEFAULT_BUILDER_MVS: RawMVSTree = {
+  kind: 'root',
+  children: [
+    {
+      kind: 'download',
+      params: { url: 'https://www.ebi.ac.uk/pdbe/entry-files/download/1opl.bcif' },
+      children: [{
+        kind: 'parse',
+        params: { format: 'bcif' },
+        children: [{
+          kind: 'structure',
+          params: { type: 'model' },
+          children: [
+            {
+              kind: 'transform',
+              params: {
+                rotation: [-0.6321036327,0.3450463255,0.6938213248,-0.6288677634,-0.7515716885,-0.1991615756,0.4527364948,-0.5622126202,0.6920597055],
+                translation: [36.3924122492,118.2516908402,-26.4992054179]
+              }
+            },
+            {
+              kind: 'component',
+              params: { selector: { label_asym_id: 'A' } },
+              children: [
+                { kind: 'representation', params: { type: 'cartoon' }, children: [{ kind: 'color', params: { color: '#4577B2' } }] },
+                { kind: 'label', params: { text: 'ABL Kinase' } }
+              ]
+            },
+            {
+              kind: 'component',
+              params: { selector: { label_asym_id: 'C' } },
+              children: [{ kind: 'representation', params: { type: 'ball_and_stick' }, children: [{ kind: 'color', params: { color: '#4577B2' } }] }]
+            },
+            {
+              kind: 'component',
+              params: { selector: { label_asym_id: 'D' } },
+              children: [{
+                kind: 'representation', params: { type: 'surface' },
+                children: [
+                  { kind: 'color', params: {}, custom: { molstar_color_theme_name: 'element-symbol', molstar_color_theme_params: { carbonColor: { name: 'uniform', params: { value: 4552626 } } } } },
+                  { kind: 'opacity', params: { opacity: 0.33 } }
+                ]
+              }, {
+                kind: 'representation', params: { type: 'ball_and_stick' },
+                children: [{ kind: 'color', params: {}, custom: { molstar_color_theme_name: 'element-symbol', molstar_color_theme_params: { carbonColor: { name: 'uniform', params: { value: 4552626 } } } } }]
+              }]
+            }
+          ]
+        }]
+      }]
+    },
+    {
+      kind: 'camera',
+      params: { position: [79.47, 66.06, 20.82], target: [0.36, 55.32, 21.8], up: [-0.01, 0.01, -1] }
+    }
+  ]
+};
+
+const defaultBuilderNodes = mvsTreeToUINodes(DEFAULT_BUILDER_MVS);
 
 // Initialize when DOM is ready
 window.addEventListener("load", async () => {
@@ -38,6 +100,29 @@ window.addEventListener("load", async () => {
           viewerHeight: "600px",
           autoRun: true,
           autoRunDelay: 500,
+        }),
+      );
+    }
+
+    // Render BuilderWithViewer component
+    const builderViewerMount = document.getElementById("builder-viewer-mount");
+    if (builderViewerMount) {
+      createRoot(builderViewerMount).render(
+        createElement(BuilderWithViewer, {
+          height: "600px",
+          initialState: { nodes: defaultBuilderNodes },
+        }),
+      );
+    }
+
+    // Render BuilderWithEditorAndViewer component
+    const builderEditorViewerMount = document.getElementById("builder-editor-viewer-mount");
+    if (builderEditorViewerMount) {
+      createRoot(builderEditorViewerMount).render(
+        createElement(BuilderWithEditorAndViewer, {
+          height: "650px",
+          autoRun: true,
+          builderInitialState: { nodes: defaultBuilderNodes },
         }),
       );
     }

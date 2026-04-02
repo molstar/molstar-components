@@ -21,6 +21,12 @@ export interface MolViewEditorProps {
    */
   initialCode?: string;
   /**
+   * Controlled value. When provided, overrides editor content imperatively.
+   * Use this to push code into the editor from outside (e.g. from a builder).
+   * Unlike `initialCode`, changes to this prop update the editor after mount.
+   */
+  value?: string;
+  /**
    * Callback invoked when the editor content changes.
    * @param code - The current code in the editor
    */
@@ -97,6 +103,7 @@ let editorCounter = 0;
  */
 export function MolViewEditor({
   initialCode = DEFAULT_CODE,
+  value,
   onCodeChange,
   onSave,
   height = "400px",
@@ -220,6 +227,17 @@ export function MolViewEditor({
       }
     }
   }, [initialCode, isReady]);
+
+  // Update editor content when controlled `value` prop changes externally.
+  // Only fires when value is defined (opt-in controlled mode).
+  useEffect(() => {
+    if (editorRef.current && isReady && value !== undefined) {
+      const currentValue = editorRef.current.getValue();
+      if (currentValue !== value) {
+        editorRef.current.setValue(value);
+      }
+    }
+  }, [value, isReady]);
 
   return (
     <div

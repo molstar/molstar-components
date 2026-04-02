@@ -81,3 +81,17 @@ export type { MolViewEditorProps } from "./MolViewEditor.tsx";
 
 export { EditorWithViewer } from "./EditorWithViewer.tsx";
 export type { EditorWithViewerProps } from "./EditorWithViewer.tsx";
+
+export { MolViewStateBuilder } from "./MolViewStateBuilder.tsx";
+export type { MolViewStateBuilderProps } from "./MolViewStateBuilder.tsx";
+export type { UIBuilderHandle, UIBuilderSnapshot } from "./MolViewStateBuilder.tsx";
+
+export { BuilderWithViewer } from "./BuilderWithViewer.tsx";
+export type { BuilderWithViewerProps } from "./BuilderWithViewer.tsx";
+
+export { BuilderWithEditorAndViewer } from "./BuilderWithEditorAndViewer.tsx";
+export type { BuilderWithEditorAndViewerProps } from "./BuilderWithEditorAndViewer.tsx";
+
+// Re-export UIBuilderProvider for consumers who want to compose their own layout
+export { UIBuilderProvider } from "./state-builder-ui/provider.tsx";
+export type { UIBuilderProviderProps } from "./state-builder-ui/provider.tsx";

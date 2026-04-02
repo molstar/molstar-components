@@ -14,7 +14,12 @@
     "noEmit": true,
     "paths": {
       "monaco-editor/typescript-contribution": ["./node_modules/monaco-editor/esm/vs/language/typescript/monaco.contribution.js"],
-      "monaco-editor/javascript-language": ["./node_modules/monaco-editor/esm/vs/basic-languages/javascript/javascript.js"]
+      "monaco-editor/javascript-language": ["./node_modules/monaco-editor/esm/vs/basic-languages/javascript/javascript.js"],
+      "@molstar/state-builder": ["./src/state-builder/index.ts"],
+      "@molstar/state-builder/compiler/ast/factory": ["./src/state-builder/compiler/ast/factory.ts"],
+      "@molstar/state-builder/compiler/codegen/generator": ["./src/state-builder/compiler/codegen/generator.ts"],
+      "@molstar/state-builder/types/composite-sequences": ["./src/state-builder/types/composite-sequences.ts"],
+      "@molstar/state-builder/*": ["./src/state-builder/*"]
     }
   },
   "include": ["src", "docs"]

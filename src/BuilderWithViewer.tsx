@@ -6,6 +6,7 @@ import { MolstarViewer } from "./MolstarViewer.tsx";
 import { executeCode } from "./utils/executeCode.ts";
 import type { UIBuilderHandle, UIBuilderSnapshot } from "./MolViewStateBuilder.tsx";
 import type { MolstarViewerConfig } from "./MolstarViewer.tsx";
+import type { PluginUIContext } from "molstar/lib/mol-plugin-ui/context";
 
 /**
  * Props for BuilderWithViewer.
@@ -77,6 +78,10 @@ export function BuilderWithViewer({
   const [mvsData, setMvsData] = useState<any>(null);
   const [runError, setRunError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [plugin, setPlugin] = useState<PluginUIContext | null>(null);
+  const [cameraSnapshot, setCameraSnapshot] = useState<unknown>(null);
+  const cameraSubRef = useRef<{ unsubscribe(): void } | null>(null);
+  const lastCameraUpdateRef = useRef<number>(0);
 
   const runCode = useCallback(async (code: string) => {
     try {
@@ -102,6 +107,22 @@ export function BuilderWithViewer({
     if (debounceRef.current !== null) clearTimeout(debounceRef.current);
   }, []);
 
+  useEffect(() => () => {
+    cameraSubRef.current?.unsubscribe();
+  }, []);
+
+  const handleViewerInit = useCallback((viewer: any) => {
+    const pluginCtx = viewer.plugin as PluginUIContext;
+    setPlugin(pluginCtx);
+    const sub = pluginCtx.canvas3d?.didDraw.subscribe(() => {
+      const now = Date.now();
+      if (now - lastCameraUpdateRef.current < 500) return;
+      lastCameraUpdateRef.current = now;
+      setCameraSnapshot(pluginCtx.canvas3d?.camera.getSnapshot() ?? null);
+    });
+    cameraSubRef.current = sub ?? null;
+  }, []);
+
   const config = viewerConfig ?? MINIMAL_VIEWER_CONFIG;
 
   return (
@@ -114,6 +135,8 @@ export function BuilderWithViewer({
           onCodeGenerated={handleCodeGenerated}
           initialState={initialState}
           autoGenerateOnMount={!!initialState?.nodes?.length}
+          plugin={plugin}
+          cameraSnapshot={cameraSnapshot}
         />
       </div>
 
@@ -125,6 +148,7 @@ export function BuilderWithViewer({
               mvsData={mvsData}
               config={config}
               style={{ width: "100%", flex: 1 }}
+              onViewerInit={handleViewerInit}
             />
           )
           : (

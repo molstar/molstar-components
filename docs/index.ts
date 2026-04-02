@@ -2,7 +2,7 @@
 import { createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { EditorWithViewer, MolstarViewer, BuilderWithViewer, BuilderWithEditorAndViewer } from "../src/mod.ts";
-import { mvsTreeToUINodes } from "../src/state-builder/index.ts";
+import { mvsTreeToUINodes, extractCameraFromUINodes } from "../src/state-builder/index.ts";
 import type { RawMVSTree } from "../src/state-builder/index.ts";
 import { exampleMVSData, defaultCode } from "./demo-data.js";
 
@@ -30,8 +30,7 @@ const DEFAULT_BUILDER_MVS: RawMVSTree = {
               kind: 'component',
               params: { selector: { label_asym_id: 'A' } },
               children: [
-                { kind: 'representation', params: { type: 'cartoon' }, children: [{ kind: 'color', params: { color: '#4577B2' } }] },
-                { kind: 'label', params: { text: 'ABL Kinase' } }
+                { kind: 'representation', params: { type: 'cartoon' }, children: [{ kind: 'color', params: { color: '#4577B2' } }] }
               ]
             },
             {
@@ -64,7 +63,9 @@ const DEFAULT_BUILDER_MVS: RawMVSTree = {
   ]
 };
 
-const defaultBuilderNodes = mvsTreeToUINodes(DEFAULT_BUILDER_MVS);
+const { nodes: defaultBuilderNodes, camera: defaultBuilderCamera } = extractCameraFromUINodes(
+  mvsTreeToUINodes(DEFAULT_BUILDER_MVS)
+);
 
 // Initialize when DOM is ready
 window.addEventListener("load", async () => {
@@ -110,7 +111,7 @@ window.addEventListener("load", async () => {
       createRoot(builderViewerMount).render(
         createElement(BuilderWithViewer, {
           height: "600px",
-          initialState: { nodes: defaultBuilderNodes },
+          initialState: { nodes: defaultBuilderNodes, camera: defaultBuilderCamera },
         }),
       );
     }
@@ -122,7 +123,7 @@ window.addEventListener("load", async () => {
         createElement(BuilderWithEditorAndViewer, {
           height: "650px",
           autoRun: true,
-          builderInitialState: { nodes: defaultBuilderNodes },
+          builderInitialState: { nodes: defaultBuilderNodes, camera: defaultBuilderCamera },
         }),
       );
     }

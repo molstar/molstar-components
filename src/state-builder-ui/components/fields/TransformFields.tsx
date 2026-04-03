@@ -1,51 +1,22 @@
 import { Label } from '../../ui/label.tsx';
 import { Button } from '../../ui/button.tsx';
 import { TransformHelper } from '../../TransformHelper.tsx';
-import type { TransformParams } from '../../transform-helper/index.ts';
 import { XIcon } from 'lucide-react';
+import type { UINode } from '@molstar/state-builder';
 
 interface TransformFieldsProps {
-  params: Record<string, unknown>;
-  onChange: (params: Record<string, unknown>) => void;
+  node: UINode;
+  onUpdate: (updates: Partial<UINode>) => void;
 }
 
-export function TransformFields({ params, onChange }: TransformFieldsProps) {
+export function TransformFields({ node, onUpdate }: TransformFieldsProps) {
+  const params = node.params as Record<string, unknown> | undefined ?? {};
   const hasTransform = !!(params.rotation || params.translation || params.rotation_center || params.matrix);
-
-  const handleTransformApply = (transform: TransformParams) => {
-    const newParams: Record<string, unknown> = { ...params };
-
-    if (transform.rotation) {
-      newParams.rotation = transform.rotation;
-    } else {
-      delete newParams.rotation;
-    }
-
-    if (transform.translation) {
-      newParams.translation = transform.translation;
-    } else {
-      delete newParams.translation;
-    }
-
-    if (transform.rotation_center !== undefined && transform.rotation_center !== null) {
-      newParams.rotation_center = transform.rotation_center;
-    } else {
-      delete newParams.rotation_center;
-    }
-
-    if (transform.matrix) {
-      newParams.matrix = transform.matrix;
-    } else {
-      delete newParams.matrix;
-    }
-
-    onChange(newParams);
-  };
 
   const handleClear = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { rotation, translation, rotation_center, matrix, ...rest } = params;
-    onChange(rest);
+    onUpdate({ params: rest });
   };
 
   return (
@@ -54,8 +25,8 @@ export function TransformFields({ params, onChange }: TransformFieldsProps) {
       <div className='flex gap-1'>
         <div className='flex-1'>
           <TransformHelper
-            onApply={handleTransformApply}
-            initialValue={params}
+            node={node}
+            onUpdate={onUpdate}
           />
         </div>
         {hasTransform && (

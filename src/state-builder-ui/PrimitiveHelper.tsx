@@ -18,10 +18,12 @@ import type { PrimitiveKind } from '@molstar/state-builder';
 import type { UINode } from '@molstar/state-builder';
 import { PrimitiveItemEditor, RawPanel } from './primitive-helper/index.ts';
 
-interface PrimitiveHelperProps {
-  /** Current 'primitive' UINode children of the primitives container */
-  primitives: UINode[];
-  onApply: (primitives: UINode[]) => void;
+export interface PrimitiveHelperProps {
+  node: UINode;
+  onUpdate: (updates: Partial<UINode>) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
 function kindLabel(kind: unknown): string {
@@ -65,8 +67,17 @@ function newNode(kind: PrimitiveKind = 'label'): UINode {
   };
 }
 
-export function PrimitiveHelper({ primitives, onApply }: PrimitiveHelperProps) {
-  const [open, setOpen] = useState(false);
+export function PrimitiveHelper({ node, onUpdate, open: controlledOpen, onOpenChange, trigger }: PrimitiveHelperProps) {
+  const isControlled = controlledOpen !== undefined;
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isOpen = isControlled ? controlledOpen! : uncontrolledOpen;
+  const setIsOpen = (v: boolean) => {
+    if (isControlled) onOpenChange?.(v);
+    else setUncontrolledOpen(v);
+  };
+
+  const primitives = (node.children ?? []).filter((c) => c.kind === 'primitive');
+
   const [localPrimitives, setLocalPrimitives] = useState<UINode[]>([]);
   const [activeTab, setActiveTab] = useState<string>('raw');
   const [rawJson, setRawJson] = useState('[]');
@@ -74,13 +85,13 @@ export function PrimitiveHelper({ primitives, onApply }: PrimitiveHelperProps) {
 
   // Sync on open
   useEffect(() => {
-    if (!open) return;
+    if (!isOpen) return;
     const nodes = primitives.map((p) => ({ ...p }));
     setLocalPrimitives(nodes);
     setActiveTab(nodes[0]?.id ?? 'raw');
     setRawJson(JSON.stringify(nodes.map((p) => ({ ...p.params })), null, 2));
     setRawError('');
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updatePrimitive = (id: string, newParams: Record<string, unknown>) => {
     setLocalPrimitives((prev) => prev.map((p) => (p.id === id ? { ...p, params: newParams } : p)));
@@ -93,9 +104,9 @@ export function PrimitiveHelper({ primitives, onApply }: PrimitiveHelperProps) {
   };
 
   const addPrimitive = () => {
-    const node = newNode('label');
-    setLocalPrimitives((prev) => [...prev, node]);
-    setActiveTab(node.id);
+    const n = newNode('label');
+    setLocalPrimitives((prev) => [...prev, n]);
+    setActiveTab(n.id);
   };
 
   const removePrimitive = (id: string) => {
@@ -131,28 +142,32 @@ export function PrimitiveHelper({ primitives, onApply }: PrimitiveHelperProps) {
           params: p,
           children: [],
         }));
-        onApply(nodes);
-        setOpen(false);
+        onUpdate({ children: nodes });
+        setIsOpen(false);
       } catch {
         setRawError('Invalid JSON');
       }
       return;
     }
-    onApply(localPrimitives);
-    setOpen(false);
+    onUpdate({ children: localPrimitives });
+    setIsOpen(false);
   };
 
   const count = primitives.length;
   const triggerLabel =
     count === 0 ? 'Add primitives...' : `${count} primitive${count > 1 ? 's' : ''}`;
 
+  const defaultTrigger = (
+    <Button variant='outline' size='sm' className='h-8' title='Edit primitive children'>
+      <BoxIcon className='size-4 mr-1' />
+      {triggerLabel}
+    </Button>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant='outline' size='sm' className='h-8' title='Edit primitive children'>
-          <BoxIcon className='size-4 mr-1' />
-          {triggerLabel}
-        </Button>
+        {trigger ?? defaultTrigger}
       </DialogTrigger>
 
       <DialogContent className='sm:max-w-2xl max-h-[85vh] overflow-y-auto'>
@@ -254,7 +269,7 @@ export function PrimitiveHelper({ primitives, onApply }: PrimitiveHelperProps) {
 
         {/* Actions */}
         <div className='flex gap-2 justify-end pt-2 border-t'>
-          <Button variant='outline' onClick={() => setOpen(false)}>
+          <Button variant='outline' onClick={() => setIsOpen(false)}>
             Cancel
           </Button>
           <Button onClick={handleApply}>Apply Primitives</Button>

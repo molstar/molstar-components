@@ -1,21 +1,17 @@
 'use client';
 
-import { Button } from './ui/button.tsx';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog.tsx';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs.tsx';
 import { FocusIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { VectorsPanel, RadiusPanel, PresetsPanel, FocusPreview, FOCUS_PRESETS } from './focus-helper/index.ts';
+import { NodeHelperBase } from './NodeHelperBase.tsx';
+import type { UINode } from '@molstar/state-builder';
 
-interface FocusHelperProps {
-  params: Record<string, unknown>;
-  onChange: (params: Record<string, unknown>) => void;
+export interface FocusHelperProps {
+  node: UINode;
+  onUpdate: (updates: Partial<UINode>) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
 type FocusTab = 'vectors' | 'presets' | 'radius';
@@ -47,8 +43,7 @@ function computeLabel(params: Record<string, unknown>): string {
   return dirLabel + radiusSuffix;
 }
 
-export function FocusHelper({ params, onChange }: FocusHelperProps) {
-  const [open, setOpen] = useState(false);
+export function FocusHelper({ node, onUpdate, open, onOpenChange, trigger }: FocusHelperProps) {
   const [activeTab, setActiveTab] = useState<FocusTab>('vectors');
 
   const [direction, setDirection] = useState<[number, number, number] | undefined>(undefined);
@@ -57,15 +52,15 @@ export function FocusHelper({ params, onChange }: FocusHelperProps) {
   const [radiusExtent, setRadiusExtent] = useState(0);
   const [radius, setRadius] = useState<number | null>(null);
 
-  // Initialise local state from params when dialog opens
-  useEffect(() => {
-    if (!open) return;
+  const handleDialogOpen = () => {
+    const params = node.params;
     setDirection(params.direction as [number, number, number] | undefined);
     setUp(params.up as [number, number, number] | undefined);
     setRadiusFactor((params.radius_factor as number | undefined) ?? 1);
     setRadiusExtent((params.radius_extent as number | undefined) ?? 0);
     setRadius((params.radius as number | null | undefined) ?? null);
-  }, [open, params]);
+    setActiveTab('vectors');
+  };
 
   const handlePresetSelect = (
     dir: [number, number, number] | undefined,
@@ -75,8 +70,8 @@ export function FocusHelper({ params, onChange }: FocusHelperProps) {
     setUp(upVec);
   };
 
-  const handleApply = () => {
-    const newParams: Record<string, unknown> = { ...params };
+  const handleApply = (ref: string) => {
+    const newParams: Record<string, unknown> = { ...node.params };
 
     // Clear all focus-specific params first
     delete newParams.direction;
@@ -98,80 +93,83 @@ export function FocusHelper({ params, onChange }: FocusHelperProps) {
       if (radiusExtent !== 0) newParams.radius_extent = radiusExtent;
     }
 
-    onChange(newParams);
-    setOpen(false);
+    onUpdate({ params: newParams, ...(ref ? { ref } : {}) });
   };
 
-  const label = computeLabel(params);
+  const handleRawApply = (params: Record<string, unknown>, ref: string) => {
+    onUpdate({ params, ...(ref ? { ref } : {}) });
+  };
+
+  const label = computeLabel(node.params);
+  const defaultTrigger = (
+    <button
+      className='inline-flex items-center gap-2 h-8 px-3 text-sm border rounded-md bg-background hover:bg-muted/50 w-full justify-start font-normal'
+      title='Open focus helper'
+    >
+      <FocusIcon className='size-4 shrink-0 text-muted-foreground' />
+      <span className='truncate'>{label}</span>
+    </button>
+  );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant='outline'
-          size='sm'
-          className='h-8 justify-start text-left font-normal w-full'
-          title='Open focus helper'
-        >
-          <FocusIcon className='size-4 mr-2 shrink-0 text-muted-foreground' />
-          <span className='truncate'>{label}</span>
-        </Button>
-      </DialogTrigger>
-
-      <DialogContent className='sm:max-w-2xl'>
-        <DialogHeader>
-          <DialogTitle>Focus Helper</DialogTitle>
-        </DialogHeader>
-
-        <div className='flex gap-4'>
-          {/* SVG preview — 1/3 width */}
-          <div className='w-1/3 shrink-0 flex items-start justify-center pt-1'>
-            <FocusPreview direction={direction} up={up} />
-          </div>
-
-          {/* Tabs — 2/3 width */}
-          <div className='w-2/3 min-w-0'>
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FocusTab)}>
-              <TabsList className='w-full'>
-                <TabsTrigger value='vectors' className='text-xs flex-1'>Vectors</TabsTrigger>
-                <TabsTrigger value='presets' className='text-xs flex-1'>Presets</TabsTrigger>
-                <TabsTrigger value='radius' className='text-xs flex-1'>Radius</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value='vectors'>
+    <NodeHelperBase
+      node={node}
+      onApply={handleApply}
+      onRawApply={handleRawApply}
+      onDialogOpen={handleDialogOpen}
+      open={open}
+      onOpenChange={onOpenChange}
+      trigger={trigger ?? defaultTrigger}
+      tabs={[
+        {
+          id: 'vectors',
+          label: 'Vectors',
+          content: (
+            <div className='flex gap-4'>
+              <div className='w-1/3 shrink-0 flex items-start justify-center pt-1'>
+                <FocusPreview direction={direction} up={up} />
+              </div>
+              <div className='w-2/3 min-w-0'>
                 <VectorsPanel
                   direction={direction}
                   up={up}
                   onDirectionChange={setDirection}
                   onUpChange={setUp}
                 />
-              </TabsContent>
-
-              <TabsContent value='presets'>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: 'presets',
+          label: 'Presets',
+          content: (
+            <div className='flex gap-4'>
+              <div className='w-1/3 shrink-0 flex items-start justify-center pt-1'>
+                <FocusPreview direction={direction} up={up} />
+              </div>
+              <div className='w-2/3 min-w-0'>
                 <PresetsPanel onSelect={handlePresetSelect} />
-              </TabsContent>
-
-              <TabsContent value='radius'>
-                <RadiusPanel
-                  radiusFactor={radiusFactor}
-                  radiusExtent={radiusExtent}
-                  radius={radius}
-                  onRadiusFactorChange={setRadiusFactor}
-                  onRadiusExtentChange={setRadiusExtent}
-                  onRadiusChange={setRadius}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-
-        <div className='flex gap-2 justify-end pt-2'>
-          <Button variant='outline' onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleApply}>Apply</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: 'radius',
+          label: 'Radius',
+          content: (
+            <RadiusPanel
+              radiusFactor={radiusFactor}
+              radiusExtent={radiusExtent}
+              radius={radius}
+              onRadiusFactorChange={setRadiusFactor}
+              onRadiusExtentChange={setRadiusExtent}
+              onRadiusChange={setRadius}
+            />
+          ),
+        },
+      ]}
+      defaultTab={activeTab}
+    />
   );
 }

@@ -4,13 +4,22 @@ import { Button } from './ui/button.tsx';
 import { ChevronDownIcon, ChevronRightIcon, FilmIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import { AnimationHelper } from './AnimationHelper.tsx';
-import type { AnimationParams, RefInfo } from '@molstar/state-builder';
+import type { AnimationParams, RefInfo, UINode } from '@molstar/state-builder';
 import { computeAnimationDuration } from '@molstar/state-builder';
 
 interface AnimationSectionProps {
   animation: AnimationParams | null;
   onAnimationChange: (animation: AnimationParams | null) => void;
   availableRefs: RefInfo[];
+}
+
+function animationToUINode(animation: AnimationParams | null): UINode {
+  return {
+    id: '__animation__',
+    kind: '',
+    params: (animation ?? {}) as unknown as Record<string, unknown>,
+    children: [],
+  };
 }
 
 export function AnimationSection({ animation, onAnimationChange, availableRefs }: AnimationSectionProps) {
@@ -23,6 +32,16 @@ export function AnimationSection({ animation, onAnimationChange, availableRefs }
   if (animation?.autoplay) flags.push('autoplay');
   if (animation?.loop) flags.push('loop');
   if (animation?.trackball?.enabled) flags.push('spin');
+
+  const animNode = animationToUINode(animation);
+  const handleUpdate = (updates: Partial<UINode>) => {
+    if (updates.params) {
+      const p = updates.params as unknown as AnimationParams;
+      if (p.steps !== undefined) {
+        onAnimationChange(p);
+      }
+    }
+  };
 
   return (
     <div className='border rounded-md'>
@@ -74,8 +93,8 @@ export function AnimationSection({ animation, onAnimationChange, availableRefs }
               {/* Actions */}
               <div className='flex gap-2'>
                 <AnimationHelper
-                  onApply={onAnimationChange}
-                  initialValue={animation}
+                  node={animNode}
+                  onUpdate={handleUpdate}
                   availableRefs={availableRefs}
                 />
                 <Button
@@ -97,8 +116,8 @@ export function AnimationSection({ animation, onAnimationChange, availableRefs }
             <div className='flex flex-col items-center gap-2 py-2'>
               <p className='text-sm text-muted-foreground'>No animation set.</p>
               <AnimationHelper
-                onApply={onAnimationChange}
-                initialValue={null}
+                node={animNode}
+                onUpdate={handleUpdate}
                 availableRefs={availableRefs}
               />
             </div>

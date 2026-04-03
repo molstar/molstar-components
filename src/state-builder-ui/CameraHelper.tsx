@@ -1,17 +1,9 @@
 'use client';
 
 import { Button } from './ui/button.tsx';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog.tsx';
 import { Label } from './ui/label.tsx';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs.tsx';
 import { CameraIcon, CrosshairIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { CameraSnapshotAtom } from './state/atoms.ts';
 import type { CameraData } from '@molstar/state-builder';
@@ -23,17 +15,18 @@ import {
   CameraPreview,
 } from './camera-helper/index.ts';
 import type { CameraParams } from './camera-helper/index.ts';
+import { NodeHelperBase } from './NodeHelperBase.tsx';
+import type { UINode } from '@molstar/state-builder';
 
-interface CameraHelperProps {
-  onApply: (params: CameraParams) => void;
-  initialValue?: CameraParams | null;
+export interface CameraHelperProps {
+  node: UINode;
+  onUpdate: (updates: Partial<UINode>) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
-type CameraTab = 'vectors' | 'presets' | 'raw';
-
-export function CameraHelper({ onApply, initialValue }: CameraHelperProps) {
-  const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<CameraTab>('vectors');
+export function CameraHelper({ node, onUpdate, open, onOpenChange, trigger }: CameraHelperProps) {
   const cameraSnapshot = useAtomValue(CameraSnapshotAtom);
 
   // Vector state
@@ -41,25 +34,24 @@ export function CameraHelper({ onApply, initialValue }: CameraHelperProps) {
   const [target, setTarget] = useState<[number, number, number]>([0, 0, 0]);
   const [up, setUp] = useState<[number, number, number]>([0, 1, 0]);
 
-  // Raw state
-  const [rawInput, setRawInput] = useState('');
-  const [rawError, setRawError] = useState('');
-
-  // Parse initial value on open
-  useEffect(() => {
-    if (!open) return;
-    if (initialValue) {
-      setPosition([...initialValue.position]);
-      setTarget([...initialValue.target]);
-      setUp(initialValue.up ? [...initialValue.up] : [0, 1, 0]);
+  const handleDialogOpen = () => {
+    const p = node.params;
+    if (p.position && Array.isArray(p.position)) {
+      setPosition([...(p.position as [number, number, number])]);
     } else {
       setPosition([0, 0, 100]);
+    }
+    if (p.target && Array.isArray(p.target)) {
+      setTarget([...(p.target as [number, number, number])]);
+    } else {
       setTarget([0, 0, 0]);
+    }
+    if (p.up && Array.isArray(p.up)) {
+      setUp([...(p.up as [number, number, number])]);
+    } else {
       setUp([0, 1, 0]);
     }
-    setRawInput('');
-    setRawError('');
-  }, [open, initialValue]);
+  };
 
   const captureFromViewer = () => {
     if (!cameraSnapshot) return;
@@ -75,34 +67,20 @@ export function CameraHelper({ onApply, initialValue }: CameraHelperProps) {
     if (params.up) setUp([...params.up]);
   };
 
-  const handleApply = () => {
-    if (activeTab === 'raw') {
-      const trimmed = rawInput.trim();
-      if (!trimmed) {
-        setRawError('Empty input');
-        return;
-      }
-      try {
-        const parsed = JSON.parse(trimmed);
-        if (!parsed.position || !parsed.target) {
-          setRawError('Must include "position" and "target" arrays');
-          return;
-        }
-        onApply(parsed as CameraParams);
-        setOpen(false);
-      } catch {
-        setRawError('Invalid JSON');
-        return;
-      }
-    } else {
-      const params: CameraParams = { position, target };
-      // Only include up if it's not the default [0, 1, 0]
-      if (!isDefaultUp(up)) {
-        params.up = up;
-      }
-      onApply(params);
-      setOpen(false);
+  const buildParams = (): Record<string, unknown> => {
+    const params: Record<string, unknown> = { position, target };
+    if (!isDefaultUp(up)) {
+      params.up = up;
     }
+    return params;
+  };
+
+  const handleApply = (ref: string) => {
+    onUpdate({ params: buildParams(), ...(ref ? { ref } : {}) });
+  };
+
+  const handleRawApply = (params: Record<string, unknown>, ref: string) => {
+    onUpdate({ params, ...(ref ? { ref } : {}) });
   };
 
   const currentParams: CameraParams = { position, target };
@@ -111,53 +89,38 @@ export function CameraHelper({ onApply, initialValue }: CameraHelperProps) {
   }
   const previewJson = JSON.stringify(currentParams, null, 2);
 
+  const defaultTrigger = (
+    <Button
+      variant='outline'
+      size='sm'
+      className='h-8'
+      title='Edit camera settings'
+    >
+      <CameraIcon className='size-4 mr-1' />
+      Edit
+    </Button>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant='outline'
-          size='sm'
-          className='h-8'
-          title='Edit camera settings'
-        >
-          <CameraIcon className='size-4 mr-1' />
-          Edit
-        </Button>
-      </DialogTrigger>
-
-      <DialogContent className='sm:max-w-3xl max-h-[85vh] overflow-y-auto'>
-        <DialogHeader>
-          <div className='flex items-center justify-between'>
-            <DialogTitle>Camera Helper</DialogTitle>
-            <Button
-              size='sm'
-              variant='outline'
-              onClick={captureFromViewer}
-              disabled={!cameraSnapshot}
-              title={cameraSnapshot ? 'Capture current viewer camera position' : 'No viewer camera available'}
-            >
-              <CrosshairIcon className='size-4 mr-1' />
-              Capture from Viewer
-            </Button>
-          </div>
-        </DialogHeader>
-
-        <div className='flex gap-4'>
-          {/* SVG Preview - 1/3 */}
-          <div className='w-1/3 shrink-0 flex items-start justify-center'>
-            <CameraPreview position={position} target={target} />
-          </div>
-
-          {/* Tabs - 2/3 */}
-          <div className='w-2/3 min-w-0'>
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as CameraTab)}>
-              <TabsList>
-                <TabsTrigger value='vectors'>Vectors</TabsTrigger>
-                <TabsTrigger value='presets'>Presets</TabsTrigger>
-                <TabsTrigger value='raw'>Raw</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value='vectors'>
+    <NodeHelperBase
+      node={node}
+      onApply={handleApply}
+      onRawApply={handleRawApply}
+      onDialogOpen={handleDialogOpen}
+      open={open}
+      onOpenChange={onOpenChange}
+      trigger={trigger ?? defaultTrigger}
+      title='Camera Helper'
+      tabs={[
+        {
+          id: 'vectors',
+          label: 'Vectors',
+          content: (
+            <div className='flex gap-4'>
+              <div className='w-1/3 shrink-0 flex items-start justify-center'>
+                <CameraPreview position={position} target={target} />
+              </div>
+              <div className='w-2/3 min-w-0 space-y-3'>
                 <VectorsPanel
                   position={position}
                   target={target}
@@ -166,43 +129,61 @@ export function CameraHelper({ onApply, initialValue }: CameraHelperProps) {
                   onTargetChange={setTarget}
                   onUpChange={setUp}
                 />
-              </TabsContent>
-
-              <TabsContent value='presets'>
+                <div className='border-t pt-3'>
+                  <Label className='text-xs text-muted-foreground'>Preview</Label>
+                  <pre className='text-xs font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-24'>
+                    {previewJson}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: 'presets',
+          label: 'Presets',
+          content: (
+            <div className='flex gap-4'>
+              <div className='w-1/3 shrink-0 flex items-start justify-center'>
+                <CameraPreview position={position} target={target} />
+              </div>
+              <div className='w-2/3 min-w-0'>
                 <PresetsPanel onSelect={handlePresetSelect} />
-              </TabsContent>
-
-              <TabsContent value='raw'>
-                <RawPanel
-                  value={rawInput}
-                  error={rawError}
-                  onChange={(v) => { setRawInput(v); setRawError(''); }}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-
-        {/* Preview */}
-        {activeTab !== 'raw' && (
-          <div className='border-t pt-3'>
-            <Label className='text-xs text-muted-foreground'>Preview</Label>
-            <pre className='text-xs font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-24'>
-              {previewJson}
-            </pre>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className='flex gap-2 justify-end pt-2'>
-          <Button variant='outline' onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleApply}>
-            Apply Camera
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: 'capture',
+          label: 'Capture',
+          content: (
+            <div className='space-y-3'>
+              <p className='text-sm text-muted-foreground'>
+                Capture the current viewer camera position and use it as the camera settings.
+              </p>
+              <Button
+                size='sm'
+                variant='outline'
+                onClick={captureFromViewer}
+                disabled={!cameraSnapshot}
+                title={cameraSnapshot ? 'Capture current viewer camera position' : 'No viewer camera available'}
+              >
+                <CrosshairIcon className='size-4 mr-1' />
+                Capture from Viewer
+              </Button>
+              {!!cameraSnapshot && (
+                <div className='border-t pt-3'>
+                  <Label className='text-xs text-muted-foreground'>Current capture</Label>
+                  <pre className='text-xs font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-24'>
+                    {previewJson}
+                  </pre>
+                </div>
+              )}
+            </div>
+          ),
+        },
+      ]}
+      defaultTab='vectors'
+    />
   );
 }

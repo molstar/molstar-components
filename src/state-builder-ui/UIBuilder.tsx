@@ -1,5 +1,6 @@
 'use client';
 
+import type React from 'react';
 import { SceneKeyAtom, UIBuilderAnimationAtom, UIBuilderCameraAtom, UIBuilderConstantsAtom, UIBuilderNodesAtom, PluginAtom } from './state/atoms.ts';
 import { useNotify } from './state/notifications.ts';
 import { useCodeGenCallback } from './state/codegen-context.ts';
@@ -57,8 +58,9 @@ import {
 } from '@molstar/state-builder';
 import { createDownloadParseNodes } from '@molstar/state-builder/types/composite-sequences';
 import { StructureMetadataProvider } from './StructureMetadataContext.tsx';
+import { SetupWizard } from './SetupWizard.tsx';
 
-export function UIBuilder() {
+export function UIBuilder(): React.ReactElement {
   const sceneKey = useAtomValue(SceneKeyAtom);
   const plugin = useAtomValue(PluginAtom) as PluginUIContext | null;
   const onCodeGenerated = useCodeGenCallback();
@@ -115,6 +117,7 @@ export function UIBuilder() {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importJson, setImportJson] = useState('');
   const [constantsExpanded, setConstantsExpanded] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   const addNode = () => {
     const [newNode] = assignMissingRefs([createDownloadParseNodes()], nodes);
@@ -431,6 +434,10 @@ export function UIBuilder() {
         {nodes.length === 0 ? (
           <div className='flex flex-col items-center justify-center h-32 text-muted-foreground text-sm gap-2 border rounded-md'>
             <p>No nodes yet.</p>
+            <div className='flex gap-2'>
+            <Button size='sm' variant='outline' onClick={() => setWizardOpen(true)}>
+              Setup wizard
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size='sm' variant='outline'>
@@ -462,6 +469,7 @@ export function UIBuilder() {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+            </div>
           </div>
         ) : (
           nodes.map((node, index) => (
@@ -493,6 +501,13 @@ export function UIBuilder() {
           ))
         )}
       </div>
+      <SetupWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        onComplete={(newNodes) => {
+          setNodes(assignMissingRefs(newNodes, nodes));
+        }}
+      />
     </div>
     </StructureMetadataProvider>
   );

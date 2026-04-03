@@ -1,18 +1,20 @@
-import { Button } from '../ui/button.tsx';
+'use client';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu.tsx';
-import { ArrowDownIcon, ArrowUpIcon, CopyIcon, PlusIcon, XIcon, ChevronDownIcon } from 'lucide-react';
+import { Button } from '../ui/button.tsx';
+import { MoreHorizontalIcon } from 'lucide-react';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import type { UINode } from '@molstar/state-builder';
-import {
-  getTemplatesForParentKind,
-  instantiateTemplate,
-} from '@molstar/state-builder';
+import { getTemplatesForParentKind, instantiateTemplate } from '@molstar/state-builder';
 
 interface OperationActionsProps {
   canHaveChildren?: boolean;
@@ -27,9 +29,6 @@ interface OperationActionsProps {
   onRemove: () => void;
 }
 
-/**
- * Action buttons for operations: move up/down, add child, copy, remove
- */
 export function OperationActions({
   canHaveChildren,
   isFirst,
@@ -42,81 +41,62 @@ export function OperationActions({
   onCopy,
   onRemove,
 }: OperationActionsProps) {
-  // Get templates valid for this parent kind
   const templates = parentKind ? getTemplatesForParentKind(parentKind as MVSKind) : [];
   const hasTemplates = templates.length > 0;
 
-  const handleTemplateSelect = (templateId: string) => {
-    const template = templates.find((t) => t.id === templateId);
-    if (template && onAddTemplateChildren) {
-      const nodes = instantiateTemplate(template);
-      onAddTemplateChildren(nodes);
-    }
-  };
-
   return (
-    <div className='flex gap-1'>
-      {onMoveUp && (
-        <Button
-          variant='ghost'
-          size='sm'
-          onClick={onMoveUp}
-          title='Move up'
-          className='h-8 w-8 p-0'
-          disabled={isFirst}
-        >
-          <ArrowUpIcon className='size-4' />
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant='ghost' size='sm' className='h-7 w-7 p-0 shrink-0'>
+          <MoreHorizontalIcon className='size-4' />
         </Button>
-      )}
-      {onMoveDown && (
-        <Button
-          variant='ghost'
-          size='sm'
-          onClick={onMoveDown}
-          title='Move down'
-          className='h-8 w-8 p-0'
-          disabled={isLast}
-        >
-          <ArrowDownIcon className='size-4' />
-        </Button>
-      )}
-      {canHaveChildren && onAddChild && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' size='sm' title='Add child' className='h-8 px-1'>
-              <PlusIcon className='size-4' />
-              <ChevronDownIcon className='size-3' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuItem onClick={onAddChild}>
-              Empty Node
-            </DropdownMenuItem>
-            {hasTemplates && (
-              <>
-                <DropdownMenuSeparator />
-                {templates.map((template) => (
-                  <DropdownMenuItem
-                    key={template.id}
-                    onClick={() => handleTemplateSelect(template.id)}
-                    title={template.description}
-                  >
-                    {template.name}
-                  </DropdownMenuItem>
-                ))}
-              </>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align='end' className='min-w-[160px]'>
+        <DropdownMenuItem onClick={onMoveUp} disabled={isFirst || !onMoveUp}>
+          Move up
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onMoveDown} disabled={isLast || !onMoveDown}>
+          Move down
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {onCopy && (
+          <DropdownMenuItem onClick={onCopy}>Duplicate</DropdownMenuItem>
+        )}
+        {canHaveChildren && onAddChild && (
+          <>
+            {hasTemplates ? (
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Add child</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={onAddChild}>Empty node</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {templates.map((t) => (
+                    <DropdownMenuItem
+                      key={t.id}
+                      onClick={() => {
+                        const nodes = instantiateTemplate(t);
+                        onAddTemplateChildren?.(nodes);
+                      }}
+                      title={t.description}
+                    >
+                      {t.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            ) : (
+              <DropdownMenuItem onClick={onAddChild}>Add child</DropdownMenuItem>
             )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-      {onCopy && (
-        <Button variant='ghost' size='sm' onClick={onCopy} title='Copy operation' className='h-8 w-8 p-0'>
-          <CopyIcon className='size-4' />
-        </Button>
-      )}
-      <Button variant='ghost' size='sm' onClick={onRemove} title='Remove operation' className='h-8 w-8 p-0'>
-        <XIcon className='size-4' />
-      </Button>
-    </div>
+          </>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={onRemove}
+          className='text-destructive focus:text-destructive'
+        >
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

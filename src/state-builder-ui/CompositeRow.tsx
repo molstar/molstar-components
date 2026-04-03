@@ -1,20 +1,29 @@
 'use client';
 
 import { Button } from './ui/button.tsx';
-import { Label } from './ui/label.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select.tsx';
 import type { UINode, ConstantDefinition } from '@molstar/state-builder';
-import { createEmptyNode, deepCopyNode, MVS_KIND_LABELS, countSubtreeNodes } from '@molstar/state-builder';
+import { createEmptyNode, deepCopyNode, countSubtreeNodes } from '@molstar/state-builder';
 import { ConfirmDialog } from './ui/confirm-dialog.tsx';
 import type { CompositeSequence } from '@molstar/state-builder/types/composite-sequences';
-import { getCompositeValidChildren, DOWNLOAD_PARSE_SEQUENCE } from '@molstar/state-builder/types/composite-sequences';
+import { getCompositeValidChildren } from '@molstar/state-builder/types/composite-sequences';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
 import { TreeLines } from './components/TreeLines.tsx';
 import { OperationActions } from './components/OperationActions.tsx';
-import { DownloadParseFields } from './components/fields/DownloadParseFields.tsx';
 import { OperationRow } from './OperationRow.tsx';
+import { CompositeHelper } from './CompositeHelper.tsx';
+import { getColorForKind } from './node-categories.ts';
+
+function truncateUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    const path = u.pathname.split('/').pop() ?? '';
+    return `${u.hostname}/…/${path}`.slice(0, 50);
+  } catch {
+    return url.slice(0, 50);
+  }
+}
 
 interface CompositeRowProps {
   sequence: CompositeSequence;
@@ -52,38 +61,13 @@ export function CompositeRow({
   allNodes = [],
 }: CompositeRowProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [helperOpen, setHelperOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{
-    type: 'delete' | 'kindChange';
-    newKind?: MVSKind;
+    type: 'delete';
   } | null>(null);
 
   const childCount = exitNode.children?.length || 0;
   const subtreeCount = countSubtreeNodes(exitNode);
-
-  // Build the list of kinds for the select, including composite option
-  // Filter out 'download' and 'parse' since they're represented by the composite
-  const regularKinds = (allowedKinds || []).filter(
-    (k) => k !== 'download' && k !== 'parse'
-  );
-
-  // Handle kind change - convert composite to regular node if different kind selected
-  const handleKindChange = (value: string) => {
-    if (value === DOWNLOAD_PARSE_SEQUENCE.selectValue) {
-      // Already a composite, nothing to do
-      return;
-    }
-    if (childCount > 0) {
-      setPendingAction({ type: 'kindChange', newKind: value as MVSKind });
-    } else {
-      // Convert to a regular node with the selected kind
-      onUpdate({
-        kind: value as MVSKind,
-        params: {},
-        children: [],
-        ref: undefined,
-      });
-    }
-  };
 
   const handleRemove = () => {
     if (childCount > 0) {
@@ -95,50 +79,19 @@ export function CompositeRow({
 
   const handleConfirmAction = () => {
     if (!pendingAction) return;
-
-    if (pendingAction.type === 'delete') {
-      onRemove();
-    } else if (pendingAction.type === 'kindChange' && pendingAction.newKind) {
-      onUpdate({
-        kind: pendingAction.newKind,
-        params: {},
-        children: [],
-        ref: undefined,
-      });
-    }
-
+    onRemove();
     setPendingAction(null);
   };
 
-  const handleDownloadParamsChange = (params: Record<string, unknown>) => {
-    onUpdate({ params });
+  const handleUpdateDownload = (updates: Partial<UINode>) => {
+    onUpdate(updates);
   };
 
-  const handleParseParamsChange = (params: Record<string, unknown>) => {
-    const updatedExitNode = { ...exitNode, params };
+  const handleUpdateParse = (updates: Partial<UINode>) => {
+    const updatedExitNode = { ...exitNode, ...updates };
     onUpdate({
       children: [updatedExitNode, ...(rootNode.children?.slice(1) || [])],
     });
-  };
-
-  const handleRefChange = (ref: string) => {
-    if (ref) {
-      // Set refs on both nodes
-      const updatedExitNode = { ...exitNode, ref: ref + 'Parse' };
-      onUpdate({
-        ref,
-        children: [updatedExitNode, ...(rootNode.children?.slice(1) || [])],
-      });
-    } else {
-      // Remove refs from both nodes
-      const { ref: _rootRef, ...restRootProps } = rootNode;
-      const { ref: _exitRef, ...restExitProps } = exitNode;
-      const updatedExitNode = { ...restExitProps, ref: undefined };
-      onUpdate({
-        ref: undefined,
-        children: [updatedExitNode as UINode, ...(rootNode.children?.slice(1) || [])],
-      });
-    }
   };
 
   const handleAddChild = () => {
@@ -263,82 +216,71 @@ export function CompositeRow({
 
   const validChildKinds = getCompositeValidChildren(sequence);
   const hasChildren = exitNode.children && exitNode.children.length > 0;
+  const dotColor = getColorForKind('download');
 
   return (
     <div className='relative' style={{ marginLeft: depth > 0 ? '20px' : '0' }}>
       <TreeLines depth={depth} isLast={isLast} />
 
-      <div className='border rounded-md p-2 bg-card'>
-        <div className='flex gap-2 items-end'>
-          {/* Expand/collapse button */}
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={() => setIsExpanded(!isExpanded)}
-            className='h-8 w-8 p-0'
-            title={isExpanded ? 'Collapse' : 'Expand'}
-          >
-            {isExpanded ? <ChevronDownIcon className='size-4' /> : <ChevronRightIcon className='size-4' />}
-          </Button>
+      <div className='border rounded-lg px-3 py-2 bg-card shadow-sm flex items-center gap-2'>
+        {/* Expand/collapse button */}
+        <Button
+          variant='ghost'
+          size='sm'
+          onClick={() => setIsExpanded(!isExpanded)}
+          className='h-6 w-6 p-0 shrink-0'
+          title={isExpanded ? 'Collapse' : 'Expand'}
+        >
+          {isExpanded ? <ChevronDownIcon className='size-3' /> : <ChevronRightIcon className='size-3' />}
+        </Button>
 
-          {/* Kind selector with composite option */}
-          <div className='w-40'>
-            <Label className='text-xs'>Kind</Label>
-            <Select value={DOWNLOAD_PARSE_SEQUENCE.selectValue} onValueChange={handleKindChange}>
-              <SelectTrigger size='sm'>
-                <SelectValue>{sequence.label}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {/* Composite option first */}
-                <SelectItem value={DOWNLOAD_PARSE_SEQUENCE.selectValue}>
-                  {DOWNLOAD_PARSE_SEQUENCE.label}
-                </SelectItem>
-                {/* Other valid kinds */}
-                {regularKinds.map((kind) => (
-                  <SelectItem key={kind} value={kind}>
-                    {MVS_KIND_LABELS[kind] ?? kind}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Combined fields for download + parse */}
-          <DownloadParseFields
-            downloadNode={rootNode}
-            parseNode={exitNode}
-            onDownloadChange={handleDownloadParamsChange}
-            onParseChange={handleParseParamsChange}
-            onRefChange={handleRefChange}
-            availableConstants={availableConstants}
+        {/* Kind label — fixed composite label */}
+        <span className='text-xs font-semibold text-muted-foreground flex items-center gap-1.5 min-w-[90px]'>
+          <span
+            className='inline-block rounded-full shrink-0'
+            style={{ width: 7, height: 7, background: dotColor }}
           />
+          Download/Parse
+        </span>
 
-          {/* Action buttons */}
-          <OperationActions
-            canHaveChildren={true}
-            isFirst={isFirst}
-            isLast={isLast}
-            parentKind={sequence.exitKind}
-            onMoveUp={onMoveUp}
-            onMoveDown={onMoveDown}
-            onAddChild={handleAddChild}
-            onAddTemplateChildren={handleAddTemplateChildren}
-            onCopy={onCopy}
-            onRemove={handleRemove}
-          />
-        </div>
+        {/* Summary button */}
+        <button
+          type='button'
+          onClick={() => setHelperOpen(true)}
+          className='flex-1 min-w-0 text-left text-xs px-2 py-1 rounded-md border bg-muted/40 truncate hover:bg-muted hover:border-border cursor-pointer text-foreground transition-colors'
+        >
+          {(rootNode.params.url as string) ? truncateUrl(rootNode.params.url as string) : 'click to configure…'}
+        </button>
+
+        <OperationActions
+          canHaveChildren={true}
+          isFirst={isFirst}
+          isLast={isLast}
+          parentKind={sequence.exitKind}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+          onAddChild={handleAddChild}
+          onAddTemplateChildren={handleAddTemplateChildren}
+          onCopy={onCopy}
+          onRemove={handleRemove}
+        />
+
+        <CompositeHelper
+          downloadNode={rootNode}
+          parseNode={exitNode}
+          onUpdateDownload={handleUpdateDownload}
+          onUpdateParse={handleUpdateParse}
+          open={helperOpen}
+          onOpenChange={setHelperOpen}
+        />
       </div>
 
       <ConfirmDialog
         open={pendingAction !== null}
         onOpenChange={(open) => !open && setPendingAction(null)}
-        title={pendingAction?.type === 'delete' ? 'Delete Node?' : 'Change Kind?'}
-        description={
-          pendingAction?.type === 'delete'
-            ? `This will delete this node and ${subtreeCount} child node${subtreeCount !== 1 ? 's' : ''}. This cannot be undone.`
-            : `Changing the kind will delete ${subtreeCount} child node${subtreeCount !== 1 ? 's' : ''}. This cannot be undone.`
-        }
-        confirmText={pendingAction?.type === 'delete' ? 'Delete' : 'Change Kind'}
+        title='Delete Node?'
+        description={`This will delete this node and ${subtreeCount} child node${subtreeCount !== 1 ? 's' : ''}. This cannot be undone.`}
+        confirmText='Delete'
         onConfirm={handleConfirmAction}
         isDestructive
       />

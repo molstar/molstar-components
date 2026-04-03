@@ -5,7 +5,7 @@ import { CameraIcon, ChevronDownIcon, ChevronRightIcon, CrosshairIcon, XIcon } f
 import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { CameraSnapshotAtom } from './state/atoms.ts';
-import type { CameraData } from '@molstar/state-builder';
+import type { CameraData, UINode } from '@molstar/state-builder';
 import { snapshotToCameraParams, isDefaultUp } from '@molstar/state-builder';
 import { CameraHelper } from './CameraHelper.tsx';
 import type { CameraParams } from './camera-helper/index.ts';
@@ -19,6 +19,13 @@ function formatVec3(v: [number, number, number]): string {
   return `[${v.map((n) => n.toFixed(1)).join(', ')}]`;
 }
 
+function cameraParamsToUINode(camera: CameraParams | null): UINode {
+  const params: Record<string, unknown> = camera
+    ? { position: camera.position, target: camera.target, ...(camera.up ? { up: camera.up } : {}) }
+    : {};
+  return { id: '__camera__', kind: 'camera', params, children: [] };
+}
+
 export function CameraSection({ camera, onCameraChange }: CameraSectionProps) {
   const [expanded, setExpanded] = useState(false);
   const cameraSnapshot = useAtomValue(CameraSnapshotAtom);
@@ -26,6 +33,20 @@ export function CameraSection({ camera, onCameraChange }: CameraSectionProps) {
   const captureFromViewer = () => {
     if (!cameraSnapshot) return;
     onCameraChange(snapshotToCameraParams(cameraSnapshot as CameraData));
+  };
+
+  const cameraNode = cameraParamsToUINode(camera);
+  const handleUpdate = (updates: Partial<UINode>) => {
+    if (updates.params) {
+      const p = updates.params;
+      if (p.position && p.target) {
+        onCameraChange({
+          position: p.position as [number, number, number],
+          target: p.target as [number, number, number],
+          ...(p.up ? { up: p.up as [number, number, number] } : {}),
+        });
+      }
+    }
   };
 
   return (
@@ -72,7 +93,7 @@ export function CameraSection({ camera, onCameraChange }: CameraSectionProps) {
 
               {/* Actions */}
               <div className='flex gap-2'>
-                <CameraHelper onApply={onCameraChange} initialValue={camera} />
+                <CameraHelper node={cameraNode} onUpdate={handleUpdate} />
                 <Button
                   size='sm'
                   variant='outline'
@@ -106,10 +127,7 @@ export function CameraSection({ camera, onCameraChange }: CameraSectionProps) {
             <div className='flex flex-col items-center gap-2 py-2'>
               <p className='text-sm text-muted-foreground'>No camera set.</p>
               <div className='flex gap-2'>
-                <CameraHelper
-                  onApply={onCameraChange}
-                  initialValue={null}
-                />
+                <CameraHelper node={cameraNode} onUpdate={handleUpdate} />
                 <Button
                   size='sm'
                   variant='outline'

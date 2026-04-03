@@ -1,9 +1,6 @@
 'use client';
 
 import { Button } from './ui/button.tsx';
-import { Input } from './ui/input.tsx';
-import { Label } from './ui/label.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select.tsx';
 import type { UINode, ConstantDefinition } from '@molstar/state-builder';
 import {
   countSubtreeNodes,
@@ -17,8 +14,9 @@ import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
 import { TreeLines } from './components/TreeLines.tsx';
 import { OperationActions } from './components/OperationActions.tsx';
-import { PrimitivesFields } from './components/fields/PrimitivesFields.tsx';
 import { PrimitiveHelper } from './PrimitiveHelper.tsx';
+import { getColorForKind } from './node-categories.ts';
+import { getNodeSummary } from './node-summary.ts';
 
 interface PrimitivesRowProps {
   node: UINode;
@@ -48,6 +46,7 @@ export function PrimitivesRow({
   allNodes = [],
 }: PrimitivesRowProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [helperOpen, setHelperOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{
     type: 'delete' | 'kindChange';
     newKind?: MVSKind;
@@ -86,79 +85,67 @@ export function PrimitivesRow({
     setPendingAction(null);
   };
 
-  const handlePrimitivesApply = (newPrimitives: UINode[]) => {
-    onUpdate({ children: newPrimitives });
-  };
+  void handleKindChange; // kept for future kind-switching support
+
+  const dotColor = getColorForKind('primitives');
+  const kindLabel = MVS_KIND_LABELS['primitives'] ?? 'Primitives';
+  const summary = getNodeSummary(node);
 
   return (
     <div className='relative' style={{ marginLeft: depth > 0 ? '20px' : '0' }}>
       <TreeLines depth={depth} isLast={isLast} />
 
-      <div className='border rounded-md p-2 bg-card'>
-        <div className='flex gap-2 items-end flex-wrap'>
-          {/* Expand/collapse */}
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={() => setIsExpanded(!isExpanded)}
-            className='h-8 w-8 p-0'
-            title={isExpanded ? 'Collapse' : 'Expand'}
-          >
-            {isExpanded ? (
-              <ChevronDownIcon className='size-4' />
-            ) : (
-              <ChevronRightIcon className='size-4' />
-            )}
-          </Button>
+      <div className='border rounded-lg px-3 py-2 bg-card shadow-sm flex items-center gap-2'>
+        {/* Expand/collapse */}
+        <Button
+          variant='ghost'
+          size='sm'
+          onClick={() => setIsExpanded(!isExpanded)}
+          className='h-6 w-6 p-0 shrink-0'
+          title={isExpanded ? 'Collapse' : 'Expand'}
+        >
+          {isExpanded ? (
+            <ChevronDownIcon className='size-3' />
+          ) : (
+            <ChevronRightIcon className='size-3' />
+          )}
+        </Button>
 
-          {/* Kind selector — shows 'primitives', allows switching away */}
-          <div className='w-40'>
-            <Label className='text-xs'>Kind</Label>
-            <Select value='primitives' onValueChange={handleKindChange}>
-              <SelectTrigger size='sm'>
-                <SelectValue>{MVS_KIND_LABELS['primitives'] ?? 'Primitives'}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='primitives'>
-                  {MVS_KIND_LABELS['primitives'] ?? 'Primitives'}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Container params: color, opacity, label_attachment, label_color */}
-          <PrimitivesFields
-            params={node.params}
-            onChange={(params) => onUpdate({ params })}
+        {/* Kind label */}
+        <span className='text-xs font-semibold text-muted-foreground flex items-center gap-1.5 min-w-[90px]'>
+          <span
+            className='inline-block rounded-full shrink-0'
+            style={{ width: 7, height: 7, background: dotColor }}
           />
+          {kindLabel}
+        </span>
 
-          {/* PrimitiveHelper trigger */}
-          <PrimitiveHelper primitives={primitiveChildren} onApply={handlePrimitivesApply} />
+        {/* Summary button — opens PrimitiveHelper */}
+        <button
+          type='button'
+          onClick={() => setHelperOpen(true)}
+          className='flex-1 min-w-0 text-left text-xs px-2 py-1 rounded-md border bg-muted/40 truncate hover:bg-muted hover:border-border cursor-pointer text-foreground transition-colors'
+        >
+          {summary ?? (primitiveChildren.length === 0 ? 'click to add primitives…' : `${primitiveChildren.length} primitive${primitiveChildren.length !== 1 ? 's' : ''}`)}
+        </button>
 
-          {/* Ref */}
-          <div className='w-24'>
-            <Label className='text-xs'>Ref</Label>
-            <Input
-              className='h-8 text-sm'
-              placeholder='name'
-              value={node.ref ?? ''}
-              onChange={(e) => onUpdate({ ref: e.target.value || undefined })}
-              title='Reference name'
-            />
-          </div>
+        <OperationActions
+          canHaveChildren={false}
+          isFirst={isFirst}
+          isLast={isLast}
+          parentKind='primitives'
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+          onCopy={onCopy}
+          onRemove={handleRemove}
+        />
 
-          {/* Action buttons */}
-          <OperationActions
-            canHaveChildren={false}
-            isFirst={isFirst}
-            isLast={isLast}
-            parentKind='primitives'
-            onMoveUp={onMoveUp}
-            onMoveDown={onMoveDown}
-            onCopy={onCopy}
-            onRemove={handleRemove}
-          />
-        </div>
+        <PrimitiveHelper
+          node={node}
+          onUpdate={onUpdate}
+          open={helperOpen}
+          onOpenChange={setHelperOpen}
+        />
       </div>
 
       <ConfirmDialog
@@ -175,7 +162,7 @@ export function PrimitivesRow({
         isDestructive
       />
 
-      {/* Summary of primitives when expanded */}
+      {/* Children summary when expanded */}
       {isExpanded && primitiveChildren.length > 0 && (
         <div className='mt-1 pl-4'>
           <p className='text-xs text-muted-foreground'>

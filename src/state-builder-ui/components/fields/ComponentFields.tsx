@@ -1,11 +1,22 @@
+import { useState } from 'react';
 import { Label } from '../../ui/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select.tsx';
+import { Button } from '../../ui/button.tsx';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog.tsx';
 import {
   COMPONENT_SELECTORS,
   formatSelectorPreview,
   getActiveValues,
+  type ComponentSelectorValue,
 } from '@molstar/state-builder';
-import { SelectorHelper } from '../../SelectorHelper.tsx';
+import { ListIcon } from 'lucide-react';
+import { SelectorHelperContent } from '../../SelectorHelperContent.tsx';
 
 interface ComponentFieldsProps {
   params: Record<string, unknown>;
@@ -13,6 +24,65 @@ interface ComponentFieldsProps {
 }
 
 type SelectorMode = 'preset' | 'custom';
+
+function SelectorDialog({
+  value,
+  onSelect,
+}: {
+  value: unknown;
+  onSelect: (selector: unknown) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<ComponentSelectorValue | undefined>(undefined);
+
+  const handleOpen = (isOpen: boolean) => {
+    if (isOpen) {
+      setDraft(value as ComponentSelectorValue | undefined);
+    }
+    setOpen(isOpen);
+  };
+
+  const handleApply = () => {
+    if (draft !== undefined) {
+      onSelect(draft);
+    }
+    setOpen(false);
+  };
+
+  const preview = formatSelectorPreview(value);
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpen}>
+      <Button
+        variant='outline'
+        size='sm'
+        className='h-8 justify-start text-left font-normal w-full'
+        title='Open selector builder'
+        onClick={() => handleOpen(true)}
+      >
+        <ListIcon className='size-4 mr-2 shrink-0' />
+        <span className='truncate'>{preview}</span>
+      </Button>
+
+      <DialogContent className='sm:max-w-lg'>
+        <DialogHeader>
+          <DialogTitle>Build Component Selector</DialogTitle>
+        </DialogHeader>
+
+        <SelectorHelperContent value={draft} onChange={setDraft} />
+
+        <DialogFooter>
+          <Button variant='outline' size='sm' onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button size='sm' onClick={handleApply} disabled={draft === undefined}>
+            Apply Selection
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function ComponentFields({ params, onChange }: ComponentFieldsProps) {
   const selector = params.selector;
@@ -74,11 +144,7 @@ export function ComponentFields({ params, onChange }: ComponentFieldsProps) {
       {selectorMode === 'custom' && (
         <div className='flex-1'>
           <Label className='text-xs'>Selector</Label>
-          <SelectorHelper
-            onSelect={handleBuilderSelect}
-            initialValue={selector}
-            preview={formatSelectorPreview(selector)}
-          />
+          <SelectorDialog value={selector} onSelect={handleBuilderSelect} />
         </div>
       )}
     </>

@@ -142,6 +142,13 @@ async function build() {
       throw new Error("Tailwind CSS build failed");
     }
     console.log("✓ Tailwind CSS built: docs/state-builder-ui.css");
+
+    // Copy molstar CSS from node_modules to docs/
+    await Deno.copyFile(
+      "./node_modules/molstar/build/viewer/molstar.css",
+      "./docs/molstar.css"
+    );
+    console.log("✓ Molstar CSS copied: docs/molstar.css");
   } catch (error) {
     console.error("Build failed:", error);
     Deno.exit(1);

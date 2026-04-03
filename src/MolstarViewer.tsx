@@ -1,6 +1,13 @@
-// deno-lint-ignore-file no-explicit-any no-window
+// deno-lint-ignore-file no-explicit-any
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, JSX } from "react";
+import { MolViewSpec } from "molstar/lib/extensions/mvs/behavior.js";
+import { loadMVSData } from "molstar/lib/extensions/mvs/components/formats.js";
+import { PluginUIContext } from "molstar/lib/mol-plugin-ui/context";
+import { Plugin } from "molstar/lib/mol-plugin-ui/plugin.js";
+import { DefaultPluginUISpec } from "molstar/lib/mol-plugin-ui/spec.js";
+import { PluginConfig } from "molstar/lib/mol-plugin/config.js";
+import { PluginSpec } from "molstar/lib/mol-plugin/spec.js";
 
 /**
  * Configuration options for the Molstar viewer.
@@ -53,6 +60,8 @@ export interface MolstarViewerProps {
    * Viewer configuration options.
    * Controls UI elements and viewer behavior.
    * @defaultValue `{ layoutIsExpanded: false, layoutShowControls: false }`
+   * @remarks Config is applied once at mount; changes to this prop after mount are ignored.
+   * Use the `key` prop to force a full remount if config needs to change.
    */
   config?: MolstarViewerConfig;
 
@@ -103,6 +112,47 @@ const defaultLoadOptions: MVSLoadOptions = {
   keepCamera: false,
 };
 
+function buildPluginSpec(config: MolstarViewerConfig) {
+  const spec = DefaultPluginUISpec();
+  return {
+    ...spec,
+    behaviors: [...spec.behaviors, PluginSpec.Behavior(MolViewSpec)],
+    layout: {
+      initial: {
+        isExpanded: config.layoutIsExpanded ?? false,
+        showControls: config.layoutShowControls ?? false,
+      },
+    },
+    components: {
+      ...spec.components,
+      disableDragOverlay: true,
+      remoteState: (config.layoutShowRemoteState ? "default" : "none") as
+        | "default"
+        | "none",
+      controls: {
+        top: config.layoutShowSequence ? undefined : ("none" as const),
+        bottom: config.layoutShowLog ? undefined : ("none" as const),
+        left: config.layoutShowLeftPanel ? undefined : ("none" as const),
+      },
+    },
+    config: [
+      ...(spec.config ?? []),
+      [
+        PluginConfig.Viewport.ShowExpand,
+        config.viewportShowExpand ?? false,
+      ],
+      [
+        PluginConfig.Viewport.ShowSelectionMode,
+        config.viewportShowSelectionMode ?? false,
+      ],
+      [
+        PluginConfig.Viewport.ShowAnimation,
+        config.viewportShowAnimation ?? false,
+      ],
+    ] as any,
+  };
+}
+
 /**
  * MolstarViewer component for displaying molecular structures.
  *
@@ -110,12 +160,12 @@ const defaultLoadOptions: MVSLoadOptions = {
  * structures from MVS (Mol* View State) data. It handles viewer initialization,
  * loading molecular data, and provides callbacks for key lifecycle events.
  *
- * The component expects the Molstar library to be loaded from a CDN and available
- * on the global window object. It will wait up to 10 seconds for the library to load.
+ * Uses a bundled PluginUIContext directly (no CDN loading), avoiding the
+ * dual-instance reference-equality issues that break PluginStateObject.is().
  *
  * @example
  * ```tsx
- * import { MolstarViewer } from "@zachcp/molstar-components";
+ * import { MolstarViewer } from "@molstar/molstar-components";
  *
  * function App() {
  *   const mvsData = {
@@ -134,7 +184,7 @@ const defaultLoadOptions: MVSLoadOptions = {
  * ```
  *
  * @param props - Component props
- * @returns A Preact component displaying the Molstar viewer
+ * @returns A React component displaying the Molstar viewer
  */
 export function MolstarViewer({
   mvsData,
@@ -146,141 +196,92 @@ export function MolstarViewer({
   onMVSLoaded,
   onError,
 }: MolstarViewerProps): JSX.Element {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const viewerRef = useRef<any>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const defaultStyle: CSSProperties = {
-    position: "relative",
     width: "100%",
     height: "500px",
     ...style,
+    position: "relative", // always last — not overridable by style prop
   };
 
   const mergedConfig = useMemo(
     () => ({ ...defaultConfig, ...config }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(config)],
   );
   const mergedLoadOptions = useMemo(
     () => ({ ...defaultLoadOptions, ...loadOptions }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(loadOptions)],
   );
 
-  // Helper function to load MVS data
-  const loadMVSDataHelper = async (viewer: any) => {
-    if (isLoading) {
-      return;
-    }
+  // Create plugin once (lazy init before hooks)
+  const pluginRef = useRef<PluginUIContext | null>(null);
+  if (!pluginRef.current) {
+    pluginRef.current = new PluginUIContext(buildPluginSpec(mergedConfig));
+  }
 
+  // Helper function to load MVS data
+  const loadMVSDataHelper = async (plugin: PluginUIContext) => {
+    if (isLoading) return;
     setIsLoading(true);
     try {
       const mvsString = JSON.stringify(mvsData);
-      await viewer.loadMvsData(mvsString, "mvsj", mergedLoadOptions);
-
-      if (onMVSLoaded) {
-        onMVSLoaded(viewer);
-      }
+      await loadMVSData(plugin, mvsString, "mvsj", mergedLoadOptions);
+      if (onMVSLoaded) onMVSLoaded({ plugin });
     } catch (error) {
-      if (onError) {
-        onError(error as Error);
-      }
+      if (onError) onError(error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Initialize viewer
+  // Initialize plugin once on mount
   useEffect(() => {
-    if (!containerRef.current || isInitialized) return;
+    const plugin = pluginRef.current!;
+    let cancelled = false;
 
-    const initViewer = async () => {
-      try {
-        // Wait for molstar to be available from CDN
-        // @ts-ignore - molstar is loaded from CDN
-        if (!window.molstar?.Viewer) {
-          await new Promise<void>((resolve, reject) => {
-            const checkMolstar = setInterval(() => {
-              // @ts-ignore - molstar is loaded from CDN
-              if (window.molstar?.Viewer) {
-                clearInterval(checkMolstar);
-                resolve();
-              }
-            }, 100);
+    (async () => {
+      await plugin.init();
+      if (cancelled) return;
+      // canvas3dInitialized resolves after ViewportCanvas.componentDidMount
+      // calls plugin.mountAsync() internally — no explicit initContainerAsync() needed
+      await plugin.canvas3dInitialized;
+      if (cancelled) return;
 
-            setTimeout(() => {
-              clearInterval(checkMolstar);
-              reject(new Error("Molstar failed to load from CDN"));
-            }, 10000);
-          });
-        }
-        // @ts-ignore - molstar is loaded from CDN
-        if (!window.molstar) {
-          throw new Error("Molstar not available");
-        }
+      setIsInitialized(true);
+      if (onViewerInit) onViewerInit({ plugin });
 
-        // @ts-ignore - molstar is loaded from CDN
-        const viewer = await window.molstar.Viewer.create(
-          containerRef.current!,
-          mergedConfig,
-        );
-
-        viewerRef.current = viewer;
-        setIsInitialized(true);
-
-        if (onViewerInit) {
-          onViewerInit(viewer);
-        }
-
-        // Load MVS data immediately after initialization
-        if (mvsData) {
-          await loadMVSDataHelper(viewer);
-        }
-      } catch (error) {
-        if (onError) {
-          onError(error as Error);
-        }
+      if (mvsData) {
+        // Extra tick: canvas3dInitialized resolves when WebGL context is created,
+        // but the first frame may not have been painted yet. This yields to the
+        // event loop so ViewportCanvas finishes its initial paint before we load data.
+        await new Promise<void>((r) => setTimeout(r, 0));
+        await loadMVSDataHelper(plugin);
       }
-    };
+    })().catch((err) => {
+      if (onError) onError(err instanceof Error ? err : new Error(String(err)));
+    });
 
-    initViewer();
-
-    // Cleanup on unmount
     return () => {
-      if (viewerRef.current) {
-        try {
-          viewerRef.current.dispose();
-        } catch (_error) {
-          // Silently handle disposal errors
-        }
-        viewerRef.current = null;
-        setIsInitialized(false);
-      }
+      cancelled = true;
+      plugin.dispose();
+      pluginRef.current = null;
+      setIsInitialized(false);
     };
-  }, []); // mergedConfig is memoized, only init once on mount
+  }, []); // run once on mount
 
   // Load MVS data when it changes
   useEffect(() => {
-    // Skip if not ready
-    if (!isInitialized || !viewerRef.current || !mvsData) {
-      return;
-    }
-
-    loadMVSDataHelper(viewerRef.current);
+    if (!isInitialized || !pluginRef.current || !mvsData) return;
+    loadMVSDataHelper(pluginRef.current);
   }, [mvsData, isInitialized]);
 
-  // Overlays must be siblings of the Molstar container, not children.
-  // React 19 is strict about DOM ownership: if React renders children into a
-  // div and Molstar also injects its canvas there, reconciliation throws
-  // "Node.removeChild: The node to be removed is not a child of this node".
-  // Solution: give Molstar a dedicated inner div React never touches, and
-  // render overlays as separate sibling divs inside the outer wrapper.
-  const wrapperStyle: CSSProperties = { ...defaultStyle, position: "relative" };
-
   return (
-    <div className={className} style={wrapperStyle}>
-      {/* Molstar owns this div entirely — React renders no children into it */}
-      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+    <div className={className} style={defaultStyle}>
+      {pluginRef.current && <Plugin plugin={pluginRef.current} />}
       {!isInitialized && (
         <div
           style={{

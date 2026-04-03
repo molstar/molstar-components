@@ -3,6 +3,7 @@ node_modules/
 *.log
 deno.lock
 docs/assets
+dist/
 docs/bundle.js
 docs/bundle.js.map
 docs/bundle.css

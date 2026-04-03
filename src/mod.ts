@@ -1,3 +1,5 @@
+/// <reference path="./monaco-aliases.d.ts" />
+
 /**
  * Molstar Components - React components for molecular visualization
  *
@@ -95,3 +97,8 @@ export type { BuilderWithEditorAndViewerProps } from "./BuilderWithEditorAndView
 // Re-export UIBuilderProvider for consumers who want to compose their own layout
 export { UIBuilderProvider } from "./state-builder-ui/provider.tsx";
 export type { UIBuilderProviderProps } from "./state-builder-ui/provider.tsx";
+
+export { UIBuilder } from "./state-builder-ui/UIBuilder.tsx";
+
+export { snapshotToCameraParams } from "./state-builder/index.ts";
+export type { ConstantDefinition } from "./state-builder/index.ts";

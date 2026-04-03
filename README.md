@@ -19,6 +19,18 @@ This bundles your local source files and serves them at
 `docs/molstar-components.dev.js`, allowing you to test changes by refreshing the
 browser.
 
+## Cross-repo / pnpm development
+
+To use these components inside another project (e.g. a pnpm monorepo) during
+development, build the npm-compatible dist bundle first:
+
+```bash
+deno task build:dist
+```
+
+This produces `dist/index.js` (React, Molstar, etc. marked external) and the
+required CSS files. See [DEV.md](./DEV.md) for the full cross-repo setup guide.
+
 ## Updating molstar
 
 When bumping the `molstar` version in `deno.json`, regenerate the Monaco editor

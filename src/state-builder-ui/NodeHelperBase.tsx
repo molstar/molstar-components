@@ -234,8 +234,8 @@ export function NodeHelperBase({
             </button>
             {customExpanded && (
               <div className='mt-1'>
-                <textarea
-                  className='w-full text-xs font-mono border rounded-md p-2 min-h-[80px] resize-y bg-background'
+                <Textarea
+                  className='text-xs font-mono min-h-[80px] resize-y'
                   placeholder='{ "key": "value" }'
                   value={localCustomInput}
                   onChange={(e) => handleCustomInputChange(e.target.value)}

@@ -5,7 +5,6 @@ import {
   isConstantRef,
   createConstantRef,
   MOLSTAR_COLOR_THEMES,
-  CARBON_COLOR_OPTIONS,
   getActiveValues,
 } from '@molstar/state-builder';
 import type { UINode, ConstantDefinition, ConstantRef, ComponentSelectorValue } from '@molstar/state-builder';
@@ -39,6 +38,8 @@ function initStateFromNode(node: UINode) {
   const params = node.params;
   const custom = node.custom;
 
+  const sel = (params as Record<string, unknown>).selector;
+
   if (isConstantRef(params.color)) {
     const ref = params.color as ConstantRef;
     return {
@@ -47,13 +48,12 @@ function initStateFromNode(node: UINode) {
       themeName: 'element-symbol',
       carbonColorName: 'element-symbol',
       carbonColorHex: '#808080',
-      selectorValue: undefined as unknown,
+      selectorValue: sel,
       constantValue: `${ref.constantName}:${ref.entryKey}`,
     };
   }
   if (custom?.molstar_color_theme_name !== undefined) {
     const themes = getActiveValues(MOLSTAR_COLOR_THEMES);
-    const carbonOptions = getActiveValues(CARBON_COLOR_OPTIONS);
     const name = (custom.molstar_color_theme_name as string) || 'element-symbol';
     const themeParams = custom.molstar_color_theme_params as Record<string, unknown> | undefined;
     const carbonParam = themeParams?.carbonColor as { name?: string; params?: { value?: number } } | undefined;
@@ -70,14 +70,15 @@ function initStateFromNode(node: UINode) {
       themeName: name,
       carbonColorName: carbonColorValid,
       carbonColorHex: carbonHex,
-      selectorValue: undefined as unknown,
+      selectorValue: sel,
       constantValue: '',
     };
   }
-  // Simple color
-  const colorNum = params.color as number | undefined;
-  const hex = typeof colorNum === 'number' ? numericToHex(colorNum) : '#808080';
-  const sel = (params as Record<string, unknown>).selector;
+  // Simple color — stored as TColor string (hex/name); accept legacy numeric for back-compat
+  const rawColor = params.color;
+  const hex = typeof rawColor === 'string' ? rawColor
+    : typeof rawColor === 'number' ? numericToHex(rawColor)
+    : '#808080';
   return {
     tab: 'simple' as ColorTab,
     simpleColor: hex,
@@ -156,11 +157,10 @@ export function ColorHelper({
     let newCustom: Record<string, unknown> | undefined;
 
     if (activeTab === 'simple') {
-      newParams = { color: hexToNumeric(simpleColor) };
+      newParams = { color: simpleColor };
       if (selectorValue !== undefined) newParams.selector = selectorValue;
       newCustom = undefined;
     } else if (activeTab === 'theme') {
-      const carbonOptions = getActiveValues(CARBON_COLOR_OPTIONS);
       const carbonNumeric = hexToNumeric(carbonColorHex);
       const defaultNumeric = 0;
       const carbonParams =

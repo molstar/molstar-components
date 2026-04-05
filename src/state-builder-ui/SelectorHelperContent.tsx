@@ -42,10 +42,10 @@ export interface SelectorHelperContentProps {
 }
 
 const MODE_LABELS: { mode: SelectorBuilderMode; label: string }[] = [
+  { mode: 'quick', label: 'Quick' },
   { mode: 'chain', label: 'Chain' },
   { mode: 'residue', label: 'Residue' },
   { mode: 'ligand', label: 'Ligand' },
-  { mode: 'quick', label: 'Quick' },
   { mode: 'expression', label: 'Expression' },
   { mode: 'union', label: 'Union' },
 ];

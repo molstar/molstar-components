@@ -11,6 +11,9 @@ import type { UINode, ConstantDefinition, ConstantRef, ComponentSelectorValue } 
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { SimplePanel, ThemePanel, ConstantPanel } from './color-helper/index.ts';
 import { SelectorHelperContent } from './SelectorHelperContent.tsx';
+import { useAncestorComponentSelector } from './AncestorComponentContext.tsx';
+import { filterMetadataBySelector } from '@molstar/state-builder';
+import { useStructureMetadataContext } from './StructureMetadataContext.tsx';
 import { ChevronRightIcon } from 'lucide-react';
 import { cn } from './lib/utils.ts';
 
@@ -99,6 +102,16 @@ function CollapsibleSelector({
 }) {
   const [expanded, setExpanded] = useState(false);
   const hasSelector = value !== undefined;
+
+  const ancestorSelector = useAncestorComponentSelector();
+  const metadataCtx = useStructureMetadataContext();
+
+  // When there is a parent component selector and loaded metadata, filter the
+  // metadata so the selector UI only shows what falls within that component.
+  const filteredMetadata = ancestorSelector !== undefined && metadataCtx?.metadata != null
+    ? filterMetadataBySelector(metadataCtx.metadata, ancestorSelector)
+    : undefined;
+
   return (
     <div className='border-t mt-3 pt-2'>
       <button
@@ -112,7 +125,11 @@ function CollapsibleSelector({
       </button>
       {expanded && (
         <div className='mt-2'>
-          <SelectorHelperContent value={value} onChange={onChange} />
+          <SelectorHelperContent
+            value={value}
+            onChange={onChange}
+            metadata={filteredMetadata}
+          />
         </div>
       )}
     </div>

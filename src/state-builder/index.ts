@@ -116,6 +116,9 @@ export {
   mergeStructureMetadata,
 } from './types/structure-metadata-extractor.ts';
 
+// Export selector filter utility
+export { filterMetadataBySelector } from './types/selector-filter.ts';
+
 // Export tree templates
 export type {
   MVSNodeSnippet,

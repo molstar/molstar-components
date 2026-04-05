@@ -1,7 +1,8 @@
 'use client';
 
 import { Button } from './ui/button.tsx';
-import type { UINode, ConstantDefinition } from '@molstar/state-builder';
+import type { UINode, ConstantDefinition, ComponentSelectorValue } from '@molstar/state-builder';
+import { AncestorComponentProvider } from './AncestorComponentContext.tsx';
 import {
   getValidChildren,
   isTerminalKind,
@@ -205,6 +206,56 @@ export function OperationRow({
     }
   };
 
+  const childRows = isExpanded && node.children && node.children.length > 0 ? (
+    <div className='mt-2 space-y-2'>
+      {node.children.map((child, index) => (
+        <OperationRow
+          key={child.id}
+          node={child}
+          onUpdate={(updates) => {
+            const newChildren = [...(node.children ?? [])];
+            newChildren[index] = { ...child, ...updates };
+            onUpdate({ children: newChildren });
+          }}
+          onRemove={() => {
+            const newChildren = (node.children ?? []).filter((_, i) => i !== index);
+            onUpdate({ children: newChildren });
+          }}
+          onAddChild={() => {
+            const newChildren = [...(node.children ?? []), { id: crypto.randomUUID(), kind: '' as MVSKind, params: {}, children: [] }];
+            onUpdate({ children: newChildren });
+          }}
+          onAddTemplateChildren={(nodes) => {
+            const newChildren = [...(node.children ?? []), ...nodes];
+            onUpdate({ children: newChildren });
+          }}
+          onCopy={() => {
+            const copy = deepCopyNode(child);
+            const newChildren = [...(node.children ?? [])];
+            newChildren.splice(index + 1, 0, copy);
+            onUpdate({ children: newChildren });
+          }}
+          onMoveUp={index > 0 ? () => {
+            const newChildren = [...(node.children ?? [])];
+            [newChildren[index - 1], newChildren[index]] = [newChildren[index], newChildren[index - 1]];
+            onUpdate({ children: newChildren });
+          } : undefined}
+          onMoveDown={index < (node.children?.length ?? 0) - 1 ? () => {
+            const newChildren = [...(node.children ?? [])];
+            [newChildren[index], newChildren[index + 1]] = [newChildren[index + 1], newChildren[index]];
+            onUpdate({ children: newChildren });
+          } : undefined}
+          depth={(depth ?? 0) + 1}
+          isFirst={index === 0}
+          isLast={index === (node.children?.length ?? 0) - 1}
+          availableConstants={availableConstants}
+          allowedKinds={node.kind ? getValidChildren(node.kind as MVSKind) : undefined}
+          allNodes={allNodes}
+        />
+      ))}
+    </div>
+  ) : null;
+
   return (
     <div className='relative' style={{ marginLeft: depth > 0 ? '20px' : '0' }}>
       <TreeLines depth={depth} isLast={isLast} />
@@ -283,55 +334,14 @@ export function OperationRow({
         isDestructive
       />
 
-      {isExpanded && node.children && node.children.length > 0 && (
-        <div className='mt-2 space-y-2'>
-          {node.children.map((child, index) => (
-            <OperationRow
-              key={child.id}
-              node={child}
-              onUpdate={(updates) => {
-                const newChildren = [...(node.children ?? [])];
-                newChildren[index] = { ...child, ...updates };
-                onUpdate({ children: newChildren });
-              }}
-              onRemove={() => {
-                const newChildren = (node.children ?? []).filter((_, i) => i !== index);
-                onUpdate({ children: newChildren });
-              }}
-              onAddChild={() => {
-                const newChildren = [...(node.children ?? []), { id: crypto.randomUUID(), kind: '' as MVSKind, params: {}, children: [] }];
-                onUpdate({ children: newChildren });
-              }}
-              onAddTemplateChildren={(nodes) => {
-                const newChildren = [...(node.children ?? []), ...nodes];
-                onUpdate({ children: newChildren });
-              }}
-              onCopy={() => {
-                const copy = deepCopyNode(child);
-                const newChildren = [...(node.children ?? [])];
-                newChildren.splice(index + 1, 0, copy);
-                onUpdate({ children: newChildren });
-              }}
-              onMoveUp={index > 0 ? () => {
-                const newChildren = [...(node.children ?? [])];
-                [newChildren[index - 1], newChildren[index]] = [newChildren[index], newChildren[index - 1]];
-                onUpdate({ children: newChildren });
-              } : undefined}
-              onMoveDown={index < (node.children?.length ?? 0) - 1 ? () => {
-                const newChildren = [...(node.children ?? [])];
-                [newChildren[index], newChildren[index + 1]] = [newChildren[index + 1], newChildren[index]];
-                onUpdate({ children: newChildren });
-              } : undefined}
-              depth={(depth ?? 0) + 1}
-              isFirst={index === 0}
-              isLast={index === (node.children?.length ?? 0) - 1}
-              availableConstants={availableConstants}
-              allowedKinds={node.kind ? getValidChildren(node.kind as MVSKind) : undefined}
-              allNodes={allNodes}
-            />
-          ))}
-        </div>
-      )}
+      {node.kind === 'component'
+        ? (
+          <AncestorComponentProvider value={node.params.selector as ComponentSelectorValue | undefined}>
+            {childRows}
+          </AncestorComponentProvider>
+        )
+        : childRows
+      }
     </div>
   );
 }

@@ -100,5 +100,5 @@ export type { UIBuilderProviderProps } from "./state-builder-ui/provider.tsx";
 
 export { UIBuilder } from "./state-builder-ui/UIBuilder.tsx";
 
-export { snapshotToCameraParams } from "./state-builder/index.ts";
+export { snapshotToCameraParams, filterMetadataBySelector } from "./state-builder/index.ts";
 export type { ConstantDefinition } from "./state-builder/index.ts";

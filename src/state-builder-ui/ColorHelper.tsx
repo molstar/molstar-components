@@ -8,9 +8,12 @@ import {
   CARBON_COLOR_OPTIONS,
   getActiveValues,
 } from '@molstar/state-builder';
-import type { UINode, ConstantDefinition, ConstantRef } from '@molstar/state-builder';
+import type { UINode, ConstantDefinition, ConstantRef, ComponentSelectorValue } from '@molstar/state-builder';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { SimplePanel, ThemePanel, ConstantPanel } from './color-helper/index.ts';
+import { SelectorHelperContent } from './SelectorHelperContent.tsx';
+import { ChevronRightIcon } from 'lucide-react';
+import { cn } from './lib/utils.ts';
 
 interface ColorHelperProps {
   node: UINode;
@@ -19,6 +22,7 @@ interface ColorHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 type ColorTab = 'simple' | 'theme' | 'constant';
@@ -54,7 +58,6 @@ function initStateFromNode(node: UINode) {
     const themeParams = custom.molstar_color_theme_params as Record<string, unknown> | undefined;
     const carbonParam = themeParams?.carbonColor as { name?: string; params?: { value?: number } } | undefined;
     const carbonName = carbonParam?.name ?? 'element-symbol';
-    const carbonOption = carbonOptions.find((o) => o.value === carbonName);
     const carbonHex = carbonParam?.params?.value !== undefined
       ? numericToHex(carbonParam.params.value)
       : '#808080';
@@ -86,6 +89,35 @@ function initStateFromNode(node: UINode) {
   };
 }
 
+function CollapsibleSelector({
+  value,
+  onChange,
+}: {
+  value: ComponentSelectorValue | undefined;
+  onChange: (v: ComponentSelectorValue | undefined) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const hasSelector = value !== undefined;
+  return (
+    <div className='border-t mt-3 pt-2'>
+      <button
+        type='button'
+        className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
+        onClick={() => setExpanded((o) => !o)}
+      >
+        <ChevronRightIcon className={cn('size-3 transition-transform', expanded && 'rotate-90')} />
+        Selector
+        {hasSelector && <span className='ml-1 size-1.5 rounded-full bg-primary inline-block' />}
+      </button>
+      {expanded && (
+        <div className='mt-2'>
+          <SelectorHelperContent value={value} onChange={onChange} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ColorHelper({
   node,
   onUpdate,
@@ -93,6 +125,7 @@ export function ColorHelper({
   open,
   onOpenChange,
   trigger,
+  onCustomChange,
 }: ColorHelperProps) {
   const init = initStateFromNode(node);
   const [activeTab, setActiveTab] = useState<ColorTab>(init.tab);
@@ -100,7 +133,9 @@ export function ColorHelper({
   const [themeName, setThemeName] = useState(init.themeName);
   const [carbonColorName, setCarbonColorName] = useState(init.carbonColorName);
   const [carbonColorHex, setCarbonColorHex] = useState(init.carbonColorHex);
-  const [selectorValue, setSelectorValue] = useState<unknown>(init.selectorValue);
+  const [selectorValue, setSelectorValue] = useState<ComponentSelectorValue | undefined>(
+    init.selectorValue as ComponentSelectorValue | undefined
+  );
   const [constantValue, setConstantValue] = useState(init.constantValue);
 
   const colorConstants = availableConstants.filter((c) => c.type === 'colors');
@@ -112,7 +147,7 @@ export function ColorHelper({
     setThemeName(s.themeName);
     setCarbonColorName(s.carbonColorName);
     setCarbonColorHex(s.carbonColorHex);
-    setSelectorValue(s.selectorValue);
+    setSelectorValue(s.selectorValue as ComponentSelectorValue | undefined);
     setConstantValue(s.constantValue);
   };
 
@@ -126,9 +161,8 @@ export function ColorHelper({
       newCustom = undefined;
     } else if (activeTab === 'theme') {
       const carbonOptions = getActiveValues(CARBON_COLOR_OPTIONS);
-      const carbonOption = carbonOptions.find((o) => o.value === carbonColorName);
       const carbonNumeric = hexToNumeric(carbonColorHex);
-      const defaultNumeric = 0; // CARBON_COLOR_OPTIONS has no defaultValue; 0 means no override
+      const defaultNumeric = 0;
       const carbonParams =
         carbonNumeric !== defaultNumeric ? { value: carbonNumeric } : undefined;
       newParams = {};
@@ -162,6 +196,13 @@ export function ColorHelper({
     onUpdate({ params, ...(ref ? { ref } : {}) });
   };
 
+  const selector = (
+    <CollapsibleSelector
+      value={selectorValue}
+      onChange={setSelectorValue}
+    />
+  );
+
   return (
     <NodeHelperBase
       node={node}
@@ -171,41 +212,51 @@ export function ColorHelper({
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       defaultTab={activeTab}
       tabs={[
         {
           id: 'simple',
           label: 'Simple',
           content: (
-            <SimplePanel
-              color={simpleColor}
-              onChange={setSimpleColor}
-            />
+            <div>
+              <SimplePanel
+                color={simpleColor}
+                onChange={setSimpleColor}
+              />
+              {selector}
+            </div>
           ),
         },
         {
           id: 'theme',
           label: 'Theme',
           content: (
-            <ThemePanel
-              themeName={themeName}
-              carbonColorName={carbonColorName}
-              carbonColorHex={carbonColorHex}
-              onThemeChange={setThemeName}
-              onCarbonColorNameChange={setCarbonColorName}
-              onCarbonColorHexChange={setCarbonColorHex}
-            />
+            <div>
+              <ThemePanel
+                themeName={themeName}
+                carbonColorName={carbonColorName}
+                carbonColorHex={carbonColorHex}
+                onThemeChange={setThemeName}
+                onCarbonColorNameChange={setCarbonColorName}
+                onCarbonColorHexChange={setCarbonColorHex}
+              />
+              {selector}
+            </div>
           ),
         },
         {
           id: 'constant',
           label: 'Constant',
           content: (
-            <ConstantPanel
-              value={constantValue}
-              colorConstants={colorConstants}
-              onChange={setConstantValue}
-            />
+            <div>
+              <ConstantPanel
+                value={constantValue}
+                colorConstants={colorConstants}
+                onChange={setConstantValue}
+              />
+              {selector}
+            </div>
           ),
         },
       ]}

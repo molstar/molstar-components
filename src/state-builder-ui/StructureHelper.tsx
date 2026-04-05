@@ -13,6 +13,7 @@ interface StructureHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 function parseIjk(v: unknown): [number, number, number] {
@@ -101,7 +102,7 @@ function initFromNode(node: UINode) {
   };
 }
 
-export function StructureHelper({ node, onUpdate, open, onOpenChange, trigger }: StructureHelperProps) {
+export function StructureHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: StructureHelperProps) {
   const init = initFromNode(node);
   const [activeTab, setActiveTab] = useState<StructureTab>(init.tab);
   const [assemblyId, setAssemblyId] = useState(init.assemblyId);
@@ -197,6 +198,7 @@ export function StructureHelper({ node, onUpdate, open, onOpenChange, trigger }:
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       defaultTab={activeTab}
       tabs={tabs}
     />

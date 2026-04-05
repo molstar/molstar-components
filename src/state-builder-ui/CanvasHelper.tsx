@@ -13,6 +13,7 @@ interface CanvasHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 function numericToHex(value: number): string {
@@ -23,7 +24,7 @@ function hexToNumeric(hex: string): number {
   return parseInt(hex.replace('#', ''), 16) || 0;
 }
 
-export function CanvasHelper({ node, onUpdate, open, onOpenChange, trigger }: CanvasHelperProps) {
+export function CanvasHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: CanvasHelperProps) {
   const initColor = typeof node.params.background_color === 'number'
     ? numericToHex(node.params.background_color as number)
     : '#ffffff';
@@ -53,6 +54,7 @@ export function CanvasHelper({ node, onUpdate, open, onOpenChange, trigger }: Ca
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Canvas',
         content: (

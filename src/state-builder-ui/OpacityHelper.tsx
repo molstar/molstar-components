@@ -13,9 +13,10 @@ interface OpacityHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
-export function OpacityHelper({ node, onUpdate, open, onOpenChange, trigger }: OpacityHelperProps) {
+export function OpacityHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: OpacityHelperProps) {
   const [opacity, setOpacity] = useState((node.params.opacity as number) ?? 1);
 
   const handleDialogOpen = () => setOpacity((node.params.opacity as number) ?? 1);
@@ -37,6 +38,7 @@ export function OpacityHelper({ node, onUpdate, open, onOpenChange, trigger }: O
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Opacity',
         content: (

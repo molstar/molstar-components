@@ -13,9 +13,10 @@ interface LabelFromUriHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
-export function LabelFromUriHelper({ node, onUpdate, open, onOpenChange, trigger }: LabelFromUriHelperProps) {
+export function LabelFromUriHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: LabelFromUriHelperProps) {
   const [uri, setUri] = useState((node.params.uri as string) ?? '');
 
   const handleDialogOpen = () => setUri((node.params.uri as string) ?? '');
@@ -37,6 +38,7 @@ export function LabelFromUriHelper({ node, onUpdate, open, onOpenChange, trigger
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Label from URI',
         content: (

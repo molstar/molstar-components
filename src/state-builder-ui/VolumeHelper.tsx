@@ -13,6 +13,7 @@ interface VolumeHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 function initFromNode(node: UINode) {
@@ -24,7 +25,7 @@ function initFromNode(node: UINode) {
   };
 }
 
-export function VolumeHelper({ node, onUpdate, open, onOpenChange, trigger }: VolumeHelperProps) {
+export function VolumeHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: VolumeHelperProps) {
   const init = initFromNode(node);
   const [sourceId, setSourceId] = useState(init.sourceId);
   const [blockIndex, setBlockIndex] = useState<number | undefined>(init.blockIndex);
@@ -59,6 +60,7 @@ export function VolumeHelper({ node, onUpdate, open, onOpenChange, trigger }: Vo
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Volume',
         content: (

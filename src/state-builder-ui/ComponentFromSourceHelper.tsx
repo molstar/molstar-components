@@ -15,6 +15,7 @@ interface ComponentFromSourceHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 function initFromNode(node: UINode) {
@@ -26,7 +27,7 @@ function initFromNode(node: UINode) {
   };
 }
 
-export function ComponentFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger }: ComponentFromSourceHelperProps) {
+export function ComponentFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: ComponentFromSourceHelperProps) {
   const init = initFromNode(node);
   const [categoryName, setCategoryName] = useState(init.categoryName);
   const [fieldName, setFieldName] = useState(init.fieldName);
@@ -64,6 +65,7 @@ export function ComponentFromSourceHelper({ node, onUpdate, open, onOpenChange, 
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[
         {
           id: 'form', label: 'Component from Source',

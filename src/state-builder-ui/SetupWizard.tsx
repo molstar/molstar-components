@@ -120,16 +120,17 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
       const selector = comp.selector === 'custom' ? comp.customSelector : comp.selector;
       const componentNode: UINode = { ...createEmptyNode('component'), params: { selector } };
       const reprNode: UINode = { ...createEmptyNode('representation'), params: { type: comp.representation } };
-      const colorNum = parseInt(comp.color.replace('#', ''), 16);
-      const colorNode: UINode = { ...createEmptyNode('color'), params: { color: colorNum } };
-      const children: UINode[] = [reprNode, colorNode];
+      const colorNode: UINode = { ...createEmptyNode('color'), params: { color: comp.color } };
+      const reprChildren: UINode[] = [colorNode];
       if (comp.opacity < 1) {
-        children.push({ ...createEmptyNode('opacity'), params: { opacity: comp.opacity } });
+        reprChildren.push({ ...createEmptyNode('opacity'), params: { opacity: comp.opacity } });
       }
+      reprNode.children = reprChildren;
+      const componentChildren: UINode[] = [reprNode];
       if (comp.label.trim()) {
-        children.push({ ...createEmptyNode('label'), params: { text: comp.label.trim() } });
+        componentChildren.push({ ...createEmptyNode('label'), params: { text: comp.label.trim() } });
       }
-      componentNode.children = children;
+      componentNode.children = componentChildren;
       return componentNode;
     });
 
@@ -286,7 +287,18 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
                           style={{ background: c }}
                         />
                       ))}
-                      <input type='color' value={comp.color} onChange={(e) => updateComponent(idx, { color: e.target.value })} className='w-6 h-5 rounded border cursor-pointer' title='Custom color' />
+                      <label
+                        className='w-5 h-5 rounded cursor-pointer border-2 border-dashed border-muted-foreground/40 flex items-center justify-center hover:border-primary transition-colors shrink-0'
+                        title='Custom color…'
+                      >
+                        <PlusIcon className='size-2.5 text-muted-foreground' />
+                        <input
+                          type='color'
+                          value={comp.color}
+                          onChange={(e) => updateComponent(idx, { color: e.target.value })}
+                          className='sr-only'
+                        />
+                      </label>
                     </div>
                   </div>
                 </div>

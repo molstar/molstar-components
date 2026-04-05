@@ -13,6 +13,7 @@ interface ColorFromSourceHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 function initFromNode(node: UINode) {
@@ -24,7 +25,7 @@ function initFromNode(node: UINode) {
   };
 }
 
-export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger }: ColorFromSourceHelperProps) {
+export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: ColorFromSourceHelperProps) {
   const init = initFromNode(node);
   const [categoryName, setCategoryName] = useState(init.categoryName);
   const [fieldName, setFieldName] = useState(init.fieldName);
@@ -57,6 +58,7 @@ export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trig
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Color from Source',
         content: (

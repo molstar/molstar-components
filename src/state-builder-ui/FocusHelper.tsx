@@ -12,6 +12,7 @@ export interface FocusHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 type FocusTab = 'vectors' | 'presets' | 'radius';
@@ -43,7 +44,7 @@ function computeLabel(params: Record<string, unknown>): string {
   return dirLabel + radiusSuffix;
 }
 
-export function FocusHelper({ node, onUpdate, open, onOpenChange, trigger }: FocusHelperProps) {
+export function FocusHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: FocusHelperProps) {
   const [activeTab, setActiveTab] = useState<FocusTab>('vectors');
 
   const [direction, setDirection] = useState<[number, number, number] | undefined>(undefined);
@@ -120,6 +121,7 @@ export function FocusHelper({ node, onUpdate, open, onOpenChange, trigger }: Foc
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger ?? defaultTrigger}
+      onCustomChange={onCustomChange}
       tabs={[
         {
           id: 'vectors',

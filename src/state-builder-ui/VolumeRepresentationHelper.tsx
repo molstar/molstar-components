@@ -14,16 +14,17 @@ interface VolumeRepresentationHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
-export function VolumeRepresentationHelper({ node, onUpdate, open, onOpenChange, trigger }: VolumeRepresentationHelperProps) {
+export function VolumeRepresentationHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: VolumeRepresentationHelperProps) {
   const [type, setType] = useState((node.params.type as string) ?? '');
   const handleDialogOpen = () => setType((node.params.type as string) ?? '');
   const handleApply = (ref: string) => onUpdate({ params: { ...node.params, type }, ...(ref ? { ref } : {}) });
   const handleRawApply = (params: Record<string, unknown>, ref: string) => onUpdate({ params, ...(ref ? { ref } : {}) });
   const types = getActiveValues(VOLUME_REPRESENTATION_TYPES);
   return (
-    <NodeHelperBase node={node} onApply={handleApply} onRawApply={handleRawApply} onDialogOpen={handleDialogOpen} open={open} onOpenChange={onOpenChange} trigger={trigger}
+    <NodeHelperBase node={node} onApply={handleApply} onRawApply={handleRawApply} onDialogOpen={handleDialogOpen} open={open} onOpenChange={onOpenChange} trigger={trigger} onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Volume Representation',
         content: (

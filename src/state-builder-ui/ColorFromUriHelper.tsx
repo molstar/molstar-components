@@ -13,9 +13,10 @@ interface ColorFromUriHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
-export function ColorFromUriHelper({ node, onUpdate, open, onOpenChange, trigger }: ColorFromUriHelperProps) {
+export function ColorFromUriHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: ColorFromUriHelperProps) {
   const [uri, setUri] = useState((node.params.uri as string) ?? '');
 
   const handleDialogOpen = () => setUri((node.params.uri as string) ?? '');
@@ -37,6 +38,7 @@ export function ColorFromUriHelper({ node, onUpdate, open, onOpenChange, trigger
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Color from URI',
         content: (

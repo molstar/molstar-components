@@ -13,9 +13,10 @@ interface TooltipFromUriHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
-export function TooltipFromUriHelper({ node, onUpdate, open, onOpenChange, trigger }: TooltipFromUriHelperProps) {
+export function TooltipFromUriHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: TooltipFromUriHelperProps) {
   const [uri, setUri] = useState((node.params.uri as string) ?? '');
 
   const handleDialogOpen = () => setUri((node.params.uri as string) ?? '');
@@ -37,6 +38,7 @@ export function TooltipFromUriHelper({ node, onUpdate, open, onOpenChange, trigg
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Tooltip from URI',
         content: (

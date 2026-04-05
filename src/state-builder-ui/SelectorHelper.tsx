@@ -12,6 +12,7 @@ export interface SelectorHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 export function SelectorHelper({
@@ -21,6 +22,7 @@ export function SelectorHelper({
   open,
   onOpenChange,
   trigger,
+  onCustomChange,
 }: SelectorHelperProps) {
   const [selectorValue, setSelectorValue] = useState<ComponentSelectorValue | undefined>(
     node.params.selector as ComponentSelectorValue | undefined
@@ -48,6 +50,7 @@ export function SelectorHelper({
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[
         {
           id: 'selector',

@@ -14,6 +14,7 @@ interface ParseHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 function ParseForm({ format, onFormatChange }: { format: string; onFormatChange: (v: string) => void }) {
@@ -35,7 +36,7 @@ function ParseForm({ format, onFormatChange }: { format: string; onFormatChange:
   );
 }
 
-export function ParseHelper({ node, onUpdate, open, onOpenChange, trigger }: ParseHelperProps) {
+export function ParseHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: ParseHelperProps) {
   const [format, setFormat] = useState((node.params.format as string) ?? '');
 
   const handleDialogOpen = () => setFormat((node.params.format as string) ?? '');
@@ -57,6 +58,7 @@ export function ParseHelper({ node, onUpdate, open, onOpenChange, trigger }: Par
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{ id: 'form', label: 'Parse', content: <ParseForm format={format} onFormatChange={setFormat} /> }]}
     />
   );

@@ -13,9 +13,10 @@ interface LabelHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
-export function LabelHelper({ node, onUpdate, open, onOpenChange, trigger }: LabelHelperProps) {
+export function LabelHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: LabelHelperProps) {
   const [text, setText] = useState((node.params.text as string) ?? '');
 
   const handleDialogOpen = () => setText((node.params.text as string) ?? '');
@@ -37,6 +38,7 @@ export function LabelHelper({ node, onUpdate, open, onOpenChange, trigger }: Lab
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Label',
         content: (

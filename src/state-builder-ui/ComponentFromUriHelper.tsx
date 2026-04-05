@@ -15,9 +15,10 @@ interface ComponentFromUriHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
-export function ComponentFromUriHelper({ node, onUpdate, open, onOpenChange, trigger }: ComponentFromUriHelperProps) {
+export function ComponentFromUriHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: ComponentFromUriHelperProps) {
   const [uri, setUri] = useState((node.params.uri as string) ?? '');
   const [selector, setSelector] = useState<ComponentSelectorValue | undefined>(node.params.selector as ComponentSelectorValue | undefined);
   const [selectorTab, setSelectorTab] = useState<SelectorTab>('chain');
@@ -47,6 +48,7 @@ export function ComponentFromUriHelper({ node, onUpdate, open, onOpenChange, tri
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[
         {
           id: 'form', label: 'Component from URI',

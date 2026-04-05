@@ -13,6 +13,7 @@ interface DownloadHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 function DownloadForm({ url, onUrlChange }: { url: string; onUrlChange: (v: string) => void }) {
@@ -31,7 +32,7 @@ function DownloadForm({ url, onUrlChange }: { url: string; onUrlChange: (v: stri
   );
 }
 
-export function DownloadHelper({ node, onUpdate, open, onOpenChange, trigger }: DownloadHelperProps) {
+export function DownloadHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: DownloadHelperProps) {
   const [url, setUrl] = useState((node.params.url as string) ?? '');
 
   const handleDialogOpen = () => {
@@ -55,6 +56,7 @@ export function DownloadHelper({ node, onUpdate, open, onOpenChange, trigger }: 
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{ id: 'form', label: 'Download', content: <DownloadForm url={url} onUrlChange={setUrl} /> }]}
     />
   );

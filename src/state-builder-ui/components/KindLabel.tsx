@@ -1,7 +1,6 @@
 'use client';
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select.tsx';
-import { ChevronDownIcon } from 'lucide-react';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import {
   MVS_KIND_LABELS,
@@ -55,7 +54,6 @@ export function KindLabel({ value, onChange, onCompositeSelect, allowedKinds, cl
           style={{ width: 7, height: 7, background: dotColor }}
         />
         <span className='truncate'>{label}</span>
-        <ChevronDownIcon className='size-3 shrink-0 text-muted-foreground ml-auto' />
       </SelectTrigger>
       <SelectContent>
         {showCompositeOption && (

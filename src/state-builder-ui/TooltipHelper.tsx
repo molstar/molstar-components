@@ -13,9 +13,10 @@ interface TooltipHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
-export function TooltipHelper({ node, onUpdate, open, onOpenChange, trigger }: TooltipHelperProps) {
+export function TooltipHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: TooltipHelperProps) {
   const [content, setContent] = useState((node.params.content as string) ?? '');
 
   const handleDialogOpen = () => setContent((node.params.content as string) ?? '');
@@ -37,6 +38,7 @@ export function TooltipHelper({ node, onUpdate, open, onOpenChange, trigger }: T
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Tooltip',
         content: (

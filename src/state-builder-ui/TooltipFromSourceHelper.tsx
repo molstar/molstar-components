@@ -13,6 +13,7 @@ interface TooltipFromSourceHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 function initFromNode(node: UINode) {
@@ -24,7 +25,7 @@ function initFromNode(node: UINode) {
   };
 }
 
-export function TooltipFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger }: TooltipFromSourceHelperProps) {
+export function TooltipFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: TooltipFromSourceHelperProps) {
   const init = initFromNode(node);
   const [categoryName, setCategoryName] = useState(init.categoryName);
   const [fieldName, setFieldName] = useState(init.fieldName);
@@ -57,6 +58,7 @@ export function TooltipFromSourceHelper({ node, onUpdate, open, onOpenChange, tr
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Tooltip from Source',
         content: (

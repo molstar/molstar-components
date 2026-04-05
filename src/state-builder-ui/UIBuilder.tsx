@@ -505,7 +505,11 @@ export function UIBuilder(): React.ReactElement {
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         onComplete={(newNodes) => {
-          setNodes(assignMissingRefs(newNodes, nodes));
+          const withRefs = assignMissingRefs(newNodes, nodes);
+          setNodes(withRefs);
+          setTimeout(() => {
+            generateCodeFromNodes(withRefs);
+          }, 0);
         }}
       />
     </div>

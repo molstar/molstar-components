@@ -15,6 +15,7 @@ interface InterpolateHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
 function initFromNode(node: UINode) {
@@ -28,7 +29,7 @@ function initFromNode(node: UINode) {
   };
 }
 
-export function InterpolateHelper({ node, onUpdate, open, onOpenChange, trigger }: InterpolateHelperProps) {
+export function InterpolateHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: InterpolateHelperProps) {
   const init = initFromNode(node);
   const [targetRef, setTargetRef] = useState(init.targetRef);
   const [property, setProperty] = useState(init.property);
@@ -73,6 +74,7 @@ export function InterpolateHelper({ node, onUpdate, open, onOpenChange, trigger 
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger}
+      onCustomChange={onCustomChange}
       tabs={[{
         id: 'form', label: 'Interpolate',
         content: (

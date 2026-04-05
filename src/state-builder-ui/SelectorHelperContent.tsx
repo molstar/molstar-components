@@ -48,7 +48,6 @@ const MODE_LABELS: { mode: SelectorBuilderMode; label: string }[] = [
   { mode: 'quick', label: 'Quick' },
   { mode: 'expression', label: 'Expression' },
   { mode: 'union', label: 'Union' },
-  { mode: 'raw', label: 'Raw' },
 ];
 
 export function SelectorHelperContent({

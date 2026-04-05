@@ -82,11 +82,6 @@ export function OperationRow({
   allNodes = [],
 }: OperationRowProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [customOpen, setCustomOpen] = useState(false);
-  const [customInput, setCustomInput] = useState(() =>
-    node.custom != null ? JSON.stringify(node.custom, null, 2) : ''
-  );
-  const [customError, setCustomError] = useState('');
   const [helperOpen, setHelperOpen] = useState(false);
 
   const [pendingAction, setPendingAction] = useState<{
@@ -174,24 +169,12 @@ export function OperationRow({
     setPendingAction(null);
   };
 
-  const handleCustomInputChange = (v: string) => {
-    setCustomInput(v);
-    if (!v.trim()) { setCustomError(''); onUpdate({ custom: undefined }); return; }
-    try {
-      const parsed = JSON.parse(v);
-      setCustomError('');
-      onUpdate({ custom: parsed });
-    } catch {
-      setCustomError('Invalid JSON');
-    }
-  };
-
   const canHaveChildren = !isTerminalKind(node.kind);
   const summary = getNodeSummary(node);
   const isUnconfigured = !node.kind;
 
   const renderHelper = () => {
-    const helperProps = { node, onUpdate, open: helperOpen, onOpenChange: setHelperOpen };
+    const helperProps = { node, onUpdate, open: helperOpen, onOpenChange: setHelperOpen, onCustomChange: (custom: unknown) => onUpdate({ custom: custom as Record<string, unknown> | undefined }) };
     switch (node.kind as string) {
       case 'download': return <DownloadHelper {...helperProps} />;
       case 'parse': return <ParseHelper {...helperProps} />;
@@ -228,7 +211,7 @@ export function OperationRow({
 
       <div className={cn('border rounded-lg px-3 py-2 bg-card shadow-sm flex items-center gap-2', isUnconfigured && 'border-dashed opacity-70')}>
         {/* Expand/collapse */}
-        {canHaveChildren ? (
+        {canHaveChildren && (
           <Button
             variant='ghost'
             size='sm'
@@ -237,8 +220,6 @@ export function OperationRow({
           >
             {isExpanded ? <ChevronDownIcon className='size-3' /> : <ChevronRightIcon className='size-3' />}
           </Button>
-        ) : (
-          <span className='inline-block w-6 h-6 shrink-0' />
         )}
 
         {/* Kind label (select trigger) */}
@@ -273,38 +254,19 @@ export function OperationRow({
           onMoveUp={onMoveUp}
           onMoveDown={onMoveDown}
           onAddChild={onAddChild}
+          onAddChildWithKind={(kind: MVSKind) => {
+            const ref = generateDefaultRef(kind, allNodes);
+            const newChild = { id: crypto.randomUUID(), kind, params: {}, children: [], ref };
+            onUpdate({ children: [...(node.children ?? []), newChild] });
+          }}
           onAddTemplateChildren={onAddTemplateChildren}
           onCopy={onCopy}
           onRemove={handleRemove}
+          validChildKinds={node.kind ? getValidChildren(node.kind as MVSKind) : undefined}
         />
 
         {/* Helper modal */}
         {renderHelper()}
-      </div>
-
-      {/* Custom data expander */}
-      <div className='mt-1 px-3'>
-        <button
-          type='button'
-          className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
-          onClick={() => setCustomOpen((o) => !o)}
-        >
-          <ChevronRightIcon className={cn('size-3 transition-transform', customOpen && 'rotate-90')} />
-          Custom data
-          {node.custom != null && <span className='ml-1 size-1.5 rounded-full bg-primary inline-block' />}
-        </button>
-        {customOpen && (
-          <div className='mt-1'>
-            <textarea
-              className='w-full text-xs font-mono border rounded-md p-2 min-h-[80px] resize-y bg-background'
-              placeholder='{ "key": "value" }'
-              value={customInput}
-              onChange={(e) => handleCustomInputChange(e.target.value)}
-              spellCheck={false}
-            />
-            {customError && <p className='text-xs text-destructive mt-1'>{customError}</p>}
-          </div>
-        )}
       </div>
 
       <ConfirmDialog

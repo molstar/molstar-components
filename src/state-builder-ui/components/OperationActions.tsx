@@ -14,7 +14,7 @@ import { Button } from '../ui/button.tsx';
 import { MoreHorizontalIcon } from 'lucide-react';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import type { UINode } from '@molstar/state-builder';
-import { getTemplatesForParentKind, instantiateTemplate } from '@molstar/state-builder';
+import { MVS_KIND_LABELS, getTemplatesForParentKind, instantiateTemplate } from '@molstar/state-builder';
 
 interface OperationActionsProps {
   canHaveChildren?: boolean;
@@ -24,9 +24,11 @@ interface OperationActionsProps {
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onAddChild?: () => void;
+  onAddChildWithKind?: (kind: MVSKind) => void;
   onAddTemplateChildren?: (nodes: UINode[]) => void;
   onCopy?: () => void;
   onRemove: () => void;
+  validChildKinds?: readonly MVSKind[];
 }
 
 export function OperationActions({
@@ -37,12 +39,16 @@ export function OperationActions({
   onMoveUp,
   onMoveDown,
   onAddChild,
+  onAddChildWithKind,
   onAddTemplateChildren,
   onCopy,
   onRemove,
+  validChildKinds,
 }: OperationActionsProps) {
   const templates = parentKind ? getTemplatesForParentKind(parentKind as MVSKind) : [];
   const hasTemplates = templates.length > 0;
+  const hasKinds = !!validChildKinds && validChildKinds.length > 0;
+  const needsSubmenu = canHaveChildren && onAddChild && (hasKinds || hasTemplates);
 
   return (
     <DropdownMenu>
@@ -63,31 +69,38 @@ export function OperationActions({
           <DropdownMenuItem onClick={onCopy}>Duplicate</DropdownMenuItem>
         )}
         {canHaveChildren && onAddChild && (
-          <>
-            {hasTemplates ? (
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Add child</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuItem onClick={onAddChild}>Empty node</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {templates.map((t) => (
-                    <DropdownMenuItem
-                      key={t.id}
-                      onClick={() => {
-                        const nodes = instantiateTemplate(t);
-                        onAddTemplateChildren?.(nodes);
-                      }}
-                      title={t.description}
-                    >
-                      {t.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            ) : (
-              <DropdownMenuItem onClick={onAddChild}>Add child</DropdownMenuItem>
-            )}
-          </>
+          needsSubmenu ? (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Add child</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {hasKinds && validChildKinds!.map((kind) => (
+                  <DropdownMenuItem
+                    key={kind}
+                    onClick={() => onAddChildWithKind?.(kind)}
+                  >
+                    {MVS_KIND_LABELS[kind]}
+                  </DropdownMenuItem>
+                ))}
+                {hasKinds && hasTemplates && <DropdownMenuSeparator />}
+                {hasTemplates && templates.map((t) => (
+                  <DropdownMenuItem
+                    key={t.id}
+                    onClick={() => {
+                      const nodes = instantiateTemplate(t);
+                      onAddTemplateChildren?.(nodes);
+                    }}
+                    title={t.description}
+                  >
+                    {t.name}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onAddChild}>Empty node</DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          ) : (
+            <DropdownMenuItem onClick={onAddChild}>Add child</DropdownMenuItem>
+          )
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem

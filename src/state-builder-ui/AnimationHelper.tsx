@@ -45,7 +45,7 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
     setIncludeCamera(src.include_camera ?? false);
     setIncludeCanvas(src.include_canvas ?? false);
     setTrackball(src.trackball ?? { enabled: false, speed: -0.05 });
-    setSteps([...src.steps]);
+    setSteps([...(src.steps ?? [])]);
   };
 
   const buildAnimationParams = (): AnimationParams => ({
@@ -93,6 +93,7 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
       trigger={trigger ?? defaultTrigger}
       title='Animation Helper'
       defaultTab='timeline'
+      dialogContentClassName='sm:max-w-2xl'
       tabs={[
         {
           id: 'timeline',

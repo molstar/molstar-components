@@ -24,9 +24,10 @@ interface TransformHelperProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
+  onCustomChange?: (custom: unknown) => void;
 }
 
-export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger }: TransformHelperProps) {
+export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: TransformHelperProps) {
   // Translation state
   const [tx, setTx] = useState(0);
   const [ty, setTy] = useState(0);
@@ -204,7 +205,9 @@ export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger }:
       onDialogOpen={handleDialogOpen}
       open={open}
       onOpenChange={onOpenChange}
-      trigger={trigger ?? defaultTrigger}
+      trigger={trigger ?? (open !== undefined ? undefined : defaultTrigger)}
+      onCustomChange={onCustomChange}
+      dialogContentClassName='sm:max-w-2xl'
       tabs={[
         {
           id: 'translation',

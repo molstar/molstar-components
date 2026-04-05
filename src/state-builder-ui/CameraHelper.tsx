@@ -111,6 +111,7 @@ export function CameraHelper({ node, onUpdate, open, onOpenChange, trigger }: Ca
       onOpenChange={onOpenChange}
       trigger={trigger ?? defaultTrigger}
       title='Camera Helper'
+      dialogContentClassName='sm:max-w-2xl'
       tabs={[
         {
           id: 'vectors',

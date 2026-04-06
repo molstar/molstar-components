@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from './ui/button.tsx';
+import { Button } from './base/button.tsx';
 import type { UINode, ConstantDefinition } from '@molstar/state-builder';
 import { createEmptyNode, deepCopyNode, countSubtreeNodes } from '@molstar/state-builder';
-import { ConfirmDialog } from './ui/confirm-dialog.tsx';
+import { ConfirmDialog } from './base/confirm-dialog.tsx';
 import type { CompositeSequence } from '@molstar/state-builder/types/composite-sequences';
 import { getCompositeValidChildren } from '@molstar/state-builder/types/composite-sequences';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { TreeLines } from './components/TreeLines.tsx';
 import { OperationActions } from './components/OperationActions.tsx';
 import { OperationRow } from './OperationRow.tsx';
-import { CompositeHelper } from './CompositeHelper.tsx';
+import { CompositeHelper } from './helpers/CompositeHelper.tsx';
 import { getColorForKind } from './node-categories.ts';
 
 function truncateUrl(url: string): string {

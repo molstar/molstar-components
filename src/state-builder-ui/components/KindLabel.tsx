@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select.tsx';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '../base/select.tsx';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import {
   MVS_KIND_LABELS,

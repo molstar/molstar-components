@@ -1,5 +1,5 @@
 import { Label } from '../../ui/label.tsx';
-import { AnnotationHelper } from '../../AnnotationHelper.tsx';
+import { AnnotationHelper } from '../../helpers/AnnotationHelper.tsx';
 
 interface Props { params: Record<string, unknown>; onChange: (p: Record<string, unknown>) => void; }
 

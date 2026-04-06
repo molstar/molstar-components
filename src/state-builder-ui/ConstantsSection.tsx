@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from './ui/button.tsx';
-import { Input } from './ui/input.tsx';
-import { Label } from './ui/label.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select.tsx';
+import { Button } from './base/button.tsx';
+import { Input } from './base/input.tsx';
+import { Label } from './base/label.tsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './base/select.tsx';
 import {
   ConstantDefinition,
   ConstantEntry,

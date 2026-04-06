@@ -1,6 +1,6 @@
 import { Label } from '../../ui/label.tsx';
 import type { UINode, ConstantDefinition } from '@molstar/state-builder';
-import { ColorHelper } from '../../ColorHelper.tsx';
+import { ColorHelper } from '../../helpers/ColorHelper.tsx';
 
 interface ColorFieldsProps {
   node: UINode;

@@ -16,7 +16,7 @@ import {
   type ComponentSelectorValue,
 } from '@molstar/state-builder';
 import { ListIcon } from 'lucide-react';
-import { SelectorHelperContent } from '../../SelectorHelperContent.tsx';
+import { SelectorHelperContent } from '../../helpers/SelectorHelperContent.tsx';
 
 interface ComponentFieldsProps {
   params: Record<string, unknown>;

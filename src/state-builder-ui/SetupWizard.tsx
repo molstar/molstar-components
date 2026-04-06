@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog.tsx';
-import { Button } from './ui/button.tsx';
-import { Input } from './ui/input.tsx';
-import { Label } from './ui/label.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select.tsx';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs.tsx';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './base/dialog.tsx';
+import { Button } from './base/button.tsx';
+import { Input } from './base/input.tsx';
+import { Label } from './base/label.tsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './base/select.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './base/tabs.tsx';
 import { PlusIcon, XIcon } from 'lucide-react';
 import type { UINode } from '@molstar/state-builder';
 import {
@@ -17,7 +17,7 @@ import {
   createEmptyNode,
   assignMissingRefs,
 } from '@molstar/state-builder';
-import { SelectorHelperContent, type SelectorTab } from './SelectorHelperContent.tsx';
+import { SelectorHelperContent, type SelectorTab } from './helpers/SelectorHelperContent.tsx';
 
 interface SetupWizardProps {
   open: boolean;

@@ -9,8 +9,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu.tsx';
-import { Button } from '../ui/button.tsx';
+} from '../base/dropdown-menu.tsx';
+import { Button } from '../base/button.tsx';
 import { MoreHorizontalIcon } from 'lucide-react';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import type { UINode } from '@molstar/state-builder';

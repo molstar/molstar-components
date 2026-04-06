@@ -7,7 +7,7 @@ import { useCodeGenCallback } from './state/codegen-context.ts';
 import { useStateChangeCallback } from './state/state-change-context.ts';
 import { useStoryConstants } from './state/story-constants-context.ts';
 import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context';
-import { Button } from './ui/button.tsx';
+import { Button } from './base/button.tsx';
 import {
   Dialog,
   DialogContent,
@@ -16,8 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog.tsx';
-import { Textarea } from './ui/textarea.tsx';
+} from './base/dialog.tsx';
+import { Textarea } from './base/textarea.tsx';
 import { ASTFactory } from '@molstar/state-builder/compiler/ast/factory';
 import { CodeGenerator } from '@molstar/state-builder/compiler/codegen/generator';
 import { useAtom, useAtomValue } from 'jotai';
@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu.tsx';
+} from './base/dropdown-menu.tsx';
 import { UploadIcon, PlusIcon, ChevronDownIcon } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAutoGenerateOnMount } from './state/auto-generate-context.ts';

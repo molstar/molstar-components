@@ -1,14 +1,14 @@
 'use client';
 
-import { Button } from './ui/button.tsx';
+import { Button } from './base/button.tsx';
 import { CameraIcon, ChevronDownIcon, ChevronRightIcon, CrosshairIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { CameraSnapshotAtom } from './state/atoms.ts';
 import type { CameraData, UINode } from '@molstar/state-builder';
 import { snapshotToCameraParams, isDefaultUp } from '@molstar/state-builder';
-import { CameraHelper } from './CameraHelper.tsx';
-import type { CameraParams } from './camera-helper/index.ts';
+import { CameraHelper } from './helpers/CameraHelper.tsx';
+import type { CameraParams } from './helpers/camera-helper/index.ts';
 
 interface CameraSectionProps {
   camera: CameraParams | null;

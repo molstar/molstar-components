@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from './ui/button.tsx';
+import { Button } from './base/button.tsx';
 import { ChevronDownIcon, ChevronRightIcon, FilmIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
-import { AnimationHelper } from './AnimationHelper.tsx';
+import { AnimationHelper } from './helpers/AnimationHelper.tsx';
 import type { AnimationParams, RefInfo, UINode } from '@molstar/state-builder';
 import { computeAnimationDuration } from '@molstar/state-builder';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Input } from '../ui/input.tsx';
+import { Input } from '../base/input.tsx';
 
 interface NumericInputProps {
   value: number | undefined;

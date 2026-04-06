@@ -13,10 +13,10 @@ import { conf, language } from "monaco-editor/javascript-language";
 
 import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context';
 import { UIBuilderProvider } from './state-builder-ui/provider.tsx';
-import { SelectorHelper } from './state-builder-ui/SelectorHelper.tsx';
-import { ColorHelper } from './state-builder-ui/ColorHelper.tsx';
-import { TransformHelper } from './state-builder-ui/TransformHelper.tsx';
-import { CameraHelper } from './state-builder-ui/CameraHelper.tsx';
+import { SelectorHelper } from './state-builder-ui/helpers/SelectorHelper.tsx';
+import { ColorHelper } from './state-builder-ui/helpers/ColorHelper.tsx';
+import { TransformHelper } from './state-builder-ui/helpers/TransformHelper.tsx';
+import { CameraHelper } from './state-builder-ui/helpers/CameraHelper.tsx';
 import type { UINode } from './state-builder/index.ts';
 import {
   detectMethodAtCursor,

@@ -1,6 +1,6 @@
 import { Label } from '../../ui/label.tsx';
 import { Button } from '../../ui/button.tsx';
-import { TransformHelper } from '../../TransformHelper.tsx';
+import { TransformHelper } from '../../helpers/TransformHelper.tsx';
 import { XIcon } from 'lucide-react';
 import type { UINode } from '@molstar/state-builder';
 

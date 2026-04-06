@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from './ui/button.tsx';
+import { Button } from './base/button.tsx';
 import type { UINode, ConstantDefinition } from '@molstar/state-builder';
 import {
   countSubtreeNodes,
@@ -8,13 +8,13 @@ import {
   generateDefaultRef,
   MVS_KIND_LABELS,
 } from '@molstar/state-builder';
-import { ConfirmDialog } from './ui/confirm-dialog.tsx';
+import { ConfirmDialog } from './base/confirm-dialog.tsx';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
 import { TreeLines } from './components/TreeLines.tsx';
 import { OperationActions } from './components/OperationActions.tsx';
-import { PrimitiveHelper } from './PrimitiveHelper.tsx';
+import { PrimitiveHelper } from './helpers/PrimitiveHelper.tsx';
 import { getColorForKind } from './node-categories.ts';
 import { getNodeSummary } from './node-summary.ts';
 

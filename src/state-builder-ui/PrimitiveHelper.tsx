@@ -3,7 +3,7 @@
 import { Button } from './ui/button.tsx';
 import { Input } from './ui/input.tsx';
 import { Label } from './ui/label.tsx';
-import { BoxIcon, PlusIcon, Trash2Icon, ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
+import { BoxIcon, PlusIcon, Trash2Icon, ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
 import { useState } from 'react';
 import { PRIMITIVE_KINDS } from '@molstar/state-builder';
 import type { PrimitiveKind } from '@molstar/state-builder';
@@ -29,7 +29,7 @@ function kindLabel(kind: unknown): string {
 function defaultParamsForKind(kind: PrimitiveKind): Record<string, unknown> {
   switch (kind) {
     case 'label':
-      return { kind, position: {}, text: 'Label' };
+      return { kind, position: [0, 0, 0], text: 'Label' };
     case 'ellipsoid':
       return { kind, center: [0, 0, 0], major_axis: [1, 0, 0], minor_axis: [0, 1, 0] };
     case 'distance_measurement':
@@ -66,14 +66,18 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
   const primitives = (node.children ?? []).filter((c) => c.kind === 'primitive');
 
   const [localPrimitives, setLocalPrimitives] = useState<UINode[]>([]);
-  const [activeTab, setActiveTab] = useState<string>('prim-raw');
+  const [activeTab, setActiveTab] = useState<string>('prim-empty');
   const [rawJson, setRawJson] = useState('[]');
   const [rawError, setRawError] = useState('');
+
+  const handleCustomChange = onCustomChange ?? ((custom: unknown) => {
+    onUpdate({ custom: custom as Record<string, unknown> | undefined });
+  });
 
   const handleDialogOpen = () => {
     const nodes = primitives.map((p) => ({ ...p }));
     setLocalPrimitives(nodes);
-    setActiveTab(nodes[0]?.id ?? 'prim-raw');
+    setActiveTab(nodes[0]?.id ?? 'prim-empty');
     setRawJson(JSON.stringify(nodes.map((p) => ({ ...p.params })), null, 2));
     setRawError('');
   };
@@ -98,7 +102,7 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
     setLocalPrimitives((prev) => {
       const next = prev.filter((p) => p.id !== id);
       if (activeTab === id) {
-        setActiveTab(next[0]?.id ?? 'prim-raw');
+        setActiveTab(next[0]?.id ?? 'prim-empty');
       }
       return next;
     });
@@ -145,6 +149,58 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
     onUpdate({ children: [...nonPrimChildren, ...localPrimitives], ref: ref || undefined });
   };
 
+  const activeIdx = localPrimitives.findIndex((p) => p.id === activeTab);
+  const isActivePrimTab = activeIdx >= 0;
+
+  const tabActions = (
+    <div className='flex items-center gap-0.5'>
+      {isActivePrimTab && (
+        <>
+          <Button
+            size='sm'
+            variant='ghost'
+            className='h-6 w-6 p-0'
+            title='Move left'
+            disabled={activeIdx === 0}
+            onClick={() => movePrimitive(localPrimitives[activeIdx].id, -1)}
+          >
+            <ArrowLeftIcon className='size-3' />
+          </Button>
+          <Button
+            size='sm'
+            variant='ghost'
+            className='h-6 w-6 p-0'
+            title='Move right'
+            disabled={activeIdx === localPrimitives.length - 1}
+            onClick={() => movePrimitive(localPrimitives[activeIdx].id, 1)}
+          >
+            <ArrowRightIcon className='size-3' />
+          </Button>
+          <Button
+            size='sm'
+            variant='ghost'
+            className='h-6 w-6 p-0 text-destructive hover:text-destructive'
+            title='Remove primitive'
+            onClick={() => removePrimitive(localPrimitives[activeIdx].id)}
+          >
+            <Trash2Icon className='size-3' />
+          </Button>
+          <span className='w-px h-4 bg-border mx-0.5 inline-block' />
+        </>
+      )}
+      <Button
+        size='sm'
+        variant='outline'
+        className='h-6 px-2 text-xs'
+        title='Add primitive'
+        onClick={addPrimitive}
+      >
+        <PlusIcon className='size-3 mr-1' />
+        Add
+      </Button>
+    </div>
+  );
+
   const count = primitives.length;
   const triggerLabel =
     count === 0 ? 'Add primitives...' : `${count} primitive${count > 1 ? 's' : ''}`;
@@ -157,7 +213,25 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
   );
 
   const tabs: HelperTab[] = [
-    ...localPrimitives.map((p, idx) => ({
+    {
+      id: 'prim-empty',
+      label: '',
+      hidden: true,
+      content: (
+        <div className='flex flex-col items-center justify-center py-10 gap-3 text-center'>
+          <BoxIcon className='size-8 text-muted-foreground' />
+          <div>
+            <p className='text-sm font-medium'>No primitives yet</p>
+            <p className='text-xs text-muted-foreground mt-1'>Add shapes, labels, or measurements to this node.</p>
+          </div>
+          <Button size='sm' variant='outline' onClick={addPrimitive}>
+            <PlusIcon className='size-3 mr-1' />
+            Add primitive
+          </Button>
+        </div>
+      ),
+    },
+    ...localPrimitives.map((p) => ({
       id: p.id,
       label: kindLabel(p.params.kind),
       content: (
@@ -167,51 +241,20 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
             onUpdate={(newParams) => updatePrimitive(p.id, newParams)}
           />
           <div className='flex gap-2 mt-3 pt-3 border-t items-center'>
-            <Label className='text-xs shrink-0'>Ref</Label>
+            <Label className='text-xs shrink-0'>Identifier</Label>
             <Input
               className='h-8 text-sm w-28'
               placeholder='optional'
               value={p.ref ?? ''}
               onChange={(e) => updateRef(p.id, e.target.value)}
             />
-            <div className='ml-auto flex gap-1'>
-              <Button
-                size='sm'
-                variant='ghost'
-                className='h-7 w-7 p-0'
-                title='Move up'
-                disabled={idx === 0}
-                onClick={() => movePrimitive(p.id, -1)}
-              >
-                <ArrowUpIcon className='size-3' />
-              </Button>
-              <Button
-                size='sm'
-                variant='ghost'
-                className='h-7 w-7 p-0'
-                title='Move down'
-                disabled={idx === localPrimitives.length - 1}
-                onClick={() => movePrimitive(p.id, 1)}
-              >
-                <ArrowDownIcon className='size-3' />
-              </Button>
-              <Button
-                size='sm'
-                variant='ghost'
-                className='h-7 w-7 p-0 text-destructive hover:text-destructive'
-                title='Remove primitive'
-                onClick={() => removePrimitive(p.id)}
-              >
-                <Trash2Icon className='size-3' />
-              </Button>
-            </div>
           </div>
         </div>
       ),
     })),
     {
       id: 'prim-raw',
-      label: 'Items Raw',
+      label: 'Raw',
       content: (
         <RawPanel
           value={rawJson}
@@ -240,17 +283,14 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
       applyDisabled={activeTab === 'prim-raw' && !!rawError}
       open={open}
       onOpenChange={onOpenChange}
-      trigger={trigger ?? defaultTrigger}
+      trigger={trigger !== undefined ? trigger : (open !== undefined ? null : defaultTrigger)}
       onDialogOpen={handleDialogOpen}
+      syncTab={activeTab}
       onTabChange={handleTabChange}
       onApply={handleApply}
-      onCustomChange={onCustomChange}
-      headerActions={
-        <Button size='sm' variant='outline' className='h-7 px-2 text-xs' onClick={addPrimitive} title='Add primitive'>
-          <PlusIcon className='size-3 mr-1' />
-          Add
-        </Button>
-      }
+      onCustomChange={handleCustomChange}
+      tabActions={tabActions}
+      dialogContentClassName='sm:max-w-2xl'
     />
   );
 }

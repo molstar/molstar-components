@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { JSX } from "react";
 import { MVSTypes } from "./utils/mvs-types.ts";
-import { setupMonacoCodeCompletion } from "./utils/monaco-utils.ts";
+import { setupMonacoCodeCompletion, clearMonacoEditHistory } from "./utils/monaco-utils.ts";
 import * as monaco from "monaco-editor";
 
 // Import TypeScript language defaults directly from contribution module
@@ -47,6 +47,24 @@ export interface MolViewEditorProps {
    * @defaultValue undefined
    */
   editorOptions?: monaco.editor.IStandaloneEditorConstructionOptions;
+  /**
+   * Story-level JavaScript code injected into Monaco's IntelliSense scope.
+   * Use this for helper function definitions shared across scenes so
+   * autocomplete works for those helpers inside scene code.
+   */
+  commonCode?: string;
+  /**
+   * CSS class applied to the editor container div.
+   * When provided, `height` is ignored — sizing is fully controlled by the class
+   * (e.g. `"absolute inset-0"` to fill a relative parent).
+   */
+  className?: string;
+  /**
+   * Called after the Monaco editor is created and ready.
+   * Use this to register custom actions, context menu items, or keybindings.
+   * @param editor - The Monaco standalone editor instance
+   */
+  onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 const DEFAULT_CODE = `const structure = builder
@@ -94,12 +112,44 @@ let editorCounter = 0;
  * ```
  *
  * @remarks
- * - Press Ctrl/Cmd+S to trigger the save callback
- * - The editor features dark theme, line numbers, and word wrap
+ * - Press Ctrl/Cmd+S (also Alt+S, Cmd/Ctrl+Enter, Alt+Enter) to trigger the save callback
+ * - The editor defaults to dark theme; pass `editorOptions={{ theme: 'vs' }}` for light theme
  * - Autocompletion for MVS types is automatically configured
  *
+ * ## Monaco worker setup (required in bundled apps)
+ *
+ * TypeScript IntelliSense (hover info, completions) requires Monaco's TypeScript language
+ * service worker. `MolViewEditor` defaults to no-op workers so it mounts without errors in
+ * any environment, but **you must configure real workers** to get full IntelliSense.
+ *
+ * Set `window.MonacoEnvironment` **before** this component mounts (e.g. at module top-level
+ * in the file that imports `MolViewEditor`). The exact setup depends on your bundler:
+ *
+ * **webpack 5 / Next.js** — bundle workers from the local `monaco-editor` package:
+ * ```ts
+ * if (typeof window !== 'undefined' && !window.MonacoEnvironment) {
+ *   window.MonacoEnvironment = {
+ *     getWorker(_moduleId: string, label: string): Worker {
+ *       if (label === 'typescript' || label === 'javascript') {
+ *         return new Worker(
+ *           new URL('monaco-editor/esm/vs/language/typescript/ts.worker', import.meta.url)
+ *         );
+ *       }
+ *       return new Worker(
+ *         new URL('monaco-editor/esm/vs/editor/editor.worker', import.meta.url)
+ *       );
+ *     },
+ *   };
+ * }
+ * ```
+ *
+ * **Vite** — same `new URL(...)` pattern works; Vite handles worker bundling automatically.
+ *
+ * If `window.MonacoEnvironment` is already set (e.g. by `@monaco-editor/react`'s CDN loader),
+ * `MolViewEditor` will use that setup and you don't need to do anything.
+ *
  * @param props - Component props
- * @returns A Preact component displaying the Monaco code editor
+ * @returns A React component displaying the Monaco code editor
  */
 export function MolViewEditor({
   initialCode = DEFAULT_CODE,
@@ -108,10 +158,23 @@ export function MolViewEditor({
   onSave,
   height = "400px",
   editorOptions,
+  commonCode,
+  className,
+  onEditorMount,
 }: MolViewEditorProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
+
+  // Keep refs to callbacks so the editor is never recreated when they change.
+  // Inline arrow functions passed as props would otherwise cause teardown/remount
+  // on every parent render, producing Monaco CancellationErrors during dispose.
+  const onSaveRef = useRef(onSave);
+  useEffect(() => { onSaveRef.current = onSave; }, [onSave]);
+  const onCodeChangeRef = useRef(onCodeChange);
+  useEffect(() => { onCodeChangeRef.current = onCodeChange; }, [onCodeChange]);
+  const onEditorMountRef = useRef(onEditorMount);
+  useEffect(() => { onEditorMountRef.current = onEditorMount; }, [onEditorMount]);
 
   // Configure Monaco environment once before first editor creation
   useEffect(() => {
@@ -124,14 +187,18 @@ export function MolViewEditor({
       // Language already registered, ignore
     }
 
-    // Configure Monaco to use bundled workers
+    // Configure Monaco worker environment if not already provided by the host.
+    // Default: no-op blob workers so the component works in any environment
+    // without requiring worker files on a specific path. Consumers who want
+    // real background worker processing should set window.MonacoEnvironment
+    // (with getWorkerUrl or getWorker) before mounting MolViewEditor.
     if (!(window as any).MonacoEnvironment) {
       (window as any).MonacoEnvironment = {
-        getWorkerUrl: function (_moduleId: string, label: string) {
-          if (label === "typescript" || label === "javascript") {
-            return "./ts.worker.js";
-          }
-          return "./editor.worker.js";
+        getWorkerUrl: function (_moduleId: string, _label: string): string {
+          const blob = new Blob(["self.onmessage = () => {};"], {
+            type: "application/javascript",
+          });
+          return URL.createObjectURL(blob);
         },
       };
     }
@@ -154,7 +221,7 @@ export function MolViewEditor({
 
       // Setup Monaco code completion with MVS types BEFORE creating editor
       // This configures compiler options, diagnostics, and adds type definitions
-      setupMonacoCodeCompletion(monacoWithTypescript as any, MVSTypes);
+      setupMonacoCodeCompletion(monacoWithTypescript as any, MVSTypes, commonCode);
 
       // Create Monaco editor model with explicit JavaScript language and unique URI
       // Each editor instance gets a unique URI to prevent model conflicts
@@ -186,21 +253,24 @@ export function MolViewEditor({
 
       editorRef.current = editor;
 
-      // Keyboard shortcut for save (Ctrl/Cmd+S)
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-        if (onSave) {
-          onSave(editor.getValue());
-        }
-      });
+      // Save shortcuts: Cmd/Ctrl+S, Alt+S, Cmd/Ctrl+Enter, Alt+Enter
+      const triggerSave = () => { if (onSaveRef.current) onSaveRef.current(editor.getValue()); };
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, triggerSave);
+      editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.KeyS, triggerSave);
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, triggerSave);
+      editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.Enter, triggerSave);
 
       // Handle content changes
       editor.onDidChangeModelContent(() => {
-        if (onCodeChange) {
-          onCodeChange(editor.getValue());
+        if (onCodeChangeRef.current) {
+          onCodeChangeRef.current(editor.getValue());
         }
       });
 
       setIsReady(true);
+      if (onEditorMountRef.current) {
+        onEditorMountRef.current(editor);
+      }
     };
 
     initEditor();
@@ -216,7 +286,8 @@ export function MolViewEditor({
         }
       }
     };
-  }, [onSave]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // callbacks accessed via refs — no deps needed, editor created once
 
   // Update editor value when initialCode prop changes
   useEffect(() => {
@@ -235,14 +306,37 @@ export function MolViewEditor({
       const currentValue = editorRef.current.getValue();
       if (currentValue !== value) {
         editorRef.current.setValue(value);
+        clearMonacoEditHistory(editorRef.current).catch(() => {});
       }
     }
   }, [value, isReady]);
 
+  // Re-apply commonCode to IntelliSense when it changes.
+  // On initial mount this fires once after setIsReady(true) — a harmless redundant
+  // re-registration since setupMonacoCodeCompletion already added it. On subsequent
+  // changes it overwrites the previous entry (addExtraLib with same path is idempotent).
+  useEffect(() => {
+    if (!isReady) return;
+    const monacoWithTypescript = {
+      ...monaco,
+      languages: {
+        ...monaco.languages,
+        typescript: typescriptModule,
+      },
+    };
+    if (commonCode) {
+      (monacoWithTypescript as any).languages.typescript.javascriptDefaults.addExtraLib(
+        commonCode,
+        'js:common-code.js',
+      );
+    }
+  }, [commonCode, isReady]);
+
   return (
     <div
       ref={containerRef}
-      style={{ width: "100%", height, border: "1px solid #333" }}
+      className={className}
+      style={className ? undefined : { width: "100%", height, border: "1px solid #333" }}
     />
   );
 }

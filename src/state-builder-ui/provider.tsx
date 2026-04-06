@@ -23,6 +23,8 @@ export interface UIBuilderSnapshot {
 export interface UIBuilderHandle {
   setCamera: (camera: CameraParams) => void;
   getState: () => UIBuilderSnapshot;
+  /** Bulk-set any subset of builder state. Unspecified keys are left unchanged. */
+  setState: (snapshot: Partial<UIBuilderSnapshot>) => void;
 }
 
 export interface UIBuilderProviderProps {
@@ -118,6 +120,21 @@ export const UIBuilderProvider: ForwardRefExoticComponent<
           camera: store.get(UIBuilderCameraAtom)[key] || null,
           animation: store.get(UIBuilderAnimationAtom)[key] || null,
         };
+      },
+      setState: (snapshot: Partial<UIBuilderSnapshot>) => {
+        const key = store.get(SceneKeyAtom);
+        if (snapshot.nodes !== undefined) {
+          store.set(UIBuilderNodesAtom, { ...store.get(UIBuilderNodesAtom), [key]: snapshot.nodes });
+        }
+        if (snapshot.constants !== undefined) {
+          store.set(UIBuilderConstantsAtom, { ...store.get(UIBuilderConstantsAtom), [key]: snapshot.constants });
+        }
+        if (snapshot.camera !== undefined) {
+          store.set(UIBuilderCameraAtom, { ...store.get(UIBuilderCameraAtom), [key]: snapshot.camera });
+        }
+        if (snapshot.animation !== undefined) {
+          store.set(UIBuilderAnimationAtom, { ...store.get(UIBuilderAnimationAtom), [key]: snapshot.animation });
+        }
       },
     }));
 

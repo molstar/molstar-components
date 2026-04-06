@@ -24,6 +24,8 @@ export interface HelperTab {
   id: string;
   label: string;
   content: ReactNode;
+  /** When true, the tab trigger is hidden from TabsList but content is still rendered. */
+  hidden?: boolean;
 }
 
 export interface NodeHelperBaseProps {
@@ -47,8 +49,12 @@ export interface NodeHelperBaseProps {
   onTabChange?: (tabId: string) => void;
   /** Extra actions rendered in the dialog header next to the title. */
   headerActions?: ReactNode;
+  /** Extra actions rendered at the trailing end of the TabsList row (e.g. Add button). */
+  tabActions?: ReactNode;
   /** Override the DialogContent width/max-width class. Defaults to 'sm:max-w-lg'. */
   dialogContentClassName?: string;
+  /** When provided, programmatically syncs the active tab. Changes trigger an internal setActiveTab call. */
+  syncTab?: string;
   // Controlled mode
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -69,7 +75,9 @@ export function NodeHelperBase({
   applyDisabled,
   onTabChange,
   headerActions,
+  tabActions,
   dialogContentClassName,
+  syncTab,
   open: controlledOpen,
   onOpenChange,
   trigger,
@@ -107,6 +115,10 @@ export function NodeHelperBase({
     }
     prevOpenRef.current = isOpen;
   }, [isOpen, node.ref, node.params, node.custom, defaultTab, tabs]);
+
+  useEffect(() => {
+    if (syncTab !== undefined) setActiveTab(syncTab);
+  }, [syncTab]);
 
   const allTabs: HelperTab[] = suppressRawTab
     ? tabs
@@ -192,9 +204,9 @@ export function NodeHelperBase({
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className='flex flex-col'>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className='flex flex-col' activationMode='manual'>
           <TabsList className='w-full justify-start rounded-none border-b bg-transparent h-auto px-5 pb-0 gap-1'>
-            {allTabs.map((tab) => (
+            {allTabs.filter((tab) => !tab.hidden).map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
@@ -203,6 +215,7 @@ export function NodeHelperBase({
                 {tab.label}
               </TabsTrigger>
             ))}
+            {tabActions && <div className='ml-auto flex items-center pb-1'>{tabActions}</div>}
           </TabsList>
           {allTabs.map((tab) => (
             <TabsContent key={tab.id} value={tab.id} className='px-5 py-4 mt-0'>

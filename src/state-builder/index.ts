@@ -210,5 +210,9 @@ export {
   computeAnimationDuration,
 } from './types/animation-builder.ts';
 
+// Export code evaluator (code → builder state)
+export type { EvaluateCodeOptions } from './types/code-evaluator.ts';
+export { evaluateCodeToMVSTree } from './types/code-evaluator.ts';
+
 export const placeholder = 'state-builder';
 

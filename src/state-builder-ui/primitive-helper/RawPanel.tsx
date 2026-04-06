@@ -25,7 +25,7 @@ export function RawPanel({ value, error, onChange }: RawPanelProps) {
       />
       {error && <p className='text-xs text-destructive'>{error}</p>}
       <p className='text-xs text-muted-foreground'>
-        Paste full primitives array JSON. Each object must include a <code>kind</code> field.
+        Type out the primitives array JSON. Each object must include a <code>kind</code> field.
       </p>
     </div>
   );

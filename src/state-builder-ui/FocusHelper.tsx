@@ -120,7 +120,8 @@ export function FocusHelper({ node, onUpdate, open, onOpenChange, trigger, onCus
       onDialogOpen={handleDialogOpen}
       open={open}
       onOpenChange={onOpenChange}
-      trigger={trigger ?? defaultTrigger}
+      trigger={trigger ?? (open !== undefined ? null : defaultTrigger)}
+      dialogContentClassName='sm:max-w-2xl'
       onCustomChange={onCustomChange}
       tabs={[
         {

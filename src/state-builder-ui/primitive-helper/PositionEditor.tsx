@@ -48,16 +48,27 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
     <div className='space-y-1'>
       <div className='flex items-center gap-1'>
         <Label className='text-xs font-medium flex-1'>{label}</Label>
-        {/* Mode toggle */}
-        <Button
-          size='sm'
-          variant={state.mode === 'expression' ? 'secondary' : 'ghost'}
-          className='h-5 text-xs px-2'
-          onClick={toggleMode}
-          title={state.mode === 'vec3' ? 'Switch to ComponentExpression (selector)' : 'Switch to XYZ coordinates'}
-        >
-          {state.mode === 'vec3' ? 'XYZ' : 'Expr'}
-        </Button>
+        {/* Mode toggle — two tab-style buttons */}
+        <div className='flex items-center gap-0.5'>
+          <Button
+            size='sm'
+            variant={state.mode === 'vec3' ? 'default' : 'ghost'}
+            className='h-5 text-xs px-2'
+            onClick={() => state.mode !== 'vec3' && toggleMode()}
+            title='XYZ coordinates'
+          >
+            XYZ
+          </Button>
+          <Button
+            size='sm'
+            variant={state.mode === 'expression' ? 'default' : 'ghost'}
+            className='h-5 text-xs px-2'
+            onClick={() => state.mode !== 'expression' && toggleMode()}
+            title='ComponentExpression (selector)'
+          >
+            Expr
+          </Button>
+        </div>
         {/* Quick default {} button — only shown in expression mode when not already {} */}
         {state.mode === 'expression' && !isDefaultExpression && (
           <Button

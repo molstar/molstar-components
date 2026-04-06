@@ -103,7 +103,7 @@ export function getNodeSummary(node: UINode): string | null {
     }
     case 'focus': {
       const dir = p.direction;
-      return dir ? `direction set` : null;
+      return dir ? `direction set` : 'default';
     }
     case 'transform': {
       const hasMatrix = p.rotation != null || p.translation != null;

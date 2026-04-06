@@ -9,6 +9,13 @@ import type { UIBuilderHandle, UIBuilderSnapshot } from "./MolViewStateBuilder.t
 import type { MolViewEditorProps } from "./MolViewEditor.tsx";
 import type { MolstarViewerConfig } from "./MolstarViewer.tsx";
 import type { PluginUIContext } from "molstar/lib/mol-plugin-ui/context";
+import {
+  evaluateCodeToMVSTree,
+  mvsTreeToUINodes,
+  extractCameraFromUINodes,
+  extractAnimationFromUINodes,
+  assignMissingRefs,
+} from "./state-builder/index.ts";
 
 /**
  * Props for BuilderWithEditorAndViewer.
@@ -49,6 +56,15 @@ export interface BuilderWithEditorAndViewerProps {
    * CSS style applied to the outer container.
    */
   style?: CSSProperties;
+  /**
+   * Extra variables injected into scope during "Sync to Builder".
+   * Use to provide math utilities present in generated code (Vec3, Mat3, etc.)
+   * so the evaluator doesn't throw ReferenceErrors.
+   * @example
+   * import { Vec3, Mat3 } from 'molstar/lib/mol-math/linear-algebra';
+   * <BuilderWithEditorAndViewer extraScope={{ Vec3, Mat3 }} />
+   */
+  extraScope?: Record<string, unknown>;
 }
 
 const MINIMAL_VIEWER_CONFIG: MolstarViewerConfig = {
@@ -97,8 +113,10 @@ export function BuilderWithEditorAndViewer({
   autoRunDelay = 500,
   viewerConfig,
   style,
+  extraScope,
 }: BuilderWithEditorAndViewerProps): JSX.Element {
   const builderRef = useRef<UIBuilderHandle>(null);
+  const latestCodeRef = useRef<string>(initialCode ?? "");
   const [activePanel, setActivePanel] = useState<"builder" | "editor">(
     "builder",
   );
@@ -110,6 +128,10 @@ export function BuilderWithEditorAndViewer({
   const [cameraSnapshot, setCameraSnapshot] = useState<unknown>(null);
   const cameraSubRef = useRef<{ unsubscribe(): void } | null>(null);
   const lastCameraUpdateRef = useRef<number>(0);
+
+  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const runCode = useCallback(async (code: string) => {
     try {
@@ -148,6 +170,7 @@ export function BuilderWithEditorAndViewer({
 
   const handleCodeGenerated = useCallback(
     (code: string) => {
+      latestCodeRef.current = code;
       setEditorValue(code);
       scheduleRun(code);
     },
@@ -156,6 +179,7 @@ export function BuilderWithEditorAndViewer({
 
   const handleEditorChange = useCallback(
     (code: string) => {
+      latestCodeRef.current = code;
       scheduleRun(code);
     },
     [scheduleRun],
@@ -172,6 +196,29 @@ export function BuilderWithEditorAndViewer({
     });
     cameraSubRef.current = sub ?? null;
   }, []);
+
+  const handleSyncToBuilder = useCallback(async () => {
+    setSyncError(null);
+    setIsSyncing(true);
+    try {
+      const tree = await evaluateCodeToMVSTree(latestCodeRef.current, { extraScope });
+      if (!tree) {
+        setSyncError(
+          "Could not parse code. Make sure it uses the builder API (builder.download(...).parse(...) etc.) and has no unresolvable references.",
+        );
+        return;
+      }
+      const uiNodes = mvsTreeToUINodes(tree);
+      const { nodes: noCamera, camera } = extractCameraFromUINodes(uiNodes);
+      const { nodes, animation } = extractAnimationFromUINodes(noCamera);
+      const withRefs = assignMissingRefs(nodes, []);
+      builderRef.current?.setState({ nodes: withRefs, camera, animation });
+      setActivePanel("builder");
+      setSyncDialogOpen(false);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [extraScope]);
 
   const config = viewerConfig ?? MINIMAL_VIEWER_CONFIG;
 
@@ -226,6 +273,27 @@ export function BuilderWithEditorAndViewer({
           >
             Code
           </button>
+          {activePanel === "editor" && (
+            <button
+              type="button"
+              onClick={() => { setSyncError(null); setSyncDialogOpen(true); }}
+              style={{
+                marginLeft: "auto",
+                padding: "4px 10px",
+                border: "none",
+                background: "transparent",
+                color: "#aaa",
+                cursor: "pointer",
+                fontSize: 12,
+                fontFamily: "sans-serif",
+                borderLeft: "1px solid #555",
+                flexShrink: 0,
+              }}
+              title="Interpret code and populate the Visual Builder"
+            >
+              → Sync to Builder
+            </button>
+          )}
         </div>
 
         {/* Builder — always mounted, hidden when not active */}
@@ -312,6 +380,85 @@ export function BuilderWithEditorAndViewer({
             </div>
           )}
       </div>
+
+      {/* Sync to Builder confirmation dialog */}
+      {syncDialogOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+          onClick={() => { if (!isSyncing) { setSyncDialogOpen(false); setSyncError(null); } }}
+        >
+          <div
+            style={{
+              background: "#2d2d2d",
+              border: "1px solid #555",
+              borderRadius: 8,
+              padding: 24,
+              maxWidth: 420,
+              width: "90%",
+              color: "#ccc",
+              fontFamily: "sans-serif",
+              fontSize: 14,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 12, color: "#eee" }}>
+              Sync Code to Builder?
+            </div>
+            <p style={{ marginBottom: 10, lineHeight: 1.5 }}>
+              This will overwrite the Visual Builder state by running your code with the MVS builder.
+            </p>
+            <p style={{ marginBottom: 16, lineHeight: 1.5, color: "#f0a04b" }}>
+              ⚠ If you later generate code from the builder, it will be reformatted by the
+              compiler and may differ from your original code.
+            </p>
+            {syncError && (
+              <p style={{ marginBottom: 16, color: "#ff6b6b", fontSize: 13 }}>{syncError}</p>
+            )}
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                disabled={isSyncing}
+                onClick={() => { setSyncDialogOpen(false); setSyncError(null); }}
+                style={{
+                  padding: "6px 14px",
+                  border: "1px solid #555",
+                  borderRadius: 4,
+                  background: "transparent",
+                  color: "#ccc",
+                  cursor: "pointer",
+                  fontSize: 13,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isSyncing}
+                onClick={handleSyncToBuilder}
+                style={{
+                  padding: "6px 14px",
+                  border: "none",
+                  borderRadius: 4,
+                  background: isSyncing ? "#666" : "#0ea5e9",
+                  color: "#fff",
+                  cursor: isSyncing ? "not-allowed" : "pointer",
+                  fontSize: 13,
+                }}
+              >
+                {isSyncing ? "Syncing…" : "Sync to Builder"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

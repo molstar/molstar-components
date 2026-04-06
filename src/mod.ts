@@ -102,3 +102,11 @@ export { UIBuilder } from "./state-builder-ui/UIBuilder.tsx";
 
 export { snapshotToCameraParams, filterMetadataBySelector } from "./state-builder/index.ts";
 export type { ConstantDefinition } from "./state-builder/index.ts";
+export type { EvaluateCodeOptions } from "./state-builder/index.ts";
+export { evaluateCodeToMVSTree } from "./state-builder/index.ts";
+
+export { useSyncToBuilder } from "./hooks/useSyncToBuilder.ts";
+export type {
+  UseSyncToBuilderOptions,
+  UseSyncToBuilderResult,
+} from "./hooks/useSyncToBuilder.ts";

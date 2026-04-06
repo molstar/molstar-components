@@ -1,4 +1,17 @@
 // Entry point for docs demo
+
+// Configure Monaco workers for this demo. The build bundles ts.worker.js and
+// editor.worker.js alongside this script, so we can use relative paths here.
+// (Library consumers who don't ship workers get no-op blob workers by default.)
+(window as any).MonacoEnvironment = {
+  getWorkerUrl: function (_moduleId: string, label: string): string {
+    if (label === "typescript" || label === "javascript") {
+      return "./ts.worker.js";
+    }
+    return "./editor.worker.js";
+  },
+};
+
 import { createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { EditorWithViewer, MolstarViewer, BuilderWithViewer, BuilderWithEditorAndViewer } from "../src/mod.ts";

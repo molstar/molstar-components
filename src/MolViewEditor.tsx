@@ -202,6 +202,23 @@ export function MolViewEditor({
         },
       };
     }
+
+    // Monaco 0.55.x bug: caretPositionFromPoint() (Firefox) or caretRangeFromPoint()
+    // (Chrome) returns null when dragging to select past the last line into empty
+    // editor space. Monaco's _doHitTestWithCaretPositionFromPoint doesn't null-check
+    // the result, throwing inside DragScrollingOperation. Selection continues to work.
+    // preventDefault() alone isn't enough — dev error overlays (e.g. Next.js) add
+    // their own listeners that still fire. We register in the capture phase and call
+    // stopImmediatePropagation() so the event never reaches those handlers.
+    // Related: https://github.com/microsoft/monaco-editor/issues/4379
+    const suppressHitTestError = (e: ErrorEvent) => {
+      if (e.message?.includes("hitResult is null") || e.message?.includes("offsetNode")) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    };
+    window.addEventListener("error", suppressHitTestError, { capture: true });
+    return () => window.removeEventListener("error", suppressHitTestError, { capture: true });
   }, []);
 
   useEffect(() => {

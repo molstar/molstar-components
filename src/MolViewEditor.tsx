@@ -11,6 +11,20 @@ import * as typescriptModule from "monaco-editor/typescript-contribution";
 // Import JavaScript syntax highlighting
 import { conf, language } from "monaco-editor/javascript-language";
 
+import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context';
+import { UIBuilderProvider } from './state-builder-ui/provider.tsx';
+import { SelectorHelper } from './state-builder-ui/SelectorHelper.tsx';
+import { ColorHelper } from './state-builder-ui/ColorHelper.tsx';
+import { TransformHelper } from './state-builder-ui/TransformHelper.tsx';
+import { CameraHelper } from './state-builder-ui/CameraHelper.tsx';
+import type { UINode } from './state-builder/index.ts';
+import {
+  detectMethodAtCursor,
+  parseParamsText,
+  injectNodeParams,
+  HYBRID_HELPER_METHODS,
+} from './utils/hybrid-editor-utils.ts';
+
 /**
  * Props for the MolViewEditor component.
  */
@@ -65,6 +79,25 @@ export interface MolViewEditorProps {
    * @param editor - The Monaco standalone editor instance
    */
   onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  /**
+   * When true, enables right-click context menu helpers for builder methods.
+   * Right-clicking inside `.component()`, `.color()`, `.transform()`, or `.camera()`
+   * opens the corresponding visual helper dialog pre-populated with the current params.
+   * The result is injected back into the code when the user clicks Apply.
+   * @defaultValue false
+   */
+  hybridMode?: boolean;
+  /**
+   * Molstar plugin instance, used by helpers to read structure metadata
+   * (chain/residue info for the SelectorHelper) and camera position.
+   * Only relevant when `hybridMode` is true.
+   */
+  plugin?: PluginUIContext | null;
+  /**
+   * Current camera snapshot from the viewer, forwarded to CameraHelper's
+   * "Capture from Viewer" button. Only relevant when `hybridMode` is true.
+   */
+  cameraSnapshot?: unknown;
 }
 
 const DEFAULT_CODE = `const structure = builder
@@ -81,6 +114,15 @@ structure
 // This prevents "ModelService: Cannot add model because it already exists!" errors
 // when multiple editors are created on the same page
 let editorCounter = 0;
+
+/**
+ * Build a minimal UINode from a detected method name and raw params text.
+ * Used to pre-populate helper dialogs in hybrid mode.
+ */
+function buildHybridNode(methodName: string, paramsText: string): UINode {
+  const kind = HYBRID_HELPER_METHODS[methodName] ?? methodName;
+  return { id: `hybrid-${methodName}`, kind: kind as any, params: parseParamsText(paramsText), children: [] };
+}
 
 /**
  * MolViewEditor component for editing Mol* View Stories code.
@@ -161,10 +203,20 @@ export function MolViewEditor({
   commonCode,
   className,
   onEditorMount,
+  hybridMode = false,
+  plugin,
+  cameraSnapshot,
 }: MolViewEditorProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
+
+  // Hybrid mode state — only active when hybridMode prop is true
+  const [hybridHelper, setHybridHelper] = useState<{
+    methodName: string;
+    node: UINode;
+    paramsRange: monaco.Range;
+  } | null>(null);
 
   // Keep refs to callbacks so the editor is never recreated when they change.
   // Inline arrow functions passed as props would otherwise cause teardown/remount
@@ -288,6 +340,50 @@ export function MolViewEditor({
       if (onEditorMountRef.current) {
         onEditorMountRef.current(editor);
       }
+
+      if (hybridMode) {
+        // One context key per method — drives smart menu visibility
+        const ctxKeys: Record<string, monaco.editor.IContextKey<boolean>> = {};
+        for (const method of Object.keys(HYBRID_HELPER_METHODS)) {
+          ctxKeys[method] = editor.createContextKey<boolean>(`inHybrid_${method}_${editorCounter}`, false);
+        }
+
+        // Update context keys on every cursor move
+        editor.onDidChangeCursorPosition(() => {
+          const model = editor.getModel();
+          const pos = editor.getPosition();
+          const detected = (model && pos) ? detectMethodAtCursor(model, pos) : null;
+          for (const method of Object.keys(HYBRID_HELPER_METHODS)) {
+            ctxKeys[method].set(detected?.methodName === method);
+          }
+        });
+
+        const HELPER_LABELS: Record<string, string> = {
+          component: 'Edit Selector with Helper…',
+          color:     'Pick Color with Helper…',
+          transform: 'Edit Transform with Helper…',
+          camera:    'Edit Camera with Helper…',
+        };
+
+        for (const [method, label] of Object.entries(HELPER_LABELS)) {
+          editor.addAction({
+            id: `hybrid-${method}-${editorCounter}`,
+            label,
+            contextMenuGroupId: 'mvs-helpers',
+            contextMenuOrder: Object.keys(HELPER_LABELS).indexOf(method),
+            precondition: `inHybrid_${method}_${editorCounter}`,
+            run: (ed) => {
+              const model = ed.getModel();
+              const pos = ed.getPosition();
+              if (!model || !pos) return;
+              const ctx = detectMethodAtCursor(model, pos);
+              if (!ctx || ctx.methodName !== method) return;
+              const node = buildHybridNode(ctx.methodName, ctx.paramsText);
+              setHybridHelper({ methodName: ctx.methodName, node, paramsRange: ctx.paramsRange });
+            },
+          });
+        }
+      }
     };
 
     initEditor();
@@ -303,8 +399,7 @@ export function MolViewEditor({
         }
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // callbacks accessed via refs — no deps needed, editor created once
+  }, [hybridMode]); // hybridMode affects Monaco action registration
 
   // Update editor value when initialCode prop changes
   useEffect(() => {
@@ -350,10 +445,39 @@ export function MolViewEditor({
   }, [commonCode, isReady]);
 
   return (
-    <div
-      ref={containerRef}
-      className={className}
-      style={className ? undefined : { width: "100%", height, border: "1px solid #333" }}
-    />
+    <>
+      <div
+        ref={containerRef}
+        className={className}
+        style={className ? undefined : { width: "100%", height, border: "1px solid #333" }}
+      />
+      {hybridMode && hybridHelper && (
+        <UIBuilderProvider plugin={plugin} cameraSnapshot={cameraSnapshot}>
+          {(() => {
+            const onUpdate = (updates: Partial<UINode>) => {
+              if (!editorRef.current) return;
+              injectNodeParams(editorRef.current, hybridHelper.paramsRange, updates.params ?? hybridHelper.node.params);
+              setHybridHelper(null);
+            };
+            const onOpenChange = (open: boolean) => { if (!open) setHybridHelper(null); };
+            const node = hybridHelper.node;
+
+            if (hybridHelper.methodName === 'component') {
+              return <SelectorHelper node={node} onUpdate={onUpdate} open onOpenChange={onOpenChange} />;
+            }
+            if (hybridHelper.methodName === 'color') {
+              return <ColorHelper node={node} onUpdate={onUpdate} open onOpenChange={onOpenChange} />;
+            }
+            if (hybridHelper.methodName === 'transform') {
+              return <TransformHelper node={node} onUpdate={onUpdate} open onOpenChange={onOpenChange} />;
+            }
+            if (hybridHelper.methodName === 'camera') {
+              return <CameraHelper node={node} onUpdate={onUpdate} open onOpenChange={onOpenChange} />;
+            }
+            return null;
+          })()}
+        </UIBuilderProvider>
+      )}
+    </>
   );
 }

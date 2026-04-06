@@ -88,7 +88,7 @@ export class ParamFormatter {
     return `[\n${items.join(',\n')}\n${'  '.repeat(depth)}]`;
   }
 
-  private static formatObject(obj: Record<string, any>, depth: number): string {
+  static formatObject(obj: Record<string, any>, depth: number): string {
     const entries = Object.entries(obj);
 
     if (entries.length === 0) return '{}';

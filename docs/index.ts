@@ -137,6 +137,7 @@ window.addEventListener("load", async () => {
           height: "650px",
           autoRun: true,
           builderInitialState: { nodes: defaultBuilderNodes, camera: defaultBuilderCamera },
+          hybridMode: true,
         }),
       );
     }

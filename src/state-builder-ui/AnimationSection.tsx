@@ -44,7 +44,7 @@ export function AnimationSection({ animation, onAnimationChange, availableRefs }
   };
 
   return (
-    <div className='border rounded-md'>
+    <div className='border rounded-lg bg-card shadow-sm'>
       {/* Header */}
       <div
         className='flex items-center gap-2 p-2 cursor-pointer hover:bg-muted/50'
@@ -55,6 +55,7 @@ export function AnimationSection({ animation, onAnimationChange, availableRefs }
         ) : (
           <ChevronRightIcon className='size-4' />
         )}
+        <span className='inline-block rounded-full shrink-0' style={{ width: 7, height: 7, background: '#ec4899' }} />
         <FilmIcon className='size-4' />
         <span className='text-sm font-medium'>Animation</span>
         <span className='text-xs text-muted-foreground'>

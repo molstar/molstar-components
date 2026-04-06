@@ -53,7 +53,7 @@ export const MolViewStateBuilder: ForwardRefExoticComponent<
   ref,
 ): JSX.Element {
   return (
-    <div style={{ height, overflow: "auto" }} className={className}>
+    <div style={{ height, width: "100%", overflow: "auto" }} className={className}>
       <UIBuilderProvider ref={ref} {...providerProps}>
         <UIBuilder />
       </UIBuilderProvider>

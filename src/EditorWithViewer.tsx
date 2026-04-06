@@ -81,6 +81,8 @@ export interface EditorWithViewerProps {
    * @defaultValue undefined
    */
   editorOptions?: monaco.editor.IStandaloneEditorConstructionOptions;
+  /** Enable Monaco hybrid mode — right-click helper dialogs on builder methods. */
+  hybridMode?: boolean;
 }
 
 /**
@@ -112,6 +114,7 @@ export function EditorWithViewer({
   showAutoUpdateToggle = true,
   showBottomControlPanel = true,
   editorOptions,
+  hybridMode,
 }: EditorWithViewerProps): JSX.Element {
   const [mvsData, setMvsData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -224,6 +227,7 @@ export function EditorWithViewer({
           onSave={handleSave}
           height={editorHeight}
           editorOptions={editorOptions}
+          hybridMode={hybridMode}
         />
         {showBottomControlPanel && showAutoUpdateToggle && (
           <div

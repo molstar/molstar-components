@@ -65,6 +65,8 @@ export interface BuilderWithEditorAndViewerProps {
    * <BuilderWithEditorAndViewer extraScope={{ Vec3, Mat3 }} />
    */
   extraScope?: Record<string, unknown>;
+  /** Enable Monaco hybrid mode — right-click helper dialogs on builder methods. */
+  hybridMode?: boolean;
 }
 
 const MINIMAL_VIEWER_CONFIG: MolstarViewerConfig = {
@@ -114,6 +116,7 @@ export function BuilderWithEditorAndViewer({
   viewerConfig,
   style,
   extraScope,
+  hybridMode,
 }: BuilderWithEditorAndViewerProps): JSX.Element {
   const builderRef = useRef<UIBuilderHandle>(null);
   const latestCodeRef = useRef<string>(initialCode ?? "");
@@ -329,6 +332,9 @@ export function BuilderWithEditorAndViewer({
             onCodeChange={handleEditorChange}
             height={runError ? "calc(100% - 30px)" : "100%"}
             editorOptions={editorOptions}
+            hybridMode={hybridMode}
+            plugin={plugin}
+            cameraSnapshot={cameraSnapshot}
           />
           {runError && (
             <div

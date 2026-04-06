@@ -50,7 +50,7 @@ export function CameraSection({ camera, onCameraChange }: CameraSectionProps) {
   };
 
   return (
-    <div className='border rounded-md'>
+    <div className='border rounded-lg bg-card shadow-sm'>
       {/* Header */}
       <div
         className='flex items-center gap-2 p-2 cursor-pointer hover:bg-muted/50'
@@ -61,6 +61,7 @@ export function CameraSection({ camera, onCameraChange }: CameraSectionProps) {
         ) : (
           <ChevronRightIcon className='size-4' />
         )}
+        <span className='inline-block rounded-full shrink-0' style={{ width: 7, height: 7, background: '#06b6d4' }} />
         <CameraIcon className='size-4' />
         <span className='text-sm font-medium'>Camera</span>
         <span className='text-xs text-muted-foreground'>

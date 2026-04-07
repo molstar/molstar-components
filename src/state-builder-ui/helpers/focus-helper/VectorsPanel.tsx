@@ -1,8 +1,7 @@
 'use client';
 
-import { Label } from '../../base/label.tsx';
 import { Button } from '../../base/button.tsx';
-import { NumericInput } from '../../components/NumericInput.tsx';
+import { SliderVec3Row } from '../../components/SliderVec3Row.tsx';
 import type { VectorsPanelProps } from './types.ts';
 
 const DEFAULT_DIRECTION: [number, number, number] = [0, 0, -1];
@@ -12,26 +11,21 @@ function Vector3Row({
   label,
   value,
   defaultValue,
+  defaultRange,
   onChange,
 }: {
   label: string;
   value: [number, number, number] | undefined;
   defaultValue: [number, number, number];
+  defaultRange: [number, number];
   onChange: (v: [number, number, number] | undefined) => void;
 }) {
   const isCustom = value !== undefined;
   const displayValue = value ?? defaultValue;
 
-  const handleChange = (axis: 0 | 1 | 2, num: number) => {
-    const next: [number, number, number] = [...displayValue] as [number, number, number];
-    next[axis] = num;
-    onChange(next);
-  };
-
   return (
     <div className='space-y-1'>
-      <div className='flex items-center gap-2'>
-        <Label className='text-xs font-medium flex-1'>{label}</Label>
+      <div className='flex items-center justify-end'>
         <Button
           size='sm'
           variant='ghost'
@@ -41,20 +35,13 @@ function Vector3Row({
           {isCustom ? 'Use default' : 'Set custom'}
         </Button>
       </div>
-      <div className={`grid grid-cols-3 gap-2 ${!isCustom ? 'opacity-40 pointer-events-none' : ''}`}>
-        {(['X', 'Y', 'Z'] as const).map((axis, i) => (
-          <div key={axis}>
-            <Label className='text-xs text-muted-foreground'>{axis}</Label>
-            <NumericInput
-              className='h-8 text-sm font-mono'
-              value={displayValue[i]}
-              disabled={!isCustom}
-              onChange={(v) => handleChange(i as 0 | 1 | 2, v ?? 0)}
-              title={`${label} ${axis}`}
-            />
-          </div>
-        ))}
-      </div>
+      <SliderVec3Row
+        label={label}
+        value={displayValue}
+        onChange={(v) => onChange(v)}
+        defaultRange={defaultRange}
+        disabled={!isCustom}
+      />
       {!isCustom && (
         <p className='text-xs text-muted-foreground'>
           MVS default: [{defaultValue.join(', ')}]
@@ -71,12 +58,14 @@ export function VectorsPanel({ direction, up, onDirectionChange, onUpChange }: V
         label='Direction'
         value={direction}
         defaultValue={DEFAULT_DIRECTION}
+        defaultRange={[-1, 1]}
         onChange={onDirectionChange}
       />
       <Vector3Row
         label='Up'
         value={up}
         defaultValue={DEFAULT_UP}
+        defaultRange={[-1, 1]}
         onChange={onUpChange}
       />
     </div>

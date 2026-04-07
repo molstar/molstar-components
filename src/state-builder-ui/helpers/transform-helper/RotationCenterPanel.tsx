@@ -2,7 +2,7 @@
 
 import { Label } from '../../base/label.tsx';
 import { Button } from '../../base/button.tsx';
-import { NumericInput } from '../../components/NumericInput.tsx';
+import { SliderVec3Row } from '../../components/SliderVec3Row.tsx';
 import type { RotationCenterPanelProps } from './types.ts';
 
 export function RotationCenterPanel({
@@ -13,12 +13,6 @@ export function RotationCenterPanel({
   onModeChange,
   onCoordsChange,
 }: RotationCenterPanelProps) {
-  const handleCoordChange = (axis: 0 | 1 | 2, num: number) => {
-    const vals: [number, number, number] = [x, y, z];
-    vals[axis] = num;
-    onCoordsChange(vals[0], vals[1], vals[2]);
-  };
-
   return (
     <div className='space-y-3'>
       <Label className='text-sm'>Rotation Center</Label>
@@ -43,20 +37,12 @@ export function RotationCenterPanel({
       )}
 
       {mode === 'custom' && (
-        <div className='grid grid-cols-3 gap-2'>
-          {(['X', 'Y', 'Z'] as const).map((label, i) => (
-            <div key={label}>
-              <Label className='text-xs text-muted-foreground'>{label}</Label>
-              <NumericInput
-                className='h-8 text-sm font-mono no-spinners'
-                placeholder='0'
-                value={[x, y, z][i]}
-                onChange={(v) => handleCoordChange(i as 0 | 1 | 2, v ?? 0)}
-                title={`${label} coordinate`}
-              />
-            </div>
-          ))}
-        </div>
+        <SliderVec3Row
+          label='Center (X, Y, Z)'
+          value={[x, y, z]}
+          onChange={(v) => onCoordsChange(v[0], v[1], v[2])}
+          defaultRange={[-100, 100]}
+        />
       )}
 
       {mode === 'none' && (

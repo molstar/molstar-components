@@ -269,8 +269,8 @@ export function MolViewEditor({
         e.stopImmediatePropagation();
       }
     };
-    window.addEventListener("error", suppressHitTestError, { capture: true });
-    return () => window.removeEventListener("error", suppressHitTestError, { capture: true });
+    globalThis.addEventListener("error", suppressHitTestError, { capture: true });
+    return () => globalThis.removeEventListener("error", suppressHitTestError, { capture: true });
   }, []);
 
   useEffect(() => {

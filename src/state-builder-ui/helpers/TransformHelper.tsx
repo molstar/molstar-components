@@ -6,15 +6,14 @@ import { Button } from '../base/button.tsx';
 import { BoxIcon } from 'lucide-react';
 import {
   TranslationPanel,
-  RotationMatrixPanel,
   RotationPresetsPanel,
-  EulerAnglesPanel,
   RotationCenterPanel,
   MatrixPanel,
   TransformPreview,
 } from './transform-helper/index.ts';
 import type { TransformParams } from './transform-helper/index.ts';
-import { IDENTITY_3x3, eulerToMatrix, matrixToEuler } from '@molstar/state-builder';
+import { SliderAngleRow } from '../components/SliderAngleRow.tsx';
+import { IDENTITY_3x3 } from '@molstar/state-builder';
 import type { UINode } from '@molstar/state-builder';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 
@@ -33,13 +32,8 @@ export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger, o
   const [ty, setTy] = useState(0);
   const [tz, setTz] = useState(0);
 
-  // Rotation state (shared by matrix-3x3, presets, and euler tabs)
+  // Rotation state (shared by rotation, presets tabs)
   const [rotationMatrix, setRotationMatrix] = useState<number[]>([...IDENTITY_3x3]);
-
-  // Euler angles (derived from / synced with rotationMatrix)
-  const [eulerRoll, setEulerRoll] = useState(0);
-  const [eulerPitch, setEulerPitch] = useState(0);
-  const [eulerYaw, setEulerYaw] = useState(0);
 
   // Rotation center state
   const [centerMode, setCenterMode] = useState<'none' | 'centroid' | 'custom'>('none');
@@ -65,13 +59,8 @@ export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger, o
       const r = initialValue.rotation as number[] | undefined;
       if (r && r.length === 9) {
         setRotationMatrix([...r]);
-        const euler = matrixToEuler(r);
-        setEulerRoll(euler.roll);
-        setEulerPitch(euler.pitch);
-        setEulerYaw(euler.yaw);
       } else {
         setRotationMatrix([...IDENTITY_3x3]);
-        setEulerRoll(0); setEulerPitch(0); setEulerYaw(0);
       }
 
       const rc = initialValue.rotation_center;
@@ -94,28 +83,10 @@ export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger, o
     } else {
       setTx(0); setTy(0); setTz(0);
       setRotationMatrix([...IDENTITY_3x3]);
-      setEulerRoll(0); setEulerPitch(0); setEulerYaw(0);
       setCenterMode('none');
       setCx(0); setCy(0); setCz(0);
       setFullMatrix(null);
     }
-  };
-
-  // When rotation matrix changes (from matrix panel or presets), sync euler angles
-  const handleRotationMatrixChange = (matrix: number[]) => {
-    setRotationMatrix(matrix);
-    const euler = matrixToEuler(matrix);
-    setEulerRoll(euler.roll);
-    setEulerPitch(euler.pitch);
-    setEulerYaw(euler.yaw);
-  };
-
-  // When euler angles change, sync rotation matrix
-  const handleEulerChange = (roll: number, pitch: number, yaw: number) => {
-    setEulerRoll(roll);
-    setEulerPitch(pitch);
-    setEulerYaw(yaw);
-    setRotationMatrix(eulerToMatrix(roll, pitch, yaw));
   };
 
   const buildTransformParams = (): TransformParams => {
@@ -223,13 +194,13 @@ export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger, o
           ),
         },
         {
-          id: 'matrix-3x3',
-          label: 'Matrix 3x3',
+          id: 'rotation',
+          label: 'Rotation',
           content: (
             <div className='flex flex-col gap-4'>
-              <RotationMatrixPanel
+              <SliderAngleRow
                 matrix={rotationMatrix}
-                onChange={handleRotationMatrixChange}
+                onChange={setRotationMatrix}
               />
               <PreviewWidget />
             </div>
@@ -240,22 +211,7 @@ export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger, o
           label: 'Presets',
           content: (
             <div className='flex flex-col gap-4'>
-              <RotationPresetsPanel onSelect={handleRotationMatrixChange} />
-              <PreviewWidget />
-            </div>
-          ),
-        },
-        {
-          id: 'euler',
-          label: 'Euler',
-          content: (
-            <div className='flex flex-col gap-4'>
-              <EulerAnglesPanel
-                roll={eulerRoll}
-                pitch={eulerPitch}
-                yaw={eulerYaw}
-                onChange={handleEulerChange}
-              />
+              <RotationPresetsPanel onSelect={setRotationMatrix} />
               <PreviewWidget />
             </div>
           ),

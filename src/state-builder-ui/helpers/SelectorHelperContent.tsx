@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Label } from '../base/label.tsx';
 import { Button } from '../base/button.tsx';
 import {
@@ -57,6 +57,7 @@ export function SelectorHelperContent({
   activeTab,
   onTabChange,
 }: SelectorHelperContentProps) {
+  const lastEmittedRef = useRef<ComponentSelectorValue | undefined>(value);
   const [internalMode, setInternalMode] = useState<SelectorBuilderMode>('chain');
   const mode = activeTab ?? internalMode;
   const setMode = (m: SelectorBuilderMode) => {
@@ -86,6 +87,8 @@ export function SelectorHelperContent({
 
   // Sync internal state from value prop
   useEffect(() => {
+    // Skip sync when the value came from our own onChange call.
+    if (value === lastEmittedRef.current) return;
     if (value === undefined) return;
     const parsed = parseSelector(value);
     setMode(parsed.mode);
@@ -145,34 +148,39 @@ export function SelectorHelperContent({
     const union = overrides?.union ?? unionEntries;
     const expr = overrides?.expr ?? expressionValue;
 
+    const emit = (v: ComponentSelectorValue | undefined) => {
+      lastEmittedRef.current = v;
+      onChange(v);
+    };
+
     switch (m) {
       case 'chain':
-        onChange(chain ? buildChainSelector(chain) : undefined);
+        emit(chain ? buildChainSelector(chain) : undefined);
         break;
       case 'residue':
         if (rChain && rFrom) {
           const from = parseInt(rFrom, 10);
           const to = rTo ? parseInt(rTo, 10) : undefined;
-          onChange(buildResidueSelector(rChain, from, to));
+          emit(buildResidueSelector(rChain, from, to));
         } else {
-          onChange(undefined);
+          emit(undefined);
         }
         break;
       case 'ligand':
-        onChange(lName ? buildLigandSelector(lName, lChain || undefined) : undefined);
+        emit(lName ? buildLigandSelector(lName, lChain || undefined) : undefined);
         break;
       case 'raw': {
         if (raw.trim()) {
           const result = parseRawSelectorInput(raw);
           if (result.error) {
             setRawError(result.error);
-            onChange(undefined);
+            emit(undefined);
           } else {
             setRawError('');
-            onChange(result.value as ComponentSelectorValue);
+            emit(result.value as ComponentSelectorValue);
           }
         } else {
-          onChange(undefined);
+          emit(undefined);
         }
         break;
       }
@@ -189,12 +197,12 @@ export function SelectorHelperContent({
             }
             return buildChainSelector(e.chain);
           });
-        onChange(selectors.length > 0 ? buildUnionSelector(selectors) : undefined);
+        emit(selectors.length > 0 ? buildUnionSelector(selectors) : undefined);
         break;
       }
       case 'expression': {
         const hasAnyField = Object.keys(expr).length > 0;
-        onChange(hasAnyField ? expr : undefined);
+        emit(hasAnyField ? expr : undefined);
         break;
       }
       case 'quick':

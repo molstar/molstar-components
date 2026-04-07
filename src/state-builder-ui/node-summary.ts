@@ -70,15 +70,16 @@ export function getNodeSummary(node: UINode): string | null {
       return type ?? null;
     }
     case 'color': {
-      // Check for theme in custom
       const theme = node.custom?.molstar_color_theme_name as string | undefined;
-      if (theme) return theme;
+      const sel = (p as Record<string, unknown>).selector;
+      const selSuffix = sel ? ` (${formatSelectorPreview(sel)})` : '';
+      if (theme) return theme + selSuffix;
       const color = p.color;
       if (typeof color === 'number') {
-        return '#' + color.toString(16).padStart(6, '0');
+        return '#' + color.toString(16).padStart(6, '0') + selSuffix;
       }
-      if (typeof color === 'string') return color;
-      return null;
+      if (typeof color === 'string') return color + selSuffix;
+      return sel ? `color${selSuffix}` : null;
     }
     case 'opacity': {
       const val = p.opacity as number | undefined;

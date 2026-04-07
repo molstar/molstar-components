@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../base/select.tsx';
-import { Switch } from '../../base/switch.tsx';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -120,19 +119,19 @@ export function TimelinePanel({
         </div>
         <div className='flex flex-wrap gap-4'>
           <label className='flex items-center gap-1.5 text-xs'>
-            <Switch checked={autoplay} onCheckedChange={onAutoplayChange} />
+            <input type='checkbox' checked={autoplay} onChange={(e) => onAutoplayChange(e.target.checked)} className='accent-primary' />
             Autoplay
           </label>
           <label className='flex items-center gap-1.5 text-xs'>
-            <Switch checked={loop} onCheckedChange={onLoopChange} />
+            <input type='checkbox' checked={loop} onChange={(e) => onLoopChange(e.target.checked)} className='accent-primary' />
             Loop
           </label>
           <label className='flex items-center gap-1.5 text-xs'>
-            <Switch checked={includeCamera} onCheckedChange={onIncludeCameraChange} />
+            <input type='checkbox' checked={includeCamera} onChange={(e) => onIncludeCameraChange(e.target.checked)} className='accent-primary' />
             Include Camera
           </label>
           <label className='flex items-center gap-1.5 text-xs'>
-            <Switch checked={includeCanvas} onCheckedChange={onIncludeCanvasChange} />
+            <input type='checkbox' checked={includeCanvas} onChange={(e) => onIncludeCanvasChange(e.target.checked)} className='accent-primary' />
             Include Canvas
           </label>
         </div>
@@ -140,10 +139,7 @@ export function TimelinePanel({
         {/* Trackball spin */}
         <div className='flex items-center gap-3'>
           <label className='flex items-center gap-1.5 text-xs'>
-            <Switch
-              checked={trackball.enabled}
-              onCheckedChange={(v: boolean) => onTrackballChange({ ...trackball, enabled: v })}
-            />
+            <input type='checkbox' checked={trackball.enabled} onChange={(e) => onTrackballChange({ ...trackball, enabled: e.target.checked })} className='accent-primary' />
             Trackball Spin
           </label>
           {trackball.enabled && (
@@ -477,16 +473,12 @@ function SimpleValueFields({
           label='Start'
           value={toVec3(Array.isArray(step.start) ? step.start as number[] : null, [0, 0, 0])}
           onChange={(v) => onUpdate({ start: v })}
-          defaultRange={[-200, 200]}
-          initialMode='xyz'
-        />
+          defaultRange={[-200, 200]}        />
         <SliderVec3Row
           label='End'
           value={toVec3(Array.isArray(step.end) ? step.end as number[] : null, [0, 0, 0])}
           onChange={(v) => onUpdate({ end: v })}
-          defaultRange={[-200, 200]}
-          initialMode='xyz'
-        />
+          defaultRange={[-200, 200]}        />
       </div>
     );
   }
@@ -643,16 +635,12 @@ function TransformMatrixFields({
           label='Start'
           value={toVec3(step.translation_start, [0, 0, 0])}
           onChange={(v) => onUpdate({ translation_start: v })}
-          defaultRange={[-100, 100]}
-          initialMode='xyz'
-        />
+          defaultRange={[-100, 100]}        />
         <SliderVec3Row
           label='End'
           value={toVec3(step.translation_end, [0, 0, 0])}
           onChange={(v) => onUpdate({ translation_end: v })}
-          defaultRange={[-100, 100]}
-          initialMode='xyz'
-        />
+          defaultRange={[-100, 100]}        />
       </ChannelSection>
 
       {/* Scale channel */}
@@ -671,16 +659,12 @@ function TransformMatrixFields({
           label='Start'
           value={toVec3(step.scale_start, [1, 1, 1])}
           onChange={(v) => onUpdate({ scale_start: v })}
-          defaultRange={[0, 4]}
-          initialMode='xyz'
-        />
+          defaultRange={[0, 4]}        />
         <SliderVec3Row
           label='End'
           value={toVec3(step.scale_end, [1, 1, 1])}
           onChange={(v) => onUpdate({ scale_end: v })}
-          defaultRange={[0, 4]}
-          initialMode='xyz'
-        />
+          defaultRange={[0, 4]}        />
       </ChannelSection>
     </div>
   );

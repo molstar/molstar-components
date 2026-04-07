@@ -300,32 +300,34 @@ export function UIBuilder(): React.ReactElement {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes]); // re-check each render until nodes are populated, then fire once
 
+  const applySnapshot = (snap: UndoSnapshot) => {
+    setNodes(snap.nodes);
+    setConstants(snap.constants);
+    setCamera(snap.camera);
+    setAnimation(snap.animation);
+    generateCodeFromNodes(snap.nodes, [...storyConstants, ...snap.constants], snap.camera, snap.animation);
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && !e.shiftKey && e.key === 'z') {
         e.preventDefault();
         const prev = undo(stateRef.current);
-        if (prev) {
-          setNodes(prev.nodes);
-          setConstants(prev.constants);
-          setCamera(prev.camera);
-          setAnimation(prev.animation);
-        }
+        if (prev) applySnapshot(prev);
       }
       if (e.ctrlKey && e.key === 'y') {
         e.preventDefault();
         const next = redo(stateRef.current);
-        if (next) {
-          setNodes(next.nodes);
-          setConstants(next.constants);
-          setCamera(next.camera);
-          setAnimation(next.animation);
-        }
+        if (next) applySnapshot(next);
+      }
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        generateCode();
       }
     };
     globalThis.addEventListener('keydown', handleKeyDown);
     return () => globalThis.removeEventListener('keydown', handleKeyDown);
-  }, []); // stateRef always current; undo/redo are stable
+  }, []); // stateRef always current; undo/redo/generateCode are stable
 
   const handleImport = () => {
     try {
@@ -386,7 +388,7 @@ export function UIBuilder(): React.ReactElement {
             variant='outline'
             onClick={() => {
               const prev = undo(stateRef.current);
-              if (prev) { setNodes(prev.nodes); setConstants(prev.constants); setCamera(prev.camera); setAnimation(prev.animation); }
+              if (prev) applySnapshot(prev);
             }}
             disabled={!canUndo}
             title='Undo (Ctrl+Z)'
@@ -398,7 +400,7 @@ export function UIBuilder(): React.ReactElement {
             variant='outline'
             onClick={() => {
               const next = redo(stateRef.current);
-              if (next) { setNodes(next.nodes); setConstants(next.constants); setCamera(next.camera); setAnimation(next.animation); }
+              if (next) applySnapshot(next);
             }}
             disabled={!canRedo}
             title='Redo (Ctrl+Y)'
@@ -506,8 +508,7 @@ export function UIBuilder(): React.ReactElement {
         {/* Camera Section */}
         <CameraSection camera={camera} onCameraChange={updateCamera} />
 
-        {/* Animation Section */}
-        <AnimationSection animation={animation} onAnimationChange={updateAnimation} availableRefs={availableRefs} />
+
 
         {/* Nodes Section */}
         {nodes.length === 0 ? (
@@ -579,6 +580,9 @@ export function UIBuilder(): React.ReactElement {
             />
           ))
         )}
+
+        {/* Animation Section */}
+        <AnimationSection animation={animation} onAnimationChange={updateAnimation} availableRefs={availableRefs} />
       </div>
       <SetupWizard
         open={wizardOpen}

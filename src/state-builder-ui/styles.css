@@ -53,3 +53,14 @@
 .no-spinners {
   -moz-appearance: textfield;
 }
+
+/* Hide spinners on all type=number inputs within the builder */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

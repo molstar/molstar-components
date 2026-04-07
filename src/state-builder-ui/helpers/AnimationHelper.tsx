@@ -5,17 +5,15 @@ import { FilmIcon } from 'lucide-react';
 import { useState } from 'react';
 import {
   createDefaultAnimationParams,
-  applyPreset,
 } from '@molstar/state-builder';
 import type {
   AnimationParams,
-  AnimationPreset,
   InterpolationStep,
   RefInfo,
   TrackballSpin,
   UINode,
 } from '@molstar/state-builder';
-import { TimelinePanel, PresetsPanel } from './animation-helper/index.ts';
+import { TimelinePanel } from './animation-helper/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 
 export interface AnimationHelperProps {
@@ -68,15 +66,6 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
 
   const handleRawApply = (params: Record<string, unknown>, ref: string) => {
     onUpdate({ params, ...(ref ? { ref } : {}) });
-  };
-
-  const handleApplyPreset = (preset: AnimationPreset, targetRef: string) => {
-    const { steps: newSteps, defaults } = applyPreset(preset, targetRef);
-    setSteps((prev) => [...prev, ...newSteps]);
-    if (defaults.autoplay !== undefined) setAutoplay(defaults.autoplay);
-    if (defaults.loop !== undefined) setLoop(defaults.loop);
-    if (defaults.trackball !== undefined) setTrackball(defaults.trackball);
-    if (defaults.duration_ms !== undefined) setDurationMs(defaults.duration_ms ?? null);
   };
 
   const currentParams = buildAnimationParams();
@@ -139,16 +128,7 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
             </div>
           ),
         },
-        {
-          id: 'presets',
-          label: 'Presets',
-          content: (
-            <PresetsPanel
-              availableRefs={availableRefs}
-              onApplyPreset={handleApplyPreset}
-            />
-          ),
-        },
+
       ]}
     />
   );

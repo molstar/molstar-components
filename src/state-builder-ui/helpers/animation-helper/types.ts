@@ -1,6 +1,5 @@
 import type {
   AnimationParams,
-  AnimationPreset,
   InterpolationStep,
   RefInfo,
   TrackballSpin,
@@ -24,11 +23,6 @@ export interface TimelinePanelProps {
   onIncludeCanvasChange: (v: boolean) => void;
   onTrackballChange: (v: TrackballSpin) => void;
   onStepsChange: (steps: InterpolationStep[]) => void;
-}
-
-export interface PresetsPanelProps {
-  availableRefs: RefInfo[];
-  onApplyPreset: (preset: AnimationPreset, targetRef: string) => void;
 }
 
 export interface RawPanelProps {

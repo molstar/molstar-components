@@ -28,7 +28,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './base/dropdown-menu.tsx';
-import { UploadIcon, PlusIcon, ChevronDownIcon } from 'lucide-react';
+import { UploadIcon, PlusIcon, ChevronDownIcon, Undo2Icon, Redo2Icon } from 'lucide-react';
+import { useUndoRedo } from './state/undo-redo.ts';
+import type { UndoSnapshot } from './state/undo-redo.ts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAutoGenerateOnMount } from './state/auto-generate-context.ts';
 import { OperationRow } from './OperationRow.tsx';
@@ -94,6 +96,32 @@ export function UIBuilder(): React.ReactElement {
     setAllAnimations({ ...allAnimations, [sceneKey]: newAnimation });
   };
 
+  const { push, undo, redo, canUndo, canRedo } = useUndoRedo();
+
+  // Always-current ref for use in keyboard handler
+  const stateRef = useRef<UndoSnapshot>({ nodes, constants, camera, animation });
+  useEffect(() => {
+    stateRef.current = { nodes, constants, camera, animation };
+  }, [nodes, constants, camera, animation]);
+
+  // History-aware setters — push snapshot before applying change
+  const updateNodes = (newNodes: UINode[]) => {
+    push({ nodes, constants, camera, animation });
+    setNodes(newNodes);
+  };
+  const updateConstants = (newConstants: ConstantDefinition[]) => {
+    push({ nodes, constants, camera, animation });
+    setConstants(newConstants);
+  };
+  const updateCamera = (newCamera: CameraParams | null) => {
+    push({ nodes, constants, camera, animation });
+    setCamera(newCamera);
+  };
+  const updateAnimation = (newAnimation: AnimationParams | null) => {
+    push({ nodes, constants, camera, animation });
+    setAnimation(newAnimation);
+  };
+
   // Story-wide constants (from context)
   const { storyConstants, onStoryConstantsChange } = useStoryConstants();
   const [storyConstantsExpanded, setStoryConstantsExpanded] = useState(false);
@@ -121,12 +149,12 @@ export function UIBuilder(): React.ReactElement {
 
   const addNode = () => {
     const [newNode] = assignMissingRefs([createDownloadParseNodes()], nodes);
-    setNodes([...nodes, newNode]);
+    updateNodes([...nodes, newNode]);
   };
 
   const addConstant = () => {
     const newConstant = createEmptyConstant('colors');
-    setConstants([...constants, newConstant]);
+    updateConstants([...constants, newConstant]);
     if (!constantsExpanded) setConstantsExpanded(true);
   };
 
@@ -138,15 +166,15 @@ export function UIBuilder(): React.ReactElement {
   };
 
   const updateNode = (id: string, updates: Partial<UINode>) => {
-    setNodes(nodes.map((node) => (node.id === id ? { ...node, ...updates } : node)));
+    updateNodes(nodes.map((node) => (node.id === id ? { ...node, ...updates } : node)));
   };
 
   const removeNode = (id: string) => {
-    setNodes(nodes.filter((node) => node.id !== id));
+    updateNodes(nodes.filter((node) => node.id !== id));
   };
 
   const addChildToNode = (id: string) => {
-    setNodes(
+    updateNodes(
       nodes.map((node) => {
         if (node.id === id) {
           const newChild = createEmptyNode();
@@ -166,7 +194,7 @@ export function UIBuilder(): React.ReactElement {
 
     const copiedNode = deepCopyNode(nodeToCopy);
 
-    setNodes([...nodes, copiedNode]);
+    updateNodes([...nodes, copiedNode]);
   };
 
   const moveNodeUp = (id: string) => {
@@ -175,7 +203,7 @@ export function UIBuilder(): React.ReactElement {
 
     const newNodes = [...nodes];
     [newNodes[index - 1], newNodes[index]] = [newNodes[index], newNodes[index - 1]];
-    setNodes(newNodes);
+    updateNodes(newNodes);
   };
 
   const moveNodeDown = (id: string) => {
@@ -184,7 +212,7 @@ export function UIBuilder(): React.ReactElement {
 
     const newNodes = [...nodes];
     [newNodes[index], newNodes[index + 1]] = [newNodes[index + 1], newNodes[index]];
-    setNodes(newNodes);
+    updateNodes(newNodes);
   };
 
   const generateCodeFromNodes = (nodesToGenerate: UINode[], constantsToInclude: ConstantDefinition[] = [...storyConstants, ...constants], cameraToInclude: CameraParams | null = camera, animationToInclude: AnimationParams | null = animation) => {
@@ -272,6 +300,33 @@ export function UIBuilder(): React.ReactElement {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes]); // re-check each render until nodes are populated, then fire once
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && !e.shiftKey && e.key === 'z') {
+        e.preventDefault();
+        const prev = undo(stateRef.current);
+        if (prev) {
+          setNodes(prev.nodes);
+          setConstants(prev.constants);
+          setCamera(prev.camera);
+          setAnimation(prev.animation);
+        }
+      }
+      if (e.ctrlKey && e.key === 'y') {
+        e.preventDefault();
+        const next = redo(stateRef.current);
+        if (next) {
+          setNodes(next.nodes);
+          setConstants(next.constants);
+          setCamera(next.camera);
+          setAnimation(next.animation);
+        }
+      }
+    };
+    globalThis.addEventListener('keydown', handleKeyDown);
+    return () => globalThis.removeEventListener('keydown', handleKeyDown);
+  }, []); // stateRef always current; undo/redo are stable
+
   const handleImport = () => {
     try {
       const parsed = JSON.parse(importJson);
@@ -298,14 +353,14 @@ export function UIBuilder(): React.ReactElement {
       // Extract animation nodes into the dedicated animation section
       const animExtracted = extractAnimationFromUINodes(cameraExtracted.nodes);
 
+      const nodesWithRefs = assignMissingRefs(animExtracted.nodes, []);
+      push({ nodes, constants, camera, animation });
       if (cameraExtracted.camera) {
         setCamera(cameraExtracted.camera);
       }
       if (animExtracted.animation) {
         setAnimation(animExtracted.animation);
       }
-
-      const nodesWithRefs = assignMissingRefs(animExtracted.nodes, []);
       setNodes(nodesWithRefs);
       setImportDialogOpen(false);
       setImportJson('');
@@ -326,6 +381,30 @@ export function UIBuilder(): React.ReactElement {
         <div className='flex items-center justify-between pb-2 border-b'>
           <h3 className='text-sm font-medium'>Visual Builder</h3>
         <div className='flex gap-2'>
+          <Button
+            size='sm'
+            variant='outline'
+            onClick={() => {
+              const prev = undo(stateRef.current);
+              if (prev) { setNodes(prev.nodes); setConstants(prev.constants); setCamera(prev.camera); setAnimation(prev.animation); }
+            }}
+            disabled={!canUndo}
+            title='Undo (Ctrl+Z)'
+          >
+            <Undo2Icon className='size-4' />
+          </Button>
+          <Button
+            size='sm'
+            variant='outline'
+            onClick={() => {
+              const next = redo(stateRef.current);
+              if (next) { setNodes(next.nodes); setConstants(next.constants); setCamera(next.camera); setAnimation(next.animation); }
+            }}
+            disabled={!canRedo}
+            title='Redo (Ctrl+Y)'
+          >
+            <Redo2Icon className='size-4' />
+          </Button>
           <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
             <DialogTrigger asChild>
               <Button size='sm' variant='outline'>
@@ -385,7 +464,7 @@ export function UIBuilder(): React.ReactElement {
                       key={template.id}
                       onClick={() => {
                         const templateNodes = assignMissingRefs(instantiateTemplate(template), nodes);
-                        setNodes([...nodes, ...templateNodes]);
+                        updateNodes([...nodes, ...templateNodes]);
                       }}
                       title={template.description}
                     >
@@ -421,14 +500,14 @@ export function UIBuilder(): React.ReactElement {
           constants={constants}
           expanded={constantsExpanded}
           onToggleExpanded={() => setConstantsExpanded(!constantsExpanded)}
-          onConstantsChange={setConstants}
+          onConstantsChange={updateConstants}
         />
 
         {/* Camera Section */}
-        <CameraSection camera={camera} onCameraChange={setCamera} />
+        <CameraSection camera={camera} onCameraChange={updateCamera} />
 
         {/* Animation Section */}
-        <AnimationSection animation={animation} onAnimationChange={setAnimation} availableRefs={availableRefs} />
+        <AnimationSection animation={animation} onAnimationChange={updateAnimation} availableRefs={availableRefs} />
 
         {/* Nodes Section */}
         {nodes.length === 0 ? (
@@ -458,7 +537,7 @@ export function UIBuilder(): React.ReactElement {
                         key={template.id}
                         onClick={() => {
                           const templateNodes = instantiateTemplate(template);
-                          setNodes([...nodes, ...templateNodes]);
+                          updateNodes([...nodes, ...templateNodes]);
                         }}
                         title={template.description}
                       >
@@ -483,7 +562,7 @@ export function UIBuilder(): React.ReactElement {
               onAddChild={() => addChildToNode(node.id)}
               onAddTemplateChildren={(templateNodes) => {
                 const withRefs = assignMissingRefs(templateNodes, nodes);
-                setNodes(
+                updateNodes(
                   nodes.map((n) =>
                     n.id === node.id
                       ? { ...n, children: [...(n.children || []), ...withRefs] }
@@ -506,7 +585,7 @@ export function UIBuilder(): React.ReactElement {
         onOpenChange={setWizardOpen}
         onComplete={(newNodes) => {
           const withRefs = assignMissingRefs(newNodes, nodes);
-          setNodes(withRefs);
+          updateNodes(withRefs);
           setTimeout(() => {
             generateCodeFromNodes(withRefs);
           }, 0);

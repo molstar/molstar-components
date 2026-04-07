@@ -11,12 +11,13 @@ interface SliderVec3RowProps {
   onChange: (v: [number, number, number]) => void;
   defaultRange: [number, number];
   disabled?: boolean;
+  initialMode?: 'slider' | 'xyz';
 }
 
 const AXES = ['X', 'Y', 'Z'] as const;
 
-export function SliderVec3Row({ label, value, onChange, defaultRange, disabled }: SliderVec3RowProps) {
-  const [mode, setMode] = useState<'slider' | 'xyz'>('slider');
+export function SliderVec3Row({ label, value, onChange, defaultRange, disabled, initialMode }: SliderVec3RowProps) {
+  const [mode, setMode] = useState<'slider' | 'xyz'>(initialMode ?? 'slider');
   const [range, setRange] = useState<[number, number]>(defaultRange);
 
   const handleChange = (axis: 0 | 1 | 2, v: number) => {

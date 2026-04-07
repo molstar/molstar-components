@@ -41,7 +41,12 @@ import type {
   RefInfo,
 } from '@molstar/state-builder';
 import type { TimelinePanelProps } from './types.ts';
-import { RotationMatrixPanel } from '../transform-helper/index.ts';
+import { SliderAngleRow } from '../../components/SliderAngleRow.tsx';
+import { SliderVec3Row } from '../../components/SliderVec3Row.tsx';
+
+function toVec3(v: number[] | null | undefined, fallback: [number, number, number]): [number, number, number] {
+  return (Array.isArray(v) && v.length === 3) ? v as [number, number, number] : fallback;
+}
 
 export function TimelinePanel({
   frameTimeMs,
@@ -466,12 +471,22 @@ function SimpleValueFields({
   }
 
   if (step.kind === 'vec3') {
-    const startArr = (Array.isArray(step.start) ? step.start : [0, 0, 0]) as number[];
-    const endArr = (Array.isArray(step.end) ? step.end : [0, 0, 0]) as number[];
     return (
       <div className='space-y-1'>
-        <Vec3Input label='Start' value={startArr} onChange={(v) => onUpdate({ start: v })} />
-        <Vec3Input label='End' value={endArr} onChange={(v) => onUpdate({ end: v })} />
+        <SliderVec3Row
+          label='Start'
+          value={toVec3(Array.isArray(step.start) ? step.start as number[] : null, [0, 0, 0])}
+          onChange={(v) => onUpdate({ start: v })}
+          defaultRange={[-200, 200]}
+          initialMode='xyz'
+        />
+        <SliderVec3Row
+          label='End'
+          value={toVec3(Array.isArray(step.end) ? step.end as number[] : null, [0, 0, 0])}
+          onChange={(v) => onUpdate({ end: v })}
+          defaultRange={[-200, 200]}
+          initialMode='xyz'
+        />
       </div>
     );
   }
@@ -539,29 +554,25 @@ function RotationMatrixFields({
   step: SimpleInterpolationStep;
   onUpdate: (updates: Partial<SimpleInterpolationStep>) => void;
 }) {
-  const startMatrix = (Array.isArray(step.start) && step.start.length === 9
-    ? step.start
-    : IDENTITY_3x3) as number[];
-  const endMatrix = (Array.isArray(step.end) && step.end.length === 9
-    ? step.end
-    : IDENTITY_3x3) as number[];
+  const startMatrix = (Array.isArray(step.start) && (step.start as number[]).length === 9
+    ? step.start as number[]
+    : IDENTITY_3x3);
+  const endMatrix = (Array.isArray(step.end) && (step.end as number[]).length === 9
+    ? step.end as number[]
+    : IDENTITY_3x3);
 
   return (
     <div className='space-y-3'>
-      <div>
-        <Label className='text-[10px] text-muted-foreground mb-1'>Start</Label>
-        <RotationMatrixPanel
-          matrix={startMatrix}
-          onChange={(m) => onUpdate({ start: m as unknown as number })}
-        />
-      </div>
-      <div>
-        <Label className='text-[10px] text-muted-foreground mb-1'>End</Label>
-        <RotationMatrixPanel
-          matrix={endMatrix}
-          onChange={(m) => onUpdate({ end: m as unknown as number })}
-        />
-      </div>
+      <SliderAngleRow
+        label='Start'
+        matrix={startMatrix}
+        onChange={(m) => onUpdate({ start: m as unknown as number })}
+      />
+      <SliderAngleRow
+        label='End'
+        matrix={endMatrix}
+        onChange={(m) => onUpdate({ end: m as unknown as number })}
+      />
     </div>
   );
 }
@@ -584,10 +595,12 @@ function TransformMatrixFields({
   return (
     <div className='space-y-1'>
       {/* Pivot */}
-      <Vec3Input
+      <SliderVec3Row
         label='Pivot'
-        value={step.pivot || [0, 0, 0]}
-        onChange={(v) => onUpdate({ pivot: v as [number, number, number] })}
+        value={toVec3(step.pivot, [0, 0, 0])}
+        onChange={(v) => onUpdate({ pivot: v })}
+        defaultRange={[-100, 100]}
+        initialMode='xyz'
       />
 
       {/* Rotation channel */}
@@ -602,20 +615,16 @@ function TransformMatrixFields({
         onFrequencyChange={(v) => onUpdate({ rotation_frequency: v })}
         onAlternateDirectionChange={(v) => onUpdate({ rotation_alternate_direction: v })}
       >
-        <div>
-          <Label className='text-[10px] text-muted-foreground mb-1'>Start</Label>
-          <RotationMatrixPanel
-            matrix={step.rotation_start?.length === 9 ? step.rotation_start : IDENTITY_3x3}
-            onChange={(m) => onUpdate({ rotation_start: m })}
-          />
-        </div>
-        <div>
-          <Label className='text-[10px] text-muted-foreground mb-1'>End</Label>
-          <RotationMatrixPanel
-            matrix={step.rotation_end?.length === 9 ? step.rotation_end : IDENTITY_3x3}
-            onChange={(m) => onUpdate({ rotation_end: m })}
-          />
-        </div>
+        <SliderAngleRow
+          label='Start'
+          matrix={step.rotation_start?.length === 9 ? step.rotation_start : IDENTITY_3x3}
+          onChange={(m) => onUpdate({ rotation_start: m })}
+        />
+        <SliderAngleRow
+          label='End'
+          matrix={step.rotation_end?.length === 9 ? step.rotation_end : IDENTITY_3x3}
+          onChange={(m) => onUpdate({ rotation_end: m })}
+        />
       </ChannelSection>
 
       {/* Translation channel */}
@@ -630,15 +639,19 @@ function TransformMatrixFields({
         onFrequencyChange={(v) => onUpdate({ translation_frequency: v })}
         onAlternateDirectionChange={(v) => onUpdate({ translation_alternate_direction: v })}
       >
-        <Vec3Input
+        <SliderVec3Row
           label='Start'
-          value={step.translation_start || [0, 0, 0]}
-          onChange={(v) => onUpdate({ translation_start: v as [number, number, number] })}
+          value={toVec3(step.translation_start, [0, 0, 0])}
+          onChange={(v) => onUpdate({ translation_start: v })}
+          defaultRange={[-100, 100]}
+          initialMode='xyz'
         />
-        <Vec3Input
+        <SliderVec3Row
           label='End'
-          value={step.translation_end || [0, 0, 0]}
-          onChange={(v) => onUpdate({ translation_end: v as [number, number, number] })}
+          value={toVec3(step.translation_end, [0, 0, 0])}
+          onChange={(v) => onUpdate({ translation_end: v })}
+          defaultRange={[-100, 100]}
+          initialMode='xyz'
         />
       </ChannelSection>
 
@@ -654,15 +667,19 @@ function TransformMatrixFields({
         onFrequencyChange={(v) => onUpdate({ scale_frequency: v })}
         onAlternateDirectionChange={(v) => onUpdate({ scale_alternate_direction: v })}
       >
-        <Vec3Input
+        <SliderVec3Row
           label='Start'
-          value={step.scale_start || [1, 1, 1]}
-          onChange={(v) => onUpdate({ scale_start: v as [number, number, number] })}
+          value={toVec3(step.scale_start, [1, 1, 1])}
+          onChange={(v) => onUpdate({ scale_start: v })}
+          defaultRange={[0, 4]}
+          initialMode='xyz'
         />
-        <Vec3Input
+        <SliderVec3Row
           label='End'
-          value={step.scale_end || [1, 1, 1]}
-          onChange={(v) => onUpdate({ scale_end: v as [number, number, number] })}
+          value={toVec3(step.scale_end, [1, 1, 1])}
+          onChange={(v) => onUpdate({ scale_end: v })}
+          defaultRange={[0, 4]}
+          initialMode='xyz'
         />
       </ChannelSection>
     </div>
@@ -826,38 +843,3 @@ function AdvancedOptions({
   );
 }
 
-// ============================================================
-// Vec3 Input helper
-// ============================================================
-
-function Vec3Input({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number[];
-  onChange: (v: number[]) => void;
-}) {
-  const update = (idx: number, val: number) => {
-    const newVal = [...value];
-    newVal[idx] = val;
-    onChange(newVal);
-  };
-
-  return (
-    <div className='flex gap-1 items-end'>
-      <Label className='text-[10px] text-muted-foreground w-10 pb-1'>{label}</Label>
-      {['X', 'Y', 'Z'].map((axis, i) => (
-        <div key={axis} className='flex-1'>
-          <Label className='text-[10px] text-muted-foreground'>{axis}</Label>
-          <NumericInput
-            className='h-7 text-xs no-spinners'
-            value={value[i] ?? 0}
-            onChange={(v) => update(i, v ?? 0)}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}

@@ -192,7 +192,7 @@ export function NodeHelperBase({
           {trigger}
         </span>
       )}
-      <DialogContent className={cn('gap-0 p-0 overflow-hidden', dialogContentClassName ?? 'sm:max-w-lg')}>
+      <DialogContent className={cn('gap-0 p-0 overflow-hidden flex flex-col max-h-[85vh]', dialogContentClassName ?? 'sm:max-w-lg')}>
         <DialogHeader className='px-5 pt-5 pb-3'>
           <DialogTitle className='flex items-center gap-2 text-base'>
             <span
@@ -204,7 +204,7 @@ export function NodeHelperBase({
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className='flex flex-col' activationMode='manual'>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className='flex flex-col flex-1 min-h-0' activationMode='manual'>
           <TabsList className='w-full justify-start rounded-none border-b bg-transparent h-auto px-5 pb-0 gap-1'>
             {allTabs.filter((tab) => !tab.hidden).map((tab) => (
               <TabsTrigger
@@ -218,7 +218,7 @@ export function NodeHelperBase({
             {tabActions && <div className='ml-auto flex items-center pb-1'>{tabActions}</div>}
           </TabsList>
           {allTabs.map((tab) => (
-            <TabsContent key={tab.id} value={tab.id} className='px-5 py-4 mt-0'>
+            <TabsContent key={tab.id} value={tab.id} className='px-5 py-4 mt-0 overflow-y-auto'>
               {tab.content}
             </TabsContent>
           ))}

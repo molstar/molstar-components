@@ -64,6 +64,12 @@ export async function evaluateCodeToMVSTree(
   }
 
   const snapshot = builder.getSnapshot({ title: 'code-to-state', linger_duration_ms: 0, transition_duration_ms: 0 });
-  // snapshot.root has the same shape as RawMVSTree (kind, params, children)
-  return snapshot.root as unknown as RawMVSTree;
+  // snapshot.root has the same shape as RawMVSTree (kind, params, children).
+  // Animation is stored separately in snapshot.animation (not as a root child), so
+  // inject it back as a child so extractAnimationFromUINodes can find it downstream.
+  const root = snapshot.root as unknown as RawMVSTree;
+  if (snapshot.animation) {
+    root.children = [...(root.children ?? []), snapshot.animation as unknown as RawMVSTree];
+  }
+  return root;
 }

@@ -200,6 +200,7 @@ export function StructureHelper({ node, onUpdate, open, onOpenChange, trigger, o
       trigger={trigger}
       onCustomChange={onCustomChange}
       defaultTab={activeTab}
+      onTabChange={(id) => setActiveTab(id as StructureTab)}
       tabs={tabs}
     />
   );

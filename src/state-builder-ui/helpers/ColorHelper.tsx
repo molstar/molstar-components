@@ -231,6 +231,7 @@ export function ColorHelper({
       trigger={trigger}
       onCustomChange={onCustomChange}
       defaultTab={activeTab}
+      onTabChange={(id) => setActiveTab(id as ColorTab)}
       tabs={[
         {
           id: 'simple',

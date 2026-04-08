@@ -456,7 +456,9 @@ export function MolViewEditor({
           {(() => {
             const onUpdate = (updates: Partial<UINode>) => {
               if (!editorRef.current) return;
-              injectNodeParams(editorRef.current, hybridHelper.paramsRange, updates.params ?? hybridHelper.node.params);
+              const params = updates.params ?? hybridHelper.node.params;
+              const injected = updates.custom != null ? { ...params, custom: updates.custom } : params;
+              injectNodeParams(editorRef.current, hybridHelper.paramsRange, injected);
               setHybridHelper(null);
             };
             const onOpenChange = (open: boolean) => { if (!open) setHybridHelper(null); };

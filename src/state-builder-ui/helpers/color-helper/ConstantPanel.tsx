@@ -13,8 +13,6 @@ export function ConstantPanel({ value, colorConstants, onChange }: ConstantPanel
       }))
   );
 
-  const selectedOption = options.find((o) => o.value === value);
-
   return (
     <div className='flex flex-col gap-2 pt-2'>
       <div>
@@ -38,16 +36,6 @@ export function ConstantPanel({ value, colorConstants, onChange }: ConstantPanel
           </SelectContent>
         </Select>
       </div>
-
-      {selectedOption && (
-        <div className='flex items-center gap-2'>
-          <div
-            className='w-6 h-6 rounded border border-gray-300'
-            style={{ backgroundColor: selectedOption.previewColor }}
-          />
-          <span className='text-xs text-muted-foreground'>{selectedOption.label}</span>
-        </div>
-      )}
 
       {options.length === 0 && (
         <p className='text-xs text-muted-foreground'>No color constants defined in Constants section.</p>

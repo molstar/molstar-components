@@ -1,6 +1,7 @@
 // src/state-builder-ui/node-summary.ts
 import type { UINode } from '@molstar/state-builder';
-import { formatSelectorPreview } from '@molstar/state-builder';
+import { formatSelectorPreview, isConstantRef } from '@molstar/state-builder';
+import type { ConstantRef } from '@molstar/state-builder';
 
 function truncateUrl(url: string, maxLen = 50): string {
   try {
@@ -75,6 +76,10 @@ export function getNodeSummary(node: UINode): string | null {
       const selSuffix = sel ? ` (${formatSelectorPreview(sel)})` : '';
       if (theme) return theme + selSuffix;
       const color = p.color;
+      if (isConstantRef(color)) {
+        const ref = color as ConstantRef;
+        return `${ref.constantName}.${ref.entryKey}` + selSuffix;
+      }
       if (typeof color === 'number') {
         return '#' + color.toString(16).padStart(6, '0') + selSuffix;
       }

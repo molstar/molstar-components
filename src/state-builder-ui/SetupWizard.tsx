@@ -287,18 +287,24 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
                           style={{ background: c }}
                         />
                       ))}
-                      <label
-                        className='w-5 h-5 rounded cursor-pointer border-2 border-dashed border-muted-foreground/40 flex items-center justify-center hover:border-primary transition-colors shrink-0'
-                        title='Custom color…'
-                      >
-                        <PlusIcon className='size-2.5 text-muted-foreground' />
-                        <input
-                          type='color'
-                          value={comp.color}
-                          onChange={(e) => updateComponent(idx, { color: e.target.value })}
-                          className='sr-only'
-                        />
-                      </label>
+                      {(() => {
+                        const isCustom = !QUICK_COLORS.includes(comp.color);
+                        return (
+                          <label
+                            className={`w-5 h-5 rounded cursor-pointer flex items-center justify-center transition-colors shrink-0 ${isCustom ? 'ring-2 ring-primary ring-offset-1 scale-110 border border-black/10' : 'border-2 border-dashed border-muted-foreground/40 hover:border-primary'}`}
+                            style={isCustom ? { background: comp.color } : undefined}
+                            title='Custom color…'
+                          >
+                            {!isCustom && <PlusIcon className='size-2.5 text-muted-foreground' />}
+                            <input
+                              type='color'
+                              value={comp.color}
+                              onChange={(e) => updateComponent(idx, { color: e.target.value })}
+                              className='sr-only'
+                            />
+                          </label>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

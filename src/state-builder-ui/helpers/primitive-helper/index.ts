@@ -2,6 +2,8 @@ export type { PositionMode, PositionEditorState, PrimitiveKindFieldsProps } from
 export { defaultPositionState, positionFromParam, positionToParam } from './types.ts';
 export { PrimitiveItemEditor } from './PrimitiveItemEditor.tsx';
 export { RawPanel } from './RawPanel.tsx';
+export { PrimitivesConfigPanel } from './PrimitivesConfigPanel.tsx';
+export type { PrimitivesConfig } from './PrimitivesConfigPanel.tsx';
 // Kind-specific field components
 export { AngleFields } from './AngleFields.tsx';
 export { ArrowFields } from './ArrowFields.tsx';

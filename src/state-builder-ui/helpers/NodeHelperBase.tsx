@@ -19,6 +19,7 @@ import { MVS_KIND_LABELS } from '@molstar/state-builder';
 import { getColorForKind } from '../node-categories.ts';
 import { ChevronRightIcon } from 'lucide-react';
 import { cn } from '../lib/utils.ts';
+import { useAfterApply } from '../state/after-apply-context.ts';
 
 export interface HelperTab {
   id: string;
@@ -82,6 +83,7 @@ export function NodeHelperBase({
   onOpenChange,
   trigger,
 }: NodeHelperBaseProps) {
+  const afterApply = useAfterApply();
   const isControlled = controlledOpen !== undefined;
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
 
@@ -169,6 +171,7 @@ export function NodeHelperBase({
         const parsed = JSON.parse(rawJson) as Record<string, unknown>;
         onRawApply?.(parsed, localRef);
         setIsOpen(false);
+        afterApply?.();
       } catch {
         setRawError('Invalid JSON — fix before applying.');
       }
@@ -176,6 +179,7 @@ export function NodeHelperBase({
     }
     onApply(localRef);
     setIsOpen(false);
+    afterApply?.();
   };
 
   const kindLabel =

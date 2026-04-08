@@ -18,6 +18,7 @@ function animationToUINode(animation: AnimationParams | null): UINode {
     id: '__animation__',
     kind: '',
     params: (animation ?? {}) as unknown as Record<string, unknown>,
+    custom: animation?.custom,
     children: [],
   };
 }
@@ -35,11 +36,12 @@ export function AnimationSection({ animation, onAnimationChange, availableRefs }
 
   const animNode = animationToUINode(animation);
   const handleUpdate = (updates: Partial<UINode>) => {
-    if (updates.params) {
-      const p = updates.params as unknown as AnimationParams;
-      if (p.steps !== undefined) {
-        onAnimationChange(p);
-      }
+    const p = updates.params as unknown as AnimationParams | undefined;
+    if (p?.steps !== undefined) {
+      onAnimationChange({
+        ...p,
+        custom: updates.custom as Record<string, unknown> | undefined,
+      });
     }
   };
 

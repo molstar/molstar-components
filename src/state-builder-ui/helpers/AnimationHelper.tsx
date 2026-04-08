@@ -35,6 +35,7 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
   const [includeCanvas, setIncludeCanvas] = useState(false);
   const [trackball, setTrackball] = useState<TrackballSpin>({ enabled: false, speed: -0.05 });
   const [steps, setSteps] = useState<InterpolationStep[]>([]);
+  const [customData, setCustomData] = useState<Record<string, unknown> | undefined>(undefined);
 
   const handleDialogOpen = () => {
     const src = (node.params as unknown as AnimationParams | null) ?? createDefaultAnimationParams();
@@ -46,6 +47,7 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
     setIncludeCanvas(src.include_canvas ?? false);
     setTrackball(src.trackball ?? { enabled: false, speed: -0.05 });
     setSteps([...(src.steps ?? [])]);
+    setCustomData(node.custom as Record<string, unknown> | undefined);
   };
 
   const buildAnimationParams = (): AnimationParams => ({
@@ -61,7 +63,11 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
 
   const handleApply = (ref: string) => {
     const animParams = buildAnimationParams();
-    onUpdate({ params: animParams as unknown as Record<string, unknown>, ...(ref ? { ref } : {}) });
+    onUpdate({
+      params: animParams as unknown as Record<string, unknown>,
+      custom: customData,
+      ...(ref ? { ref } : {}),
+    });
   };
 
   const handleRawApply = (params: Record<string, unknown>, ref: string) => {
@@ -90,6 +96,7 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
       onApply={handleApply}
       onRawApply={handleRawApply}
       onDialogOpen={handleDialogOpen}
+      onCustomChange={(v) => setCustomData(v as Record<string, unknown> | undefined)}
       open={open}
       onOpenChange={onOpenChange}
       trigger={trigger ?? defaultTrigger}

@@ -8,7 +8,8 @@ import { useState } from 'react';
 import { PRIMITIVE_KINDS } from '@molstar/state-builder';
 import type { PrimitiveKind } from '@molstar/state-builder';
 import type { UINode } from '@molstar/state-builder';
-import { PrimitiveItemEditor, RawPanel } from './primitive-helper/index.ts';
+import { PrimitiveItemEditor, RawPanel, PrimitivesConfigPanel } from './primitive-helper/index.ts';
+import type { PrimitivesConfig } from './primitive-helper/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import type { HelperTab } from './NodeHelperBase.tsx';
 
@@ -66,6 +67,7 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
   const primitives = (node.children ?? []).filter((c) => c.kind === 'primitive');
 
   const [localPrimitives, setLocalPrimitives] = useState<UINode[]>([]);
+  const [localConfig, setLocalConfig] = useState<PrimitivesConfig>({});
   const [activeTab, setActiveTab] = useState<string>('prim-empty');
   const [rawJson, setRawJson] = useState('[]');
   const [rawError, setRawError] = useState('');
@@ -80,6 +82,20 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
     setActiveTab(nodes[0]?.id ?? 'prim-empty');
     setRawJson(JSON.stringify(nodes.map((p) => ({ ...p.params })), null, 2));
     setRawError('');
+    // Initialize config from node.params (pick only config fields)
+    const p = (node.params ?? {}) as Record<string, unknown>;
+    const cfg: PrimitivesConfig = {};
+    if (p.color !== undefined) cfg.color = p.color as string;
+    if (p.label_color !== undefined) cfg.label_color = p.label_color as string;
+    if (p.tooltip !== undefined) cfg.tooltip = p.tooltip as string | null;
+    if (p.opacity !== undefined) cfg.opacity = p.opacity as number;
+    if (p.label_opacity !== undefined) cfg.label_opacity = p.label_opacity as number;
+    if (p.label_show_tether !== undefined) cfg.label_show_tether = p.label_show_tether as boolean;
+    if (p.label_tether_length !== undefined) cfg.label_tether_length = p.label_tether_length as number;
+    if (p.label_attachment !== undefined) cfg.label_attachment = p.label_attachment as string;
+    if (p.label_background_color !== undefined) cfg.label_background_color = p.label_background_color as string | null;
+    if (p.snapshot_key !== undefined) cfg.snapshot_key = p.snapshot_key as string | null;
+    setLocalConfig(cfg);
   };
 
   const updatePrimitive = (id: string, newParams: Record<string, unknown>) => {
@@ -130,6 +146,7 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
 
   const handleApply = (ref: string) => {
     const nonPrimChildren = (node.children ?? []).filter((c) => c.kind !== 'primitive');
+    const configParams = localConfig as Record<string, unknown>;
     if (activeTab === 'prim-raw') {
       try {
         const arr = JSON.parse(rawJson) as Array<Record<string, unknown>>;
@@ -140,13 +157,13 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
           params: p,
           children: [],
         }));
-        onUpdate({ children: [...nonPrimChildren, ...nodes], ref: ref || undefined });
+        onUpdate({ params: configParams, children: [...nonPrimChildren, ...nodes], ref: ref || undefined });
       } catch {
         setRawError('Invalid JSON');
       }
       return;
     }
-    onUpdate({ children: [...nonPrimChildren, ...localPrimitives], ref: ref || undefined });
+    onUpdate({ params: configParams, children: [...nonPrimChildren, ...localPrimitives], ref: ref || undefined });
   };
 
   const activeIdx = localPrimitives.findIndex((p) => p.id === activeTab);
@@ -213,6 +230,13 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
   );
 
   const tabs: HelperTab[] = [
+    {
+      id: 'prim-config',
+      label: 'Config',
+      content: (
+        <PrimitivesConfigPanel config={localConfig} onChange={setLocalConfig} />
+      ),
+    },
     {
       id: 'prim-empty',
       label: '',

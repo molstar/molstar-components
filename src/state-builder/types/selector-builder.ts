@@ -117,8 +117,11 @@ export const COMMON_LIGAND_IDS: readonly LabeledValue[] = [
  * Quick selection presets that map to MVS component selector strings.
  */
 export const QUICK_SELECTOR_PRESETS: readonly LabeledValue[] = [
-  { value: 'all', label: 'All Components', description: 'Select all atoms' },
+  { value: 'all', label: 'All', description: 'Select all atoms' },
   { value: 'polymer', label: 'Polymer', description: 'Proteins and nucleic acids' },
+  { value: 'protein', label: 'Protein', description: 'Protein chains' },
+  { value: 'nucleic', label: 'Nucleic', description: 'Nucleic acid chains' },
+  { value: 'branched', label: 'Branched', description: 'Branched entities (e.g. carbohydrates)' },
   { value: 'ligand', label: 'Ligand', description: 'Small molecule ligands' },
   { value: 'ion', label: 'Ion', description: 'Metal ions' },
   { value: 'water', label: 'Water', description: 'Water molecules' },

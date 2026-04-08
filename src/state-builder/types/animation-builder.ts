@@ -90,6 +90,8 @@ export interface AnimationParams {
   include_canvas?: boolean;
   steps: InterpolationStep[];
   trackball?: TrackballSpin;
+  /** Raw custom data from the MVS node (e.g. molstar_trackball for non-spin modes) */
+  custom?: Record<string, unknown>;
 }
 
 /** Step template used in presets — all step fields except id and target_ref */
@@ -367,11 +369,14 @@ export function convertAnimationToMVSNode(params: AnimationParams): {
   let custom: Record<string, unknown> | undefined;
   if (params.trackball?.enabled) {
     custom = {
+      ...(params.custom ?? {}),
       molstar_trackball: {
         name: 'spin',
         params: { speed: params.trackball.speed },
       },
     };
+  } else if (params.custom && Object.keys(params.custom).length > 0) {
+    custom = params.custom;
   }
 
   const children = params.steps.map((step) => {
@@ -456,7 +461,12 @@ export function convertMVSNodeToAnimationParams(node: {
   if (params.include_camera) animation.include_camera = true;
   if (params.include_canvas) animation.include_canvas = true;
 
-  // Extract trackball spin from custom
+  // Preserve raw custom data
+  if (Object.keys(custom).length > 0) {
+    animation.custom = custom as Record<string, unknown>;
+  }
+
+  // Extract trackball spin from custom (only 'spin' is representable in the UI)
   const trackball = custom.molstar_trackball as { name?: string; params?: { speed?: number } } | undefined;
   if (trackball?.name === 'spin') {
     animation.trackball = {
@@ -545,7 +555,7 @@ export function extractAnimationFromUINodes(nodes: UINode[]): {
         kind: c.kind,
         params: c.params as Record<string, unknown>,
       })),
-      custom: (node.params as Record<string, unknown>)?.custom as Record<string, unknown>,
+      custom: node.custom as Record<string, unknown> | undefined,
     });
   }
 

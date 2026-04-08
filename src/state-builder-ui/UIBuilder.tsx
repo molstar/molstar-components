@@ -61,6 +61,7 @@ import {
 import { createDownloadParseNodes } from '@molstar/state-builder/types/composite-sequences';
 import { StructureMetadataProvider } from './StructureMetadataContext.tsx';
 import { SetupWizard } from './SetupWizard.tsx';
+import { AfterApplyContext } from './state/after-apply-context.ts';
 
 export function UIBuilder(): React.ReactElement {
   const sceneKey = useAtomValue(SceneKeyAtom);
@@ -103,6 +104,19 @@ export function UIBuilder(): React.ReactElement {
   useEffect(() => {
     stateRef.current = { nodes, constants, camera, animation };
   }, [nodes, constants, camera, animation]);
+
+  // After-apply auto-codegen: set this flag from NodeHelperBase Apply; the effect below
+  // fires once React has committed the new nodes so generateCodeFromNodes sees fresh state.
+  const pendingCodeGenRef = useRef(false);
+  useEffect(() => {
+    if (pendingCodeGenRef.current && nodes.length > 0) {
+      pendingCodeGenRef.current = false;
+      generateCodeFromNodes(nodes);
+    }
+  // generateCodeFromNodes is redefined each render (closes over constants/camera/animation),
+  // so intentionally omitted — we only want this to fire when nodes changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodes]);
 
   // History-aware setters — push snapshot before applying change
   const updateNodes = (newNodes: UINode[]) => {
@@ -378,6 +392,7 @@ export function UIBuilder(): React.ReactElement {
   };
 
   return (
+    <AfterApplyContext.Provider value={() => { pendingCodeGenRef.current = true; }}>
     <StructureMetadataProvider plugin={plugin ?? null} onGenerateCode={generateCode}>
       <div className='flex flex-col gap-2 h-full p-2'>
         <div className='flex items-center justify-between pb-2 border-b'>
@@ -597,5 +612,6 @@ export function UIBuilder(): React.ReactElement {
       />
     </div>
     </StructureMetadataProvider>
+    </AfterApplyContext.Provider>
   );
 }

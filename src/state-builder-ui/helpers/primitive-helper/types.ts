@@ -4,11 +4,13 @@
  * Shared types and helpers for the primitive-helper panel components.
  */
 
-export type PositionMode = 'vec3' | 'expression';
+import type { ComponentSelectorValue } from '@molstar/state-builder';
+
+export type PositionMode = 'selector' | 'vec3' | 'expression';
 
 /**
- * Dual-mode position state: either a vec3 triple [x,y,z] or a raw ComponentExpression JSON.
- * Primitive position/start/end/center fields accept both.
+ * Tri-mode position state: visual selector, vec3 triple [x,y,z], or raw ComponentExpression JSON.
+ * Primitive position/start/end/center fields accept all three.
  */
 export interface PositionEditorState {
   mode: PositionMode;
@@ -17,31 +19,27 @@ export interface PositionEditorState {
   z: number;
   /** Raw JSON string for expression mode, e.g. '{}' or '{ "label_asym_id": "A" }' */
   expressionJson: string;
+  /** Selector value for selector mode. undefined = all atoms ({}). */
+  selectorValue: ComponentSelectorValue | undefined;
 }
 
 export function defaultPositionState(): PositionEditorState {
-  return { mode: 'vec3', x: 0, y: 0, z: 0, expressionJson: '{}' };
+  return { mode: 'selector', x: 0, y: 0, z: 0, expressionJson: '{}', selectorValue: undefined };
 }
 
 export function positionFromParam(value: unknown): PositionEditorState {
-  if (Array.isArray(value) && value.length === 3) {
-    const [x, y, z] = value;
-    return {
-      mode: 'vec3',
-      x: typeof x === 'number' ? x : 0,
-      y: typeof y === 'number' ? y : 0,
-      z: typeof z === 'number' ? z : 0,
-      expressionJson: '{}',
-    };
+  // vec3: [number, number, number]
+  if (Array.isArray(value) && value.length === 3 && value.every((v) => typeof v === 'number')) {
+    const [x, y, z] = value as [number, number, number];
+    return { mode: 'vec3', x, y, z, expressionJson: '{}', selectorValue: undefined };
   }
+  // Object or non-vec3 array → selector mode, pre-populate if non-empty
   if (value !== null && typeof value === 'object') {
-    return {
-      mode: 'expression',
-      x: 0,
-      y: 0,
-      z: 0,
-      expressionJson: JSON.stringify(value, null, 2),
-    };
+    const isEmpty = !Array.isArray(value) && Object.keys(value as object).length === 0;
+    const selectorValue: ComponentSelectorValue | undefined = isEmpty
+      ? undefined
+      : (value as ComponentSelectorValue);
+    return { mode: 'selector', x: 0, y: 0, z: 0, expressionJson: '{}', selectorValue };
   }
   return defaultPositionState();
 }
@@ -67,6 +65,9 @@ export function tryParseExpressionJson(str: string): unknown | undefined {
 export function positionToParam(state: PositionEditorState): unknown {
   if (state.mode === 'vec3') {
     return [state.x, state.y, state.z];
+  }
+  if (state.mode === 'selector') {
+    return state.selectorValue ?? {};
   }
   return tryParseExpressionJson(state.expressionJson) ?? {};
 }

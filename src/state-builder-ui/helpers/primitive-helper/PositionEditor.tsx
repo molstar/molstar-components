@@ -6,6 +6,9 @@ import { Input } from '../../base/input.tsx';
 import { Label } from '../../base/label.tsx';
 import type { PositionEditorState } from './types.ts';
 import { defaultPositionState, tryParseExpressionJson } from './types.ts';
+import { SelectorHelperContent } from '../SelectorHelperContent.tsx';
+import { useStructureMetadataContext } from '../../StructureMetadataContext.tsx';
+import type { ComponentSelectorValue } from '@molstar/state-builder';
 
 interface PositionEditorProps {
   label: string;
@@ -15,28 +18,34 @@ interface PositionEditorProps {
 
 export function PositionEditor({ label, state, onChange }: PositionEditorProps) {
   const [draft, setDraft] = useState(state.expressionJson);
+  const metadataCtx = useStructureMetadataContext();
 
-  // Sync draft when external state changes (mode switch, parent reset, future SelectorHelper)
+  // Sync draft when external state changes (mode switch, parent reset)
   useEffect(() => {
     setDraft(state.expressionJson);
   }, [state.expressionJson]);
+
   const isDefaultExpression = state.mode === 'expression' && state.expressionJson.trim() === '{}';
 
-  const toggleMode = () => {
-    if (state.mode === 'vec3') {
-      onChange({ ...state, mode: 'expression', expressionJson: '{}' });
-    } else {
-      // Try to parse expression as [x,y,z]
-      try {
-        const parsed = JSON.parse(state.expressionJson);
-        if (Array.isArray(parsed) && parsed.length === 3) {
-          onChange({ ...state, mode: 'vec3', x: parsed[0] ?? 0, y: parsed[1] ?? 0, z: parsed[2] ?? 0 });
-          return;
-        }
-      } catch {
-        // ignore
+  const setMode = (mode: PositionEditorState['mode']) => {
+    if (mode === state.mode) return;
+    if (mode === 'vec3') {
+      // Try to round-trip from expression JSON → vec3
+      if (state.mode === 'expression') {
+        try {
+          const parsed = JSON.parse(state.expressionJson);
+          if (Array.isArray(parsed) && parsed.length === 3) {
+            onChange({ ...state, mode: 'vec3', x: parsed[0] ?? 0, y: parsed[1] ?? 0, z: parsed[2] ?? 0 });
+            return;
+          }
+        } catch { /* ignore */ }
       }
       onChange({ ...defaultPositionState(), mode: 'vec3' });
+    } else if (mode === 'expression') {
+      onChange({ ...state, mode: 'expression', expressionJson: '{}' });
+    } else {
+      // selector
+      onChange({ ...state, mode: 'selector', selectorValue: undefined });
     }
   };
 
@@ -48,13 +57,22 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
     <div className='space-y-1'>
       <div className='flex items-center gap-1'>
         <Label className='text-xs font-medium flex-1'>{label}</Label>
-        {/* Mode toggle — two tab-style buttons */}
+        {/* Mode toggle — three tab-style buttons */}
         <div className='flex items-center gap-0.5'>
+          <Button
+            size='sm'
+            variant={state.mode === 'selector' ? 'default' : 'ghost'}
+            className='h-5 text-xs px-2'
+            onClick={() => setMode('selector')}
+            title='Visual selector'
+          >
+            Selector
+          </Button>
           <Button
             size='sm'
             variant={state.mode === 'vec3' ? 'default' : 'ghost'}
             className='h-5 text-xs px-2'
-            onClick={() => state.mode !== 'vec3' && toggleMode()}
+            onClick={() => setMode('vec3')}
             title='XYZ coordinates'
           >
             XYZ
@@ -63,10 +81,10 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
             size='sm'
             variant={state.mode === 'expression' ? 'default' : 'ghost'}
             className='h-5 text-xs px-2'
-            onClick={() => state.mode !== 'expression' && toggleMode()}
-            title='ComponentExpression (selector)'
+            onClick={() => setMode('expression')}
+            title='ComponentExpression (raw JSON)'
           >
-            Expr
+            Raw Expr
           </Button>
         </div>
         {/* Quick default {} button — only shown in expression mode when not already {} */}
@@ -83,7 +101,17 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
         )}
       </div>
 
-      {state.mode === 'vec3' ? (
+      {state.mode === 'selector' && (
+        <SelectorHelperContent
+          value={state.selectorValue}
+          onChange={(v: ComponentSelectorValue | undefined) =>
+            onChange({ ...state, selectorValue: v })
+          }
+          metadata={metadataCtx?.metadata ?? undefined}
+        />
+      )}
+
+      {state.mode === 'vec3' && (
         <div className='grid grid-cols-3 gap-2'>
           {(['x', 'y', 'z'] as const).map((axis) => (
             <div key={axis}>
@@ -99,7 +127,9 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
             </div>
           ))}
         </div>
-      ) : (
+      )}
+
+      {state.mode === 'expression' && (
         <div className='space-y-1'>
           <textarea
             className='w-full min-h-[52px] text-xs font-mono border rounded-md p-2 bg-background resize-y'

@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../base/button.tsx';
 import { Input } from '../../base/input.tsx';
 import { Label } from '../../base/label.tsx';
 import type { PositionEditorState } from './types.ts';
-import { defaultPositionState, tryParseExpressionJson } from './types.ts';
+import { positionToParam, tryParseExpressionJson } from './types.ts';
 import { SelectorHelperContent } from '../SelectorHelperContent.tsx';
 import { useStructureMetadataContext } from '../../StructureMetadataContext.tsx';
 import type { ComponentSelectorValue } from '@molstar/state-builder';
@@ -17,83 +17,89 @@ interface PositionEditorProps {
 }
 
 export function PositionEditor({ label, state, onChange }: PositionEditorProps) {
+  // localMode is decoupled from state.mode so that switching modes (e.g. to Raw Expr)
+  // doesn't immediately propagate a value change that would snap the mode back.
+  const [localMode, setLocalMode] = useState(state.mode);
   const [draft, setDraft] = useState(state.expressionJson);
   const metadataCtx = useStructureMetadataContext();
 
-  // Sync draft when external state changes (mode switch, parent reset)
+  // Track the last position value we emitted so we can distinguish external
+  // parent changes (new primitive loaded, dialog re-opened) from our own echoes.
+  const lastEmittedJsonRef = useRef(JSON.stringify(positionToParam(state)));
+
   useEffect(() => {
-    setDraft(state.expressionJson);
-  }, [state.expressionJson]);
-
-  const isDefaultExpression = state.mode === 'expression' && state.expressionJson.trim() === '{}';
-
-  const setMode = (mode: PositionEditorState['mode']) => {
-    if (mode === state.mode) return;
-    if (mode === 'vec3') {
-      // Try to round-trip from expression JSON → vec3
-      if (state.mode === 'expression') {
-        try {
-          const parsed = JSON.parse(state.expressionJson);
-          if (Array.isArray(parsed) && parsed.length === 3) {
-            onChange({ ...state, mode: 'vec3', x: parsed[0] ?? 0, y: parsed[1] ?? 0, z: parsed[2] ?? 0 });
-            return;
-          }
-        } catch { /* ignore */ }
-      }
-      onChange({ ...defaultPositionState(), mode: 'vec3' });
-    } else if (mode === 'expression') {
-      onChange({ ...state, mode: 'expression', expressionJson: '{}' });
-    } else {
-      // selector
-      onChange({ ...state, mode: 'selector', selectorValue: undefined });
+    const incomingJson = JSON.stringify(positionToParam(state));
+    if (incomingJson !== lastEmittedJsonRef.current) {
+      // Value changed from outside — re-sync mode and draft
+      lastEmittedJsonRef.current = incomingJson;
+      setLocalMode(state.mode);
+      setDraft(state.expressionJson);
     }
+  }, [state]);
+
+  const emitChange = (newState: PositionEditorState) => {
+    lastEmittedJsonRef.current = JSON.stringify(positionToParam(newState));
+    onChange(newState);
+  };
+
+  const isDefaultExpression = localMode === 'expression' && draft.trim() === '{}';
+
+  const handleSetMode = (mode: PositionEditorState['mode']) => {
+    if (mode === localMode) return;
+    setLocalMode(mode);
+    // Don't emit onChange on mode switch — only emit when the user changes a value
+    // within the new mode. This prevents the parent from re-deriving a different mode
+    // before the user has had a chance to interact.
   };
 
   const handleAxis = (axis: 'x' | 'y' | 'z', str: string) => {
-    onChange({ ...state, [axis]: parseFloat(str) || 0 });
+    emitChange({ ...state, mode: 'vec3', [axis]: parseFloat(str) || 0 });
   };
 
   return (
-    <div className='space-y-1'>
+    <div className='space-y-1 rounded-md border bg-muted/20 px-2 pt-1.5 pb-2'>
       <div className='flex items-center gap-1'>
         <Label className='text-xs font-medium flex-1'>{label}</Label>
         {/* Mode toggle — three tab-style buttons */}
         <div className='flex items-center gap-0.5'>
           <Button
             size='sm'
-            variant={state.mode === 'selector' ? 'default' : 'ghost'}
+            variant={localMode === 'selector' ? 'default' : 'ghost'}
             className='h-5 text-xs px-2'
-            onClick={() => setMode('selector')}
+            onClick={() => handleSetMode('selector')}
             title='Visual selector'
           >
             Selector
           </Button>
           <Button
             size='sm'
-            variant={state.mode === 'vec3' ? 'default' : 'ghost'}
+            variant={localMode === 'vec3' ? 'default' : 'ghost'}
             className='h-5 text-xs px-2'
-            onClick={() => setMode('vec3')}
+            onClick={() => handleSetMode('vec3')}
             title='XYZ coordinates'
           >
             XYZ
           </Button>
           <Button
             size='sm'
-            variant={state.mode === 'expression' ? 'default' : 'ghost'}
+            variant={localMode === 'expression' ? 'default' : 'ghost'}
             className='h-5 text-xs px-2'
-            onClick={() => setMode('expression')}
+            onClick={() => handleSetMode('expression')}
             title='ComponentExpression (raw JSON)'
           >
             Raw Expr
           </Button>
         </div>
         {/* Quick default {} button — only shown in expression mode when not already {} */}
-        {state.mode === 'expression' && !isDefaultExpression && (
+        {localMode === 'expression' && !isDefaultExpression && (
           <Button
             size='sm'
             variant='ghost'
             className='h-5 text-xs px-2 text-muted-foreground'
-            onClick={() => onChange({ ...state, expressionJson: '{}' })}
+            onClick={() => {
+              setDraft('{}');
+              emitChange({ ...state, mode: 'expression', expressionJson: '{}' });
+            }}
             title='Reset to default expression {} (all atoms)'
           >
             {}
@@ -101,17 +107,19 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
         )}
       </div>
 
-      {state.mode === 'selector' && (
+      {localMode === 'selector' && (
         <SelectorHelperContent
           value={state.selectorValue}
           onChange={(v: ComponentSelectorValue | undefined) =>
-            onChange({ ...state, selectorValue: v })
+            emitChange({ ...state, mode: 'selector', selectorValue: v })
           }
           metadata={metadataCtx?.metadata ?? undefined}
+          hideMetadataStatus
+          hidePreview
         />
       )}
 
-      {state.mode === 'vec3' && (
+      {localMode === 'vec3' && (
         <div className='grid grid-cols-3 gap-2'>
           {(['x', 'y', 'z'] as const).map((axis) => (
             <div key={axis}>
@@ -129,7 +137,7 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
         </div>
       )}
 
-      {state.mode === 'expression' && (
+      {localMode === 'expression' && (
         <div className='space-y-1'>
           <textarea
             className='w-full min-h-[52px] text-xs font-mono border rounded-md p-2 bg-background resize-y'
@@ -138,13 +146,12 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
             onChange={(e) => {
               setDraft(e.target.value);
               if (tryParseExpressionJson(e.target.value) !== undefined) {
-                onChange({ ...state, expressionJson: e.target.value });
+                emitChange({ ...state, mode: 'expression', expressionJson: e.target.value });
               }
             }}
             onBlur={() => {
-              // Only propagate on blur if parseable; otherwise leave params unchanged
               if (tryParseExpressionJson(draft) !== undefined) {
-                onChange({ ...state, expressionJson: draft });
+                emitChange({ ...state, mode: 'expression', expressionJson: draft });
               }
             }}
             title={`${label} ComponentExpression JSON`}

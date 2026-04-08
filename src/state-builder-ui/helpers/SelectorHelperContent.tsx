@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Label } from '../base/label.tsx';
 import { Button } from '../base/button.tsx';
+import { ChevronRightIcon } from 'lucide-react';
+import { cn } from '../lib/utils.ts';
 import {
   buildChainSelector,
   buildLigandSelector,
@@ -39,6 +41,10 @@ export interface SelectorHelperContentProps {
   metadata?: StructureMetadata;
   activeTab?: SelectorTab;
   onTabChange?: (tab: SelectorTab) => void;
+  /** Hide the "Load from structure" metadata status section. Use when embedded inside another helper. */
+  hideMetadataStatus?: boolean;
+  /** Hide the selector preview. Use when embedded inline (not in a dedicated selector dialog). */
+  hidePreview?: boolean;
 }
 
 const MODE_LABELS: { mode: SelectorBuilderMode; label: string }[] = [
@@ -56,8 +62,12 @@ export function SelectorHelperContent({
   metadata,
   activeTab,
   onTabChange,
+  hideMetadataStatus = false,
+  hidePreview = false,
 }: SelectorHelperContentProps) {
-  const lastEmittedRef = useRef<ComponentSelectorValue | undefined>(value);
+  // Initialize to undefined (not value) so the initial mount sync always runs
+  // and pre-populates the correct tab from the incoming value.
+  const lastEmittedRef = useRef<ComponentSelectorValue | undefined>(undefined);
   const [internalMode, setInternalMode] = useState<SelectorBuilderMode>('chain');
   const mode = activeTab ?? internalMode;
   const setMode = (m: SelectorBuilderMode) => {
@@ -257,13 +267,15 @@ export function SelectorHelperContent({
     onChange(v as ComponentSelectorValue);
   };
 
+  const [previewExpanded, setPreviewExpanded] = useState(false);
+
   // Preview
   const previewText = value !== undefined ? selectorToString(value) : 'No selection';
 
   return (
     <div className='space-y-4'>
       {/* Metadata status */}
-      {metadataContext && (
+      {!hideMetadataStatus && metadataContext && (
         <MetadataStatus
           metadata={effectiveMetadata ?? null}
           isLoading={metadataContext.isLoading}
@@ -349,13 +361,18 @@ export function SelectorHelperContent({
         <ExpressionPanel value={expressionValue} onChange={handleExpressionChange} />
       )}
 
-      {/* Preview - not shown for quick mode */}
-      {mode !== 'quick' && (
-        <div className='border-t pt-3'>
-          <Label className='text-xs text-muted-foreground'>Preview</Label>
-          <pre className='text-sm font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-20'>
-            {previewText}
-          </pre>
+      {/* Preview - not shown for quick mode or when explicitly hidden */}
+      {!hidePreview && mode !== 'quick' && (
+        <div className='border-t pt-2'>
+          <button type='button' className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors' onClick={() => setPreviewExpanded((o) => !o)}>
+            <ChevronRightIcon className={cn('size-3 transition-transform', previewExpanded && 'rotate-90')} />
+            MVS Preview
+          </button>
+          {previewExpanded && (
+            <pre className='text-sm font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-20'>
+              {previewText}
+            </pre>
+          )}
         </div>
       )}
     </div>

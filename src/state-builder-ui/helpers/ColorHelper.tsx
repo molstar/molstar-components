@@ -129,6 +129,8 @@ function CollapsibleSelector({
             value={value}
             onChange={onChange}
             metadata={filteredMetadata}
+            hideMetadataStatus
+            hidePreview
           />
         </div>
       )}

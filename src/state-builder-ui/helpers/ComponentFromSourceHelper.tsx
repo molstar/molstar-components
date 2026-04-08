@@ -94,6 +94,7 @@ export function ComponentFromSourceHelper({ node, onUpdate, open, onOpenChange, 
               onChange={setSelector}
               activeTab={selectorTab}
               onTabChange={setSelectorTab}
+              hideMetadataStatus
             />
           ),
         },

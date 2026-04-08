@@ -2,8 +2,9 @@
 
 import { Button } from '../base/button.tsx';
 import { Label } from '../base/label.tsx';
-import { CameraIcon, CrosshairIcon } from 'lucide-react';
+import { CameraIcon, CrosshairIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
+import { cn } from '../lib/utils.ts';
 import { useAtomValue } from 'jotai';
 import { CameraSnapshotAtom } from '../state/atoms.ts';
 import type { CameraData } from '@molstar/state-builder';
@@ -83,6 +84,8 @@ export function CameraHelper({ node, onUpdate, open, onOpenChange, trigger }: Ca
     onUpdate({ params, ...(ref ? { ref } : {}) });
   };
 
+  const [previewExpanded, setPreviewExpanded] = useState(false);
+
   const currentParams: CameraParams = { position, target };
   if (up[0] !== 0 || up[1] !== 1 || up[2] !== 0) {
     currentParams.up = up;
@@ -130,11 +133,16 @@ export function CameraHelper({ node, onUpdate, open, onOpenChange, trigger }: Ca
                   onTargetChange={setTarget}
                   onUpChange={setUp}
                 />
-                <div className='border-t pt-3'>
-                  <Label className='text-xs text-muted-foreground'>Preview</Label>
-                  <pre className='text-xs font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-24'>
-                    {previewJson}
-                  </pre>
+                <div className='border-t pt-2'>
+                  <button type='button' className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors' onClick={() => setPreviewExpanded((o) => !o)}>
+                    <ChevronRightIcon className={cn('size-3 transition-transform', previewExpanded && 'rotate-90')} />
+                    MVS Preview
+                  </button>
+                  {previewExpanded && (
+                    <pre className='text-xs font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-24'>
+                      {previewJson}
+                    </pre>
+                  )}
                 </div>
               </div>
             </div>

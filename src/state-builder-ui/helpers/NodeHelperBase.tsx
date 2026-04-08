@@ -107,7 +107,7 @@ export function NodeHelperBase({
       setLocalRef(node.ref ?? '');
       setRawJson(JSON.stringify(node.params, null, 2));
       setRawError('');
-      setActiveTab(defaultTab ?? tabs[0]?.id ?? 'raw');
+      setActiveTab(syncTab ?? defaultTab ?? tabs[0]?.id ?? 'raw');
       setLocalCustomInput(node.custom != null ? JSON.stringify(node.custom, null, 2) : '');
       setCustomExpanded(false);
       setCustomError('');

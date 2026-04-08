@@ -1,8 +1,8 @@
 'use client';
 
-import { Label } from '../base/label.tsx';
-import { FilmIcon } from 'lucide-react';
+import { FilmIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
+import { cn } from '../lib/utils.ts';
 import {
   createDefaultAnimationParams,
 } from '@molstar/state-builder';
@@ -68,6 +68,8 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
     onUpdate({ params, ...(ref ? { ref } : {}) });
   };
 
+  const [previewExpanded, setPreviewExpanded] = useState(false);
+
   const currentParams = buildAnimationParams();
   const previewJson = JSON.stringify(currentParams, null, 2);
 
@@ -119,11 +121,16 @@ export function AnimationHelper({ node, onUpdate, availableRefs, open, onOpenCha
                 onTrackballChange={setTrackball}
                 onStepsChange={setSteps}
               />
-              <div className='border-t pt-3'>
-                <Label className='text-xs text-muted-foreground'>Preview</Label>
-                <pre className='text-xs font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-32'>
-                  {previewJson}
-                </pre>
+              <div className='border-t pt-2'>
+                <button type='button' className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors' onClick={() => setPreviewExpanded((o) => !o)}>
+                  <ChevronRightIcon className={cn('size-3 transition-transform', previewExpanded && 'rotate-90')} />
+                  MVS Preview
+                </button>
+                {previewExpanded && (
+                  <pre className='text-xs font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-32'>
+                    {previewJson}
+                  </pre>
+                )}
               </div>
             </div>
           ),

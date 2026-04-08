@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Label } from '../base/label.tsx';
 import { Button } from '../base/button.tsx';
-import { BoxIcon } from 'lucide-react';
+import { BoxIcon, ChevronRightIcon } from 'lucide-react';
+import { cn } from '../lib/utils.ts';
 import {
   TranslationPanel,
   RotationPresetsPanel,
@@ -43,6 +43,8 @@ export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger, o
 
   // 4x4 matrix state
   const [fullMatrix, setFullMatrix] = useState<number[] | null>(null);
+
+  const [previewExpanded, setPreviewExpanded] = useState(false);
 
   const initialValue = node.params as Record<string, unknown> | undefined;
 
@@ -136,10 +138,15 @@ export function TransformHelper({ node, onUpdate, open, onOpenChange, trigger, o
           />
         </div>
         <div className='flex-1 min-w-0'>
-          <Label className='text-xs text-muted-foreground'>Preview</Label>
-          <pre className='text-xs font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-24'>
-            {previewJson}
-          </pre>
+          <button type='button' className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors' onClick={() => setPreviewExpanded((o) => !o)}>
+            <ChevronRightIcon className={cn('size-3 transition-transform', previewExpanded && 'rotate-90')} />
+            MVS Preview
+          </button>
+          {previewExpanded && (
+            <pre className='text-xs font-mono bg-muted p-2 rounded-md mt-1 overflow-auto max-h-24'>
+              {previewJson}
+            </pre>
+          )}
         </div>
       </div>
     );

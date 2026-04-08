@@ -72,6 +72,7 @@ export function ComponentFromUriHelper({ node, onUpdate, open, onOpenChange, tri
               onChange={setSelector}
               activeTab={selectorTab}
               onTabChange={setSelectorTab}
+              hideMetadataStatus
             />
           ),
         },

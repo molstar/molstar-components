@@ -74,6 +74,35 @@ async function build() {
 
     console.log("✓ Docs bundle created: docs/bundle.js");
 
+    // Build the docs feature overview bundle
+    console.log("\nBuilding docs feature overview bundle...");
+    await esbuild.build({
+      plugins: [
+        ...denoPlugins({
+          configPath,
+        }),
+      ] as any,
+      entryPoints: ["./docs/docs.ts"],
+      outfile: "./docs/docs.bundle.js",
+      bundle: true,
+      format: "esm",
+      platform: "browser",
+      minify: true,
+      target: "es2022",
+      jsx: "automatic",
+      jsxImportSource: "react",
+      loader: {
+        ".ttf": "file",
+        ".woff": "file",
+        ".woff2": "file",
+        ".eot": "file",
+      },
+      assetNames: "assets/[name]-[hash]",
+      publicPath: "./",
+    });
+
+    console.log("✓ Docs feature overview bundle created: docs/docs.bundle.js");
+
     // Build Monaco editor workers
     console.log("\nBuilding Monaco editor workers...");
 

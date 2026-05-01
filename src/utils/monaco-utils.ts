@@ -74,15 +74,14 @@ export interface MonacoEditorModel {
  * setupMonacoCodeCompletion(monaco, MVSTypes, storyJavaScript);
  * ```
  */
-export function setupMonacoCodeCompletion(monaco: MonacoInstance, mvsTypes?: string, commonCode?: string): void {
+export function setupMonacoCodeCompletion(monaco: MonacoInstance, mvsTypes?: string, commonCode?: string, diagnosticCodesToIgnore: number[] = []): void {
   monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 
-  // Configure diagnostics for error highlighting
   monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-    noSemanticValidation: false, // Enable semantic errors (type checking)
-    noSyntaxValidation: false, // Enable syntax errors
-    noSuggestionDiagnostics: false, // Enable suggestion diagnostics
-    diagnosticCodesToIgnore: [],
+    noSemanticValidation: false,
+    noSyntaxValidation: false,
+    noSuggestionDiagnostics: false,
+    diagnosticCodesToIgnore,
   });
 
   const extraLibs = monaco.languages.typescript.javascriptDefaults.getExtraLibs();

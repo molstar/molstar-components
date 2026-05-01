@@ -98,17 +98,14 @@ export interface MolViewEditorProps {
    * "Capture from Viewer" button. Only relevant when `hybridMode` is true.
    */
   cameraSnapshot?: unknown;
+  /**
+   * TypeScript diagnostic error codes to suppress in this editor.
+   * Use `[2451]` when multiple independent editors share one page to suppress
+   * cross-editor "Cannot redeclare block-scoped variable" false positives.
+   * @defaultValue []
+   */
+  diagnosticCodesToIgnore?: number[];
 }
-
-const DEFAULT_CODE = `const structure = builder
-  .download({ url: 'https://www.ebi.ac.uk/pdbe/entry-files/1cbs.bcif' })
-  .parse({ format: 'bcif' })
-  .modelStructure();
-
-structure
-  .component({ selector: 'polymer' })
-  .representation({ type: 'cartoon' })
-  .color({ color: 'green' });`;
 
 // Counter to generate unique URIs for Monaco models
 // This prevents "ModelService: Cannot add model because it already exists!" errors
@@ -194,7 +191,7 @@ function buildHybridNode(methodName: string, paramsText: string): UINode {
  * @returns A React component displaying the Monaco code editor
  */
 export function MolViewEditor({
-  initialCode = DEFAULT_CODE,
+  initialCode = '',
   value,
   onCodeChange,
   onSave,
@@ -206,6 +203,7 @@ export function MolViewEditor({
   hybridMode = false,
   plugin,
   cameraSnapshot,
+  diagnosticCodesToIgnore = [],
 }: MolViewEditorProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<any>(null);
@@ -290,7 +288,7 @@ export function MolViewEditor({
 
       // Setup Monaco code completion with MVS types BEFORE creating editor
       // This configures compiler options, diagnostics, and adds type definitions
-      setupMonacoCodeCompletion(monacoWithTypescript as any, MVSTypes, commonCode);
+      setupMonacoCodeCompletion(monacoWithTypescript as any, MVSTypes, commonCode, diagnosticCodesToIgnore);
 
       // Create Monaco editor model with explicit JavaScript language and unique URI
       // Each editor instance gets a unique URI to prevent model conflicts

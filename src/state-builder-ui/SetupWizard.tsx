@@ -84,6 +84,13 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
   // Step 2 state
   const [structureType, setStructureType] = useState('model');
   const [assemblyId, setAssemblyId] = useState('');
+  const [radius, setRadius] = useState(5);
+  const [ijkMin, setIjkMin] = useState<[number, number, number]>([0, 0, 0]);
+  const [ijkMax, setIjkMax] = useState<[number, number, number]>([1, 1, 1]);
+  const [modelIndex, setModelIndex] = useState<number | undefined>(undefined);
+  const [blockIndex, setBlockIndex] = useState<number | undefined>(undefined);
+  const [blockHeader, setBlockHeader] = useState<string | undefined>(undefined);
+  const [coordinatesRef, setCoordinatesRef] = useState<string | undefined>(undefined);
 
   // Step 3 state
   const [components, setComponents] = useState<ComponentConfig[]>([newComponent()]);
@@ -113,7 +120,13 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
     const downloadNode: UINode = { ...createEmptyNode('download'), params: { url } };
     const parseNode: UINode = { ...createEmptyNode('parse'), params: { format } };
     const structureParams: Record<string, unknown> = { type: structureType };
+    if (modelIndex !== undefined) structureParams.model_index = modelIndex;
+    if (blockIndex !== undefined) structureParams.block_index = blockIndex;
+    if (blockHeader) structureParams.block_header = blockHeader;
+    if (coordinatesRef) structureParams.coordinates_ref = coordinatesRef;
     if (structureType === 'assembly' && assemblyId) structureParams.assembly_id = assemblyId;
+    if (structureType === 'symmetry_mates') structureParams.radius = radius;
+    if (structureType === 'symmetry') { structureParams.ijk_min = ijkMin; structureParams.ijk_max = ijkMax; }
     const structureNode: UINode = { ...createEmptyNode('structure'), params: structureParams };
 
     structureNode.children = components.map((comp) => {
@@ -144,6 +157,8 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
     setStep(1);
     setUrl(''); setFormat('bcif');
     setStructureType('model'); setAssemblyId('');
+    setRadius(5); setIjkMin([0, 0, 0]); setIjkMax([1, 1, 1]);
+    setModelIndex(undefined); setBlockIndex(undefined); setBlockHeader(undefined); setCoordinatesRef(undefined);
     setComponents([newComponent()]); setActiveCompTab('0');
   };
 
@@ -198,6 +213,63 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
                 <Input className='h-7 text-sm' placeholder='1' value={assemblyId} onChange={(e) => setAssemblyId(e.target.value)} />
               </div>
             )}
+            {structureType === 'symmetry_mates' && (
+              <div className='flex flex-col gap-1 w-28'>
+                <Label className='text-xs'>Radius (Å)</Label>
+                <Input className='h-7 text-xs font-mono' type='number' min='0' step='1' placeholder='5' value={radius} onChange={(e) => setRadius(parseFloat(e.target.value) || 5)} />
+              </div>
+            )}
+            {structureType === 'symmetry' && (
+              <div className='flex gap-4'>
+                {(['Min', 'Max'] as const).map((bound) => {
+                  const val = bound === 'Min' ? ijkMin : ijkMax;
+                  const set = bound === 'Min' ? setIjkMin : setIjkMax;
+                  return (
+                    <div key={bound} className='flex flex-col gap-1'>
+                      <Label className='text-xs'>IJK {bound}</Label>
+                      <div className='flex gap-1'>
+                        {(['i', 'j', 'k'] as const).map((axis, idx) => (
+                          <Input
+                            key={axis}
+                            className='h-7 text-xs font-mono w-14'
+                            type='number'
+                            step='1'
+                            placeholder={axis}
+                            value={val[idx]}
+                            onChange={(e) => {
+                              const next = [...val] as [number, number, number];
+                              next[idx] = parseInt(e.target.value) || 0;
+                              set(next);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <div className='flex flex-col gap-2 pt-2 border-t'>
+              <Label className='text-xs text-muted-foreground'>Advanced</Label>
+              <div className='flex gap-3 flex-wrap'>
+                <div className='flex flex-col gap-1 w-24'>
+                  <Label className='text-xs'>Model index</Label>
+                  <Input className='h-7 text-xs font-mono' type='number' min='0' placeholder='0' value={modelIndex ?? ''} onChange={(e) => setModelIndex(e.target.value === '' ? undefined : parseInt(e.target.value))} />
+                </div>
+                <div className='flex flex-col gap-1 w-24'>
+                  <Label className='text-xs'>Block index</Label>
+                  <Input className='h-7 text-xs font-mono' type='number' min='0' placeholder='0' value={blockIndex ?? ''} onChange={(e) => setBlockIndex(e.target.value === '' ? undefined : parseInt(e.target.value))} />
+                </div>
+                <div className='flex flex-col gap-1 w-32'>
+                  <Label className='text-xs'>Block header</Label>
+                  <Input className='h-7 text-xs' placeholder='optional' value={blockHeader ?? ''} onChange={(e) => setBlockHeader(e.target.value || undefined)} />
+                </div>
+                <div className='flex flex-col gap-1 w-28'>
+                  <Label className='text-xs'>Coords ref</Label>
+                  <Input className='h-7 text-xs font-mono' placeholder='optional' value={coordinatesRef ?? ''} onChange={(e) => setCoordinatesRef(e.target.value || undefined)} />
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -211,7 +283,7 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
                   value={String(idx)}
                   className='rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2 text-xs flex items-center gap-1'
                 >
-                  Comp {idx + 1}
+                  Component {idx + 1}
                   {components.length > 1 && (
                     <span
                       className='ml-1 text-muted-foreground hover:text-destructive'
@@ -225,7 +297,7 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
               <button
                 type='button'
                 onClick={addComponent}
-                className='pb-2 text-xs text-primary hover:text-primary/80 flex items-center gap-0.5'
+                className='mb-0.5 px-2 h-6 rounded border border-dashed border-muted-foreground/40 bg-muted/40 text-muted-foreground hover:border-primary hover:text-primary hover:bg-muted flex items-center transition-colors'
               >
                 <PlusIcon className='size-3' />
               </button>
@@ -260,6 +332,7 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
                           onChange={(v) => updateComponent(idx, { customSelector: v })}
                           activeTab={comp.selectorTab}
                           onTabChange={(t) => updateComponent(idx, { selectorTab: t })}
+                          hideMetadataStatus
                         />
                       </div>
                     </div>

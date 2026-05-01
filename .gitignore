@@ -7,6 +7,8 @@ dist/
 docs/bundle.js
 docs/bundle.js.map
 docs/bundle.css
+docs/docs.bundle.js
+docs/docs.bundle.css
 docs/editor.worker.js
 docs/ts.worker.js
 docs/molstar-components.js

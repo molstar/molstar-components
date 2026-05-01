@@ -67,6 +67,19 @@ export interface BuilderWithEditorAndViewerProps {
   extraScope?: Record<string, unknown>;
   /** Enable Monaco hybrid mode — right-click helper dialogs on builder methods. */
   hybridMode?: boolean;
+  /**
+   * Which panel is shown on initial render.
+   * @defaultValue "builder"
+   */
+  initialPanel?: "builder" | "editor";
+  /** Hide the "Sync to Builder" button in the editor toolbar. */
+  hideSyncButton?: boolean;
+  /**
+   * TypeScript diagnostic codes to suppress across all editor instances on the page.
+   * Pass `[2451]` when multiple independent editors share one page to suppress
+   * cross-editor "Cannot redeclare block-scoped variable" false positives.
+   */
+  diagnosticCodesToIgnore?: number[];
 }
 
 const MINIMAL_VIEWER_CONFIG: MolstarViewerConfig = {
@@ -117,11 +130,14 @@ export function BuilderWithEditorAndViewer({
   style,
   extraScope,
   hybridMode,
+  initialPanel = "builder",
+  hideSyncButton,
+  diagnosticCodesToIgnore = [],
 }: BuilderWithEditorAndViewerProps): JSX.Element {
   const builderRef = useRef<UIBuilderHandle>(null);
   const latestCodeRef = useRef<string>(initialCode ?? "");
   const [activePanel, setActivePanel] = useState<"builder" | "editor">(
-    "builder",
+    initialPanel,
   );
   const [editorValue, setEditorValue] = useState<string | undefined>(undefined);
   const [mvsData, setMvsData] = useState<any>(null);
@@ -276,28 +292,35 @@ export function BuilderWithEditorAndViewer({
           >
             Code
           </button>
-          {activePanel === "editor" && (
+        </div>
+        {activePanel === "editor" && !hideSyncButton && (
+          <div
+            style={{
+              flexShrink: 0,
+              borderBottom: "1px solid #333",
+              backgroundColor: "#1e1e1e",
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
             <button
               type="button"
               onClick={() => { setSyncError(null); setSyncDialogOpen(true); }}
               style={{
-                marginLeft: "auto",
-                padding: "4px 10px",
+                padding: "4px 12px",
                 border: "none",
                 background: "transparent",
                 color: "#aaa",
                 cursor: "pointer",
                 fontSize: 12,
                 fontFamily: "sans-serif",
-                borderLeft: "1px solid #555",
-                flexShrink: 0,
               }}
               title="Interpret code and populate the Visual Builder"
             >
               → Sync to Builder
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Builder — always mounted, hidden when not active */}
         <div
@@ -327,13 +350,14 @@ export function BuilderWithEditorAndViewer({
           }}
         >
           <MolViewEditor
-            initialCode={initialCode}
+            initialCode={initialCode ?? ''}
             value={editorValue}
             onCodeChange={handleEditorChange}
             height={runError ? "calc(100% - 30px)" : "100%"}
             editorOptions={editorOptions}
             hybridMode={hybridMode}
             plugin={plugin}
+            diagnosticCodesToIgnore={diagnosticCodesToIgnore}
             cameraSnapshot={cameraSnapshot}
           />
           {runError && (

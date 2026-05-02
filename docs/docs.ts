@@ -72,6 +72,74 @@ const DEMO_BUILDER_MVS: RawMVSTree = {
   ],
 };
 
+// Advanced demo: 1OG5 assembly with two ligands, ellipsoid markers, distance measurement, animation
+const ADVANCED_CODE = `const struct = builder
+  .download({ url: 'https://wwwdev.ebi.ac.uk/pdbe/entry-files/download/1og5.bcif' })
+  .parse({ format: 'bcif' })
+  .assemblyStructure({ assembly_id: '1' });
+
+struct
+  .component({ selector: 'polymer' })
+  .representation({ type: 'cartoon' });
+
+struct
+  .component({ selector: { label_comp_id: 'HEC' } })
+  .representation({ type: 'ball_and_stick' })
+  .color({ color: '#ff652d' });
+
+struct
+  .component({ selector: { label_comp_id: 'SWF' } })
+  .representation({ type: 'ball_and_stick' })
+  .color({ color: '#652dff' });
+
+struct
+  .primitives({ opacity: 0, ref: 'prim_spheres' })
+  .ellipsoid({ center: { label_comp_id: 'HEC' }, color: '#fcb094' })
+  .ellipsoid({ center: { label_comp_id: 'SWF' }, color: '#b094fc' });
+
+struct
+  .primitives({ opacity: 0, label_opacity: 1, ref: 'prim_distance' })
+  .distance({
+    start: { label_comp_id: 'HEC' },
+    end: { label_comp_id: 'SWF' },
+    radius: 0.25,
+    color: 'black',
+    dash_length: 0.25,
+    label_size: 3,
+  });
+
+struct.component({ selector: 'ligand' }).focus({ direction: [1, 0, 0] });
+
+builder
+  .animation()
+  .interpolate({
+    kind: 'scalar',
+    target_ref: 'prim_spheres',
+    property: 'opacity',
+    start: 0,
+    end: 0.5,
+    start_ms: 800,
+    duration_ms: 400,
+  })
+  .interpolate({
+    kind: 'scalar',
+    target_ref: 'prim_distance',
+    property: 'opacity',
+    start: 0,
+    end: 1,
+    start_ms: 1600,
+    duration_ms: 400,
+  })
+  .interpolate({
+    kind: 'scalar',
+    target_ref: 'prim_distance',
+    property: 'label_opacity',
+    start: 0,
+    end: 1,
+    start_ms: 1600,
+    duration_ms: 400,
+  });`;
+
 // Starter code for the hybrid mode demo — has .component() and .color() calls to right-click
 const HYBRID_STARTER_CODE = `const structure = builder
   .download({ url: 'https://www.ebi.ac.uk/pdbe/entry-files/1cbs.bcif' })
@@ -97,6 +165,21 @@ window.addEventListener("load", async () => {
     // Multiple editors share one Monaco TS service — suppress cross-editor
     // "cannot redeclare block-scoped variable" false positives (code 2451).
     const MULTI_EDITOR_CODES = [2451];
+
+    // Demo 0 — Advanced Example: 1OG5 with ellipsoids, distance, animation; starts on editor tab
+    const demoAdvanced = document.getElementById("demo-advanced");
+    if (demoAdvanced) {
+      createRoot(demoAdvanced).render(
+        createElement(BuilderWithEditorAndViewer, {
+          height: "620px",
+          autoRun: true,
+          hybridMode: true,
+          initialCode: ADVANCED_CODE,
+          syncOnMount: true,
+          diagnosticCodesToIgnore: MULTI_EDITOR_CODES,
+        }),
+      );
+    }
 
     // Demo 1 — State Builder: preloaded structure, builder tab
     const demoBuilder = document.getElementById("demo-builder");

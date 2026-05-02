@@ -214,7 +214,7 @@ export function NodeHelperBase({
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className='rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2 text-xs'
+                className='rounded-none border-b-2 border-transparent opacity-50 data-[state=active]:opacity-100 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:font-medium pb-2 text-xs'
               >
                 {tab.label}
               </TabsTrigger>

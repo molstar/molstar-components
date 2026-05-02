@@ -5,6 +5,10 @@
    Run via: deno run npm:@tailwindcss/cli@4 -i docs/tailwind-entry.css -o docs/state-builder-ui.css */
 @import "tailwindcss";
 
+/* Use class-based dark mode so that dark: utilities fire when .dark is on an
+   ancestor element (e.g. <html class="dark">), not only via prefers-color-scheme. */
+@variant dark (&:where(.dark, .dark *));
+
 /* Explicitly scope scanning to the state-builder-ui source */
 @source "../src/state-builder-ui";
 

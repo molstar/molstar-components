@@ -75,6 +75,12 @@ export interface BuilderWithEditorAndViewerProps {
   /** Hide the "Sync to Builder" button in the editor toolbar. */
   hideSyncButton?: boolean;
   /**
+   * When true, automatically syncs `initialCode` into the visual builder on
+   * mount — equivalent to the user clicking "Sync to Builder" immediately after
+   * the component loads.
+   */
+  syncOnMount?: boolean;
+  /**
    * TypeScript diagnostic codes to suppress across all editor instances on the page.
    * Pass `[2451]` when multiple independent editors share one page to suppress
    * cross-editor "Cannot redeclare block-scoped variable" false positives.
@@ -132,6 +138,7 @@ export function BuilderWithEditorAndViewer({
   hybridMode,
   initialPanel = "builder",
   hideSyncButton,
+  syncOnMount,
   diagnosticCodesToIgnore = [],
 }: BuilderWithEditorAndViewerProps): JSX.Element {
   const builderRef = useRef<UIBuilderHandle>(null);
@@ -203,6 +210,13 @@ export function BuilderWithEditorAndViewer({
     },
     [scheduleRun],
   );
+
+  useEffect(() => {
+    if (syncOnMount && initialCode) {
+      handleSyncToBuilder();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run only once on mount
 
   const handleViewerInit = useCallback((viewer: any) => {
     const pluginCtx = viewer.plugin as PluginUIContext;

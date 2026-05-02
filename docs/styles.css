@@ -47,3 +47,28 @@
     translate: none !important;
     transform: translate(-50%, -50%) !important;
 }
+
+/* Align state-builder-ui color variables with DaisyUI dark theme.
+   DaisyUI dark: base-100 = oklch(25.33% 0.016 252.42), base-content = oklch(83.28% 0.027 254.46).
+   The builder defaults (background L=12.9%, muted L=27.9%) straddle the page background,
+   creating jarring contrast. Use html.dark (specificity 0,1,1) to beat DaisyUI's
+   [data-theme="dark"] (0,1,0) which otherwise steals --primary with its purple. */
+html.dark {
+    --background:         oklch(0.2533 0.016 252.42); /* = DaisyUI base-100 */
+    --foreground:         oklch(0.8328 0.027 254.46); /* = DaisyUI base-content */
+    --card:               oklch(0.2326 0.016 252.42); /* = DaisyUI base-200, nodes sit slightly recessed */
+    --card-foreground:    oklch(0.8328 0.027 254.46);
+    --popover:            oklch(0.2533 0.016 252.42);
+    --popover-foreground: oklch(0.8328 0.027 254.46);
+    --primary:            oklch(0.8328 0.027 254.46); /* light for buttons */
+    --primary-foreground: oklch(0.2533 0.016 252.42);
+    --secondary:          oklch(0.2326 0.016 252.42);
+    --secondary-foreground: oklch(0.8328 0.027 254.46);
+    --muted:              oklch(0.2326 0.016 252.42);
+    --muted-foreground:   oklch(0.60 0.025 254);
+    --accent:             oklch(0.2326 0.016 252.42);
+    --accent-foreground:  oklch(0.8328 0.027 254.46);
+    --border:             oklch(1 0 0 / 8%);
+    --input:              oklch(1 0 0 / 12%);
+    --ring:               oklch(0.55 0.025 254);
+}

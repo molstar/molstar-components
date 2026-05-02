@@ -3,8 +3,21 @@
 [![JSR](https://jsr.io/badges/@molstar/molstar-components)](https://jsr.io/@molstar/molstar-components)
 [![JSR Score](https://jsr.io/badges/@molstar/molstar-components/score)](https://jsr.io/@molstar/molstar-components)
 
-Preact components for integrating Molstar molecular viewer with interactive
-Monaco editor support for MolViewSpec.
+React components for integrating Molstar molecular viewer with interactive
+Monaco editor support for MolViewSpec, and a visual state builder UI.
+
+## Versions
+
+| Version | Runtime | Components |
+|---------|---------|------------|
+| **0.5.x** | Preact (stable) | `MolstarViewer`, `EditorWithViewer` |
+| **0.6.x** | React (experimental) | above + `MolViewStateBuilder`, `BuilderWithViewer`, `BuilderWithEditorAndViewer` |
+
+**0.5.x** is the stable Preact-based release. Use it if you only need the viewer
+and editor and want a stable API.
+
+**0.6.x** is an experimental React migration that adds the visual State Builder.
+The API may still change before a stable release.
 
 ## Development
 

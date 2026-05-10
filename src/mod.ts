@@ -1,5 +1,7 @@
+/// <reference path="./monaco-aliases.d.ts" />
+
 /**
- * Molstar Components - Preact components for molecular visualization
+ * Molstar Components - React components for molecular visualization
  *
  * This package provides ready-to-use Preact components for integrating the Molstar
  * molecular viewer into your web applications. It includes components for displaying
@@ -15,17 +17,17 @@
  * ## Installation
  *
  * ```bash
- * # Using JSR
- * deno add @zachcp/molstar-components
+ * # Using JSR (Deno)
+ * deno add @molstar/molstar-components
  *
  * # Using npm
- * npx jsr add @zachcp/molstar-components
+ * npx jsr add @molstar/molstar-components
  * ```
  *
  * ## Usage
  *
  * ```tsx
- * import { MolstarViewer, EditorWithViewer } from "@zachcp/molstar-components";
+ * import { MolstarViewer, EditorWithViewer } from "@molstar/molstar-components";
  *
  * // Display a molecular structure
  * function App() {
@@ -62,8 +64,9 @@
  *
  * ## Requirements
  *
- * - Molstar viewer library (loaded from CDN or bundled)
- * - Monaco editor (for code editing features)
+ * - Molstar 5.7+ (peer dependency — bundled by the consuming app)
+ * - Monaco Editor 0.55+ (for code editing features)
+ * - React 18+
  * - Modern browser with ES2022 support
  *
  * @module
@@ -81,3 +84,30 @@ export type { MolViewEditorProps } from "./MolViewEditor.tsx";
 
 export { EditorWithViewer } from "./EditorWithViewer.tsx";
 export type { EditorWithViewerProps } from "./EditorWithViewer.tsx";
+
+export { MolViewStateBuilder } from "./MolViewStateBuilder.tsx";
+export type { MolViewStateBuilderProps } from "./MolViewStateBuilder.tsx";
+export type { UIBuilderHandle, UIBuilderSnapshot } from "./MolViewStateBuilder.tsx";
+
+export { BuilderWithViewer } from "./BuilderWithViewer.tsx";
+export type { BuilderWithViewerProps } from "./BuilderWithViewer.tsx";
+
+export { BuilderWithEditorAndViewer } from "./BuilderWithEditorAndViewer.tsx";
+export type { BuilderWithEditorAndViewerProps } from "./BuilderWithEditorAndViewer.tsx";
+
+// Re-export UIBuilderProvider for consumers who want to compose their own layout
+export { UIBuilderProvider } from "./state-builder-ui/provider.tsx";
+export type { UIBuilderProviderProps } from "./state-builder-ui/provider.tsx";
+
+export { UIBuilder } from "./state-builder-ui/UIBuilder.tsx";
+
+export { snapshotToCameraParams, filterMetadataBySelector } from "./state-builder/index.ts";
+export type { ConstantDefinition } from "./state-builder/index.ts";
+export type { EvaluateCodeOptions } from "./state-builder/index.ts";
+export { evaluateCodeToMVSTree } from "./state-builder/index.ts";
+
+export { useSyncToBuilder } from "./hooks/useSyncToBuilder.ts";
+export type {
+  UseSyncToBuilderOptions,
+  UseSyncToBuilderResult,
+} from "./hooks/useSyncToBuilder.ts";

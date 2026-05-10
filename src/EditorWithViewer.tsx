@@ -1,9 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
-import { h } from "preact";
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { StoryManager } from "@molstar/mol-view-stories";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { JSX } from "react";
 import { MolViewEditor } from "./MolViewEditor.tsx";
 import { MolstarViewer } from "./MolstarViewer.tsx";
+import { executeCode as executeMVSCode } from "./utils/executeCode.ts";
 import type * as monaco from "monaco-editor";
 
 /**
@@ -81,6 +81,8 @@ export interface EditorWithViewerProps {
    * @defaultValue undefined
    */
   editorOptions?: monaco.editor.IStandaloneEditorConstructionOptions;
+  /** Enable Monaco hybrid mode — right-click helper dialogs on builder methods. */
+  hybridMode?: boolean;
 }
 
 /**
@@ -97,42 +99,8 @@ export interface EditorWithViewerProps {
  * - Hidden code execution for setup/utility functions
  * - Debounced auto-execution to reduce unnecessary renders
  *
- * @example
- * ```tsx
- * import { EditorWithViewer } from "@zachcp/molstar-components";
- *
- * function App() {
- *   const initialCode = `
- *     const structure = builder
- *       .download({ url: 'https://www.ebi.ac.uk/pdbe/entry-files/1cbs.bcif' })
- *       .parse({ format: 'bcif' })
- *       .modelStructure();
- *
- *     structure
- *       .component({ selector: 'polymer' })
- *       .representation({ type: 'cartoon' })
- *       .color({ color: 'blue' });
- *   `;
- *
- *   return (
- *     <EditorWithViewer
- *       initialCode={initialCode}
- *       layout="horizontal"
- *       autoRun={true}
- *       autoRunDelay={1000}
- *     />
- *   );
- * }
- * ```
- *
- * @remarks
- * - In manual mode, press Ctrl/Cmd+S to execute code
- * - In auto-run mode, code executes automatically after typing stops
- * - Errors are displayed below the editor
- * - The component uses StoryManager from @molstar/mol-view-stories
- *
  * @param props - Component props
- * @returns A Preact component with integrated editor and viewer
+ * @returns A React component with integrated editor and viewer
  */
 export function EditorWithViewer({
   initialCode,
@@ -146,7 +114,8 @@ export function EditorWithViewer({
   showAutoUpdateToggle = true,
   showBottomControlPanel = true,
   editorOptions,
-}: EditorWithViewerProps): h.JSX.Element {
+  hybridMode,
+}: EditorWithViewerProps): JSX.Element {
   const [mvsData, setMvsData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentCode, setCurrentCode] = useState(initialCode || "");
@@ -167,48 +136,17 @@ export function EditorWithViewer({
     [],
   );
 
-  const executeCode = useCallback(
+  const handleExecute = useCallback(
     async (code: string) => {
       const startTime = Date.now();
-
       try {
         setError(null);
         addLog("info", "Executing MVS code...");
-
-        // Convert 8-digit hex colors (with alpha) to 6-digit hex colors
-        // VS Code color picker adds alpha channel, but Molstar expects 6-digit hex
-        const processedCode = code.replace(
-          /#([0-9A-Fa-f]{6})[0-9A-Fa-f]{2}/g,
-          "#$1",
-        );
-
-        const storyManager = new StoryManager();
-
-        // Set global JavaScript code if provided
-        if (hiddenCode) {
-          storyManager.setGlobalJavascript(hiddenCode);
-        }
-
-        const sceneId = storyManager.addScene({
-          javascript: processedCode,
-        });
-
-        const scene = storyManager.getScene(sceneId);
-        if (!scene) {
-          throw new Error("Failed to retrieve scene");
-        }
-
-        const mvsDataResult = await storyManager.toMVS([scene]);
-
-        if (!mvsDataResult) {
-          throw new Error("Failed to generate valid MVS data");
-        }
-
-        const duration = Date.now() - startTime;
-        addLog("success", `Code executed successfully (${duration}ms)`);
-        setMvsData(mvsDataResult);
-      } catch (err: any) {
-        const errorMsg = err.message || "Error executing code";
+        const result = await executeMVSCode(code, hiddenCode || undefined);
+        addLog("success", `Code executed successfully (${Date.now() - startTime}ms)`);
+        setMvsData(result);
+      } catch (err: unknown) {
+        const errorMsg = (err as Error).message || "Error executing code";
         addLog("error", errorMsg);
         setError(errorMsg);
       }
@@ -218,9 +156,9 @@ export function EditorWithViewer({
 
   const handleSave = useCallback(
     (code: string) => {
-      executeCode(code);
+      handleExecute(code);
     },
-    [executeCode],
+    [handleExecute],
   );
 
   const handleCodeChange = useCallback(
@@ -235,23 +173,23 @@ export function EditorWithViewer({
 
         // Set new timer
         debounceTimerRef.current = setTimeout(() => {
-          executeCode(code);
+          handleExecute(code);
         }, autoRunDelay) as any;
       }
     },
-    [autoUpdateEnabled, autoRunDelay, executeCode],
+    [autoUpdateEnabled, autoRunDelay, handleExecute],
   );
 
   // Execute initial code on mount if autoRun is enabled
   useEffect(() => {
     if (autoRun && initialCode) {
-      // Small delay to ensure StoryManager is ready
+      // Small delay to ensure viewer is ready
       const timer = setTimeout(() => {
-        executeCode(initialCode);
+        handleExecute(initialCode);
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [autoRun, initialCode, executeCode]);
+  }, [autoRun, initialCode, handleExecute]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -280,149 +218,125 @@ export function EditorWithViewer({
     minHeight: viewerHeight,
   };
 
-  return h(
-    "div",
-    { style: containerStyle },
-    h(
-      "div",
-      { style: editorContainerStyle },
-      h(MolViewEditor, {
-        initialCode: currentCode,
-        onCodeChange: handleCodeChange,
-        onSave: handleSave,
-        height: editorHeight,
-        editorOptions,
-      }),
-      showBottomControlPanel &&
-        showAutoUpdateToggle &&
-        h(
-          "div",
-          {
-            style: {
+  return (
+    <div style={containerStyle}>
+      <div style={editorContainerStyle}>
+        <MolViewEditor
+          initialCode={currentCode}
+          onCodeChange={handleCodeChange}
+          onSave={handleSave}
+          height={editorHeight}
+          editorOptions={editorOptions}
+          hybridMode={hybridMode}
+        />
+        {showBottomControlPanel && showAutoUpdateToggle && (
+          <div
+            style={{
               padding: "10px",
               backgroundColor: "#2a2a2a",
               borderTop: "1px solid #333",
               display: "flex",
               gap: "20px",
               alignItems: "center",
-            },
-          },
-          h(
-            "label",
-            {
-              style: {
+            }}
+          >
+            <label
+              style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
                 cursor: "pointer",
                 fontSize: "14px",
-              },
-            },
-            h("input", {
-              type: "checkbox",
-              checked: autoUpdateEnabled,
-              onChange: (e: any) => setAutoUpdateEnabled(e.target.checked),
-              style: { cursor: "pointer" },
-            }),
-            h(
-              "span",
-              null,
-              "Auto-update (runs code automatically after typing)",
-            ),
-          ),
-          h(
-            "label",
-            {
-              style: {
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={autoUpdateEnabled}
+                onChange={(e) =>
+                  setAutoUpdateEnabled((e.target as HTMLInputElement).checked)}
+                style={{ cursor: "pointer" }}
+              />
+              <span>Auto-update (runs code automatically after typing)</span>
+            </label>
+            <label
+              style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
                 cursor: "pointer",
                 fontSize: "14px",
-              },
-            },
-            h("input", {
-              type: "checkbox",
-              checked: showLogPanel,
-              onChange: (e: any) => setShowLogPanel(e.target.checked),
-              style: { cursor: "pointer" },
-            }),
-            h("span", null, "Show execution log"),
-          ),
-        ),
-      showBottomControlPanel &&
-        showLog &&
-        showLogPanel &&
-        logs.length > 0 &&
-        h(
-          "details",
-          {
-            open: logExpanded,
-            onToggle: (e: any) => setLogExpanded(e.target.open),
-            style: {
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={showLogPanel}
+                onChange={(e) =>
+                  setShowLogPanel((e.target as HTMLInputElement).checked)}
+                style={{ cursor: "pointer" }}
+              />
+              <span>Show execution log</span>
+            </label>
+          </div>
+        )}
+        {showBottomControlPanel && showLog && showLogPanel &&
+          logs.length > 0 && (
+          <details
+            open={logExpanded}
+            onToggle={(e) =>
+              setLogExpanded((e.target as HTMLDetailsElement).open)}
+            style={{
               marginTop: "5px",
               border: "1px solid #333",
               backgroundColor: "#1a1a1a",
-            },
-          },
-          h(
-            "summary",
-            {
-              style: {
+            }}
+          >
+            <summary
+              style={{
                 padding: "8px 10px",
                 cursor: "pointer",
                 userSelect: "none",
                 fontSize: "14px",
-              },
-            },
-            `Execution Log (${logs.length} ${
-              logs.length === 1 ? "entry" : "entries"
-            }) - Click to ${logExpanded ? "collapse" : "expand"}`,
-          ),
-          h(
-            "div",
-            {
-              style: {
+              }}
+            >
+              {`Execution Log (${logs.length} ${
+                logs.length === 1 ? "entry" : "entries"
+              }) - Click to ${logExpanded ? "collapse" : "expand"}`}
+            </summary>
+            <div
+              style={{
                 maxHeight: "200px",
                 overflowY: "auto",
                 backgroundColor: "#0a0a0a",
                 fontFamily: "monospace",
                 fontSize: "12px",
-              },
-            },
-            logs.map((log, idx) =>
-              h(
-                "div",
-                {
-                  key: idx,
-                  style: {
+              }}
+            >
+              {logs.map((log, idx) => (
+                <div
+                  key={idx}
+                  style={{
                     padding: "4px 10px",
                     borderBottom: "1px solid #333",
-                    color:
-                      log.level === "error"
-                        ? "#ff6b6b"
-                        : log.level === "success"
-                          ? "#51cf66"
-                          : "#ccc",
-                  },
-                },
-                h(
-                  "span",
-                  { style: { opacity: 0.6 } },
-                  `[${log.timestamp.toLocaleTimeString()}]`,
-                ),
-                " ",
-                log.message,
-              ),
-            ),
-          ),
-        ),
-      showBottomControlPanel &&
-        error &&
-        h(
-          "div",
-          {
-            style: {
+                    color: log.level === "error"
+                      ? "#ff6b6b"
+                      : log.level === "success"
+                      ? "#51cf66"
+                      : "#ccc",
+                  }}
+                >
+                  <span style={{ opacity: 0.6 }}>
+                    [{log.timestamp.toLocaleTimeString()}]
+                  </span>
+                  {" "}
+                  {log.message}
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+        {showBottomControlPanel && error && (
+          <div
+            style={{
               padding: "10px",
               marginTop: "5px",
               backgroundColor: "#ff000020",
@@ -430,34 +344,34 @@ export function EditorWithViewer({
               border: "1px solid #ff0000",
               fontFamily: "monospace",
               fontSize: "12px",
-            },
-          },
-          `Error: ${error}`,
-        ),
-    ),
-    h(
-      "div",
-      { style: viewerContainerStyle },
-      mvsData
-        ? h(MolstarViewer, {
-            mvsData: mvsData,
-            config: {
-              layoutIsExpanded: false,
-              layoutShowControls: false,
-              layoutShowRemoteState: false,
-              layoutShowSequence: false,
-              layoutShowLog: false,
-              layoutShowLeftPanel: false,
-              viewportShowExpand: false,
-              viewportShowSelectionMode: false,
-              viewportShowAnimation: false,
-            },
-            style: { height: "100%", width: "100%" },
-          })
-        : h(
-            "div",
-            {
-              style: {
+            }}
+          >
+            {`Error: ${error}`}
+          </div>
+        )}
+      </div>
+      <div style={viewerContainerStyle}>
+        {mvsData
+          ? (
+            <MolstarViewer
+              mvsData={mvsData}
+              config={{
+                layoutIsExpanded: false,
+                layoutShowControls: false,
+                layoutShowRemoteState: false,
+                layoutShowSequence: false,
+                layoutShowLog: false,
+                layoutShowLeftPanel: false,
+                viewportShowExpand: false,
+                viewportShowSelectionMode: false,
+                viewportShowAnimation: false,
+              }}
+              style={{ height: "100%", width: "100%" }}
+            />
+          )
+          : (
+            <div
+              style={{
                 height: "100%",
                 display: "flex",
                 alignItems: "center",
@@ -465,12 +379,14 @@ export function EditorWithViewer({
                 border: "1px solid #333",
                 color: "#666",
                 backgroundColor: "#1e1e1e",
-              },
-            },
-            autoUpdateEnabled
-              ? "Start typing to see live updates..."
-              : "Press Ctrl/Cmd+S to execute code",
-          ),
-    ),
+              }}
+            >
+              {autoUpdateEnabled
+                ? "Start typing to see live updates..."
+                : "Press Ctrl/Cmd+S to execute code"}
+            </div>
+          )}
+      </div>
+    </div>
   );
 }

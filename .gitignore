@@ -3,14 +3,22 @@ node_modules/
 *.log
 deno.lock
 docs/assets
+dist/
 docs/bundle.js
 docs/bundle.js.map
 docs/bundle.css
+docs/docs.bundle.js
+docs/docs.bundle.css
 docs/editor.worker.js
 docs/ts.worker.js
 docs/molstar-components.js
 docs/molstar-components.js.map
 docs/molstar-components.css
+docs/state-builder-ui.css
+docs/molstar.css
 
 # Release tarballs created by CI
 molstar-components-*.tar.gz
+
+.idea/
+.vite/

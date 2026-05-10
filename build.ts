@@ -32,7 +32,7 @@ async function build() {
       minify: true,
       target: "es2022",
       jsx: "automatic",
-      jsxImportSource: "preact",
+      jsxImportSource: "react",
       loader: {
         ".ttf": "file",
         ".woff": "file",
@@ -61,7 +61,7 @@ async function build() {
       minify: true,
       target: "es2022",
       jsx: "automatic",
-      jsxImportSource: "preact",
+      jsxImportSource: "react",
       loader: {
         ".ttf": "file",
         ".woff": "file",
@@ -73,6 +73,35 @@ async function build() {
     });
 
     console.log("✓ Docs bundle created: docs/bundle.js");
+
+    // Build the docs feature overview bundle
+    console.log("\nBuilding docs feature overview bundle...");
+    await esbuild.build({
+      plugins: [
+        ...denoPlugins({
+          configPath,
+        }),
+      ] as any,
+      entryPoints: ["./docs/docs.ts"],
+      outfile: "./docs/docs.bundle.js",
+      bundle: true,
+      format: "esm",
+      platform: "browser",
+      minify: true,
+      target: "es2022",
+      jsx: "automatic",
+      jsxImportSource: "react",
+      loader: {
+        ".ttf": "file",
+        ".woff": "file",
+        ".woff2": "file",
+        ".eot": "file",
+      },
+      assetNames: "assets/[name]-[hash]",
+      publicPath: "./",
+    });
+
+    console.log("✓ Docs feature overview bundle created: docs/docs.bundle.js");
 
     // Build Monaco editor workers
     console.log("\nBuilding Monaco editor workers...");
@@ -117,6 +146,38 @@ async function build() {
     console.log("  ✓ ts.worker.js");
 
     console.log("✓ Monaco workers built successfully");
+
+    // Generate Tailwind CSS for state-builder-ui components
+    console.log("\nBuilding Tailwind CSS for state-builder-ui...");
+    const cssCmd = new Deno.Command("deno", {
+      args: [
+        "run",
+        "--allow-read",
+        "--allow-write",
+        "--allow-env",
+        "--allow-sys",
+        "--allow-net",
+        "--allow-ffi",
+        "npm:@tailwindcss/cli@4",
+        "-i", "./docs/tailwind-entry.css",
+        "-o", "./docs/state-builder-ui.css",
+        "--minify",
+      ],
+      stdout: "inherit",
+      stderr: "inherit",
+    });
+    const cssResult = await cssCmd.output();
+    if (!cssResult.success) {
+      throw new Error("Tailwind CSS build failed");
+    }
+    console.log("✓ Tailwind CSS built: docs/state-builder-ui.css");
+
+    // Copy molstar CSS from node_modules to docs/
+    await Deno.copyFile(
+      "./node_modules/molstar/build/viewer/molstar.css",
+      "./docs/molstar.css"
+    );
+    console.log("✓ Molstar CSS copied: docs/molstar.css");
   } catch (error) {
     console.error("Build failed:", error);
     Deno.exit(1);

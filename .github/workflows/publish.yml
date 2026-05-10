@@ -20,11 +20,14 @@ jobs:
         with:
           deno-version: v2.x
 
+      - name: Test
+        run: deno task test
+
       - name: Lint
         run: deno lint
 
       - name: Type Check
-        run: deno check
+        run: deno check src/mod.ts
 
       - name: Build and bundle for GitHub Pages
         run: deno task build
@@ -35,7 +38,8 @@ jobs:
           name: molstar-components-bundle
           path: |
             docs/molstar-components.js
-            docs/molstar-components.css
+            docs/molstar.css
+            docs/state-builder-ui.css
             docs/editor.worker.js
             docs/ts.worker.js
 

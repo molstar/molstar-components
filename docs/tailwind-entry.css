@@ -1,0 +1,45 @@
+/* Tailwind v4 entry point for state-builder-ui component styles.
+   Used only for: the library's own docs page.
+   Consumers with Tailwind v4: add @source pointing to this library's
+   state-builder-ui directory instead of importing this file.
+   Run via: deno run npm:@tailwindcss/cli@4 -i docs/tailwind-entry.css -o docs/state-builder-ui.css */
+@import "tailwindcss";
+
+/* Use class-based dark mode so that dark: utilities fire when .dark is on an
+   ancestor element (e.g. <html class="dark">), not only via prefers-color-scheme. */
+@variant dark (&:where(.dark, .dark *));
+
+/* Explicitly scope scanning to the state-builder-ui source */
+@source "../src/state-builder-ui";
+
+/* Component-level CSS variables and utilities defined in state-builder-ui */
+@import "../src/state-builder-ui/styles.css";
+
+/* Map semantic CSS variables to Tailwind v4 theme tokens so that utilities
+   like bg-background, bg-popover, text-muted-foreground etc. are generated.
+   @theme inline means the generated utilities reference the CSS variables
+   directly, so .dark overrides in styles.css take effect at runtime. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}

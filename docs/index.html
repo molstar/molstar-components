@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" class="dark">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,10 +14,10 @@
         <script src="https://cdn.tailwindcss.com"></script>
 
         <!-- Molstar CSS -->
-        <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.css"
-        />
+        <link rel="stylesheet" href="molstar.css" />
+
+        <!-- State Builder UI CSS (Tailwind v4 generated) -->
+        <link rel="stylesheet" href="state-builder-ui.css" />
 
         <!-- Bundled Monaco CSS -->
         <link rel="stylesheet" href="bundle.css" />
@@ -87,22 +87,35 @@
                         </h1>
                         <p class="py-6">
                             Interactive molecular visualization with
-                            <code class="badge badge-secondary"
-                                >MolstarViewer</code
-                            >
-                            and
-                            <code class="badge badge-secondary"
-                                >EditorWithViewer</code
-                            >
-                            components
+                            <code class="badge badge-secondary">MolstarViewer</code>,
+                            <code class="badge badge-secondary">EditorWithViewer</code>,
+                            and a visual
+                            <code class="badge badge-secondary">State Builder</code>
+                            component
                         </p>
                         <div class="flex gap-2 justify-center flex-wrap">
                             <div class="badge badge-outline">JSR Package</div>
-                            <div class="badge badge-outline">
-                                Preact Components
-                            </div>
+                            <div class="badge badge-outline">React Components</div>
+                            <a href="./docs.html" class="badge badge-outline">State Builder Docs ↗</a>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Version notice -->
+            <div class="card bg-base-100 shadow-xl mb-8">
+                <div class="card-body">
+                    <h2 class="card-title">Choosing a version</h2>
+                    <p>
+                        <strong>0.5.x</strong> — Stable Preact-based build. Includes
+                        <code class="badge badge-sm">MolstarViewer</code> and
+                        <code class="badge badge-sm">EditorWithViewer</code> only.
+                    </p>
+                    <p>
+                        <strong>0.6.x</strong> — Experimental. Migrated to React and adds the visual
+                        <code class="badge badge-sm">State Builder</code>
+                        and builder-combo components. API may still change.
+                    </p>
                 </div>
             </div>
 
@@ -143,10 +156,45 @@
                     <div id="editor-viewer-container"></div>
                 </div>
             </div>
+            <!-- Demo 3: BuilderWithViewer -->
+            <div class="card bg-base-100 shadow-xl mb-8">
+                <div class="card-body">
+                    <h2 class="card-title">
+                        BuilderWithViewer Component
+                        <span class="badge badge-warning badge-sm">Experimental</span>
+                        <span class="badge badge-neutral badge-sm">0.6.x+</span>
+                        <a href="./docs.html" class="badge badge-outline badge-sm">Docs ↗</a>
+                    </h2>
+                    <p>
+                        Using
+                        <code class="badge badge-sm">BuilderWithViewer</code>
+                        from <code>@molstar/molstar-components</code>. Visual MVS
+                        node tree builder on the left; Molstar viewer on the right.
+                        Click "Generate Code" to update the viewer.
+                    </p>
+                    <div id="builder-viewer-mount" style="height: 600px;"></div>
+                </div>
+            </div>
+            <!-- Demo 4: BuilderWithEditorAndViewer -->
+            <div class="card bg-base-100 shadow-xl mb-8">
+                <div class="card-body">
+                    <h2 class="card-title">
+                        BuilderWithEditorAndViewer Component
+                        <span class="badge badge-warning badge-sm">Experimental</span>
+                        <span class="badge badge-neutral badge-sm">0.6.x+</span>
+                        <a href="./docs.html" class="badge badge-outline badge-sm">Docs ↗</a>
+                    </h2>
+                    <p>
+                        Using
+                        <code class="badge badge-sm">BuilderWithEditorAndViewer</code>
+                        from <code>@molstar/molstar-components</code>. Two-panel
+                        layout: left panel toggles between visual builder and Monaco
+                        editor via tabs; Molstar viewer always visible on the right.
+                    </p>
+                    <div id="builder-editor-viewer-mount" style="height: 650px;"></div>
+                </div>
+            </div>
         </div>
-
-        <!-- Load Molstar from CDN -->
-        <script src="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.js"></script>
 
         <!-- Bundled application code (includes Preact and Monaco) -->
         <script type="module" src="./bundle.js"></script>

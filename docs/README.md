@@ -2,6 +2,10 @@
 
 This directory contains an interactive demo of the `@molstar/molstar-components` package.
 
+The demo covers all components across both release lines:
+- **0.5.x** (stable, Preact): `MolstarViewer`, `EditorWithViewer`
+- **0.6.x** (experimental, React): above + `MolViewStateBuilder`, `BuilderWithViewer`, `BuilderWithEditorAndViewer`
+
 ## Development
 
 ```bash

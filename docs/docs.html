@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en" data-theme="dark" class="dark" style="scroll-behavior: smooth;">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Molstar Components – Docs</title>
+
+        <!-- DaisyUI + Tailwind CSS -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@4.6.0/dist/full.min.css"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- Molstar CSS -->
+        <link rel="stylesheet" href="molstar.css" />
+
+        <!-- State Builder UI CSS (Tailwind v4 generated) -->
+        <link rel="stylesheet" href="state-builder-ui.css" />
+
+        <!-- Bundled Monaco CSS -->
+        <link rel="stylesheet" href="bundle.css" />
+
+        <!-- Custom styles (Molstar control hiding + dialog centering) -->
+        <link rel="stylesheet" href="styles.css" />
+
+        <!-- Highlight.js syntax highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css" />
+    </head>
+    <body>
+        <!-- Navbar -->
+        <div class="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50">
+            <div class="flex-1">
+                <a href="./" class="btn btn-ghost text-xl">Molstar Components</a>
+            </div>
+            <div class="flex-none gap-2">
+                <a href="./" class="btn btn-ghost btn-sm">Demo</a>
+                <a href="./docs.html" class="btn btn-ghost btn-sm font-semibold text-primary">Docs</a>
+                <a
+                    href="https://jsr.io/@molstar/molstar-components"
+                    target="_blank"
+                    class="btn btn-ghost btn-sm"
+                    title="View on JSR"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 256 256" fill="currentColor">
+                        <path d="M256 128c0 70.7-57.3 128-128 128S0 198.7 0 128 57.3 0 128 0s128 57.3 128 128z" fill="#f7df1e"/>
+                        <path d="M71.7 178.5c4.5 7.3 10.4 12.7 20.8 12.7 8.7 0 14.3-4.4 14.3-10.4 0-7.2-5.7-9.8-15.3-14l-5.2-2.2c-15.2-6.5-25.3-14.6-25.3-31.7 0-15.8 12-27.8 30.8-27.8 13.4 0 23 4.7 29.9 16.9l-16.4 10.5c-3.6-6.5-7.5-9-13.5-9-6.1 0-10 3.9-10 9 0 6.3 3.9 8.9 12.9 12.8l5.2 2.2c17.9 7.7 28 15.5 28 33.1 0 19-14.9 29.3-34.9 29.3-19.6 0-32.3-9.3-38.5-21.5l17.2-10z"/>
+                        <path d="M152 107.5h21.1v63.9c0 27.1-15.9 39.4-39 39.4-20.9 0-33-10.8-39.2-23.8l17.2-10.4c4.5 8 8.6 14.8 18.5 14.8 9.5 0 15.4-3.7 15.4-18.1v-65.8z"/>
+                    </svg>
+                </a>
+                <a
+                    href="https://github.com/molstar/molstar-components"
+                    target="_blank"
+                    class="btn btn-ghost btn-sm"
+                    title="View on GitHub"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="flex max-w-7xl mx-auto">
+
+            <!-- Sidebar -->
+            <aside class="sticky top-16 h-[calc(100vh-64px)] overflow-y-auto w-56 shrink-0 border-r border-base-300 py-6 px-4 hidden md:block">
+                <nav class="flex flex-col gap-0.5">
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wider mb-2 px-2">Features</p>
+                    <a href="#overview" class="text-sm px-2 py-1.5 rounded hover:bg-base-200 transition-colors">Overview</a>
+                    <a href="#core-concepts" class="text-sm px-2 py-1.5 rounded hover:bg-base-200 transition-colors">Core Concepts</a>
+                    <a href="#state-builder" class="text-sm px-2 py-1.5 rounded hover:bg-base-200 transition-colors">Visual Node Tree</a>
+                    <a href="#wizard" class="text-sm px-2 py-1.5 rounded hover:bg-base-200 transition-colors">Setup Wizard</a>
+                    <a href="#advanced-example" class="text-sm px-2 py-1.5 rounded hover:bg-base-200 transition-colors">Advanced Example</a>
+                    <a href="#hybrid-mode" class="text-sm px-2 py-1.5 rounded hover:bg-base-200 transition-colors">Monaco &amp; Hybrid Mode</a>
+                    <a href="#sync" class="text-sm px-2 py-1.5 rounded hover:bg-base-200 transition-colors">Bidirectional Sync</a>
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wider mt-5 mb-2 px-2">Reference</p>
+                    <a href="#installation" class="text-sm px-2 py-1.5 rounded hover:bg-base-200 transition-colors">Installation</a>
+                    <a href="https://jsr.io/@molstar/molstar-components" target="_blank" class="text-sm px-2 py-1.5 rounded hover:bg-base-200 transition-colors text-base-content/60">API Reference ↗</a>
+                </nav>
+            </aside>
+
+            <!-- Main content -->
+            <main class="flex-1 min-w-0 px-6 md:px-10 py-10">
+
+                <!-- Experimental banner -->
+                <div class="alert alert-warning mb-10 text-sm flex-col items-start gap-1 sm:flex-row sm:items-center">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <span>The State Builder is an <strong>experimental feature</strong> — the API may change before the stable release.</span>
+                    </div>
+                    <a href="https://github.com/molstar/molstar-components/issues" target="_blank" class="font-semibold underline underline-offset-2 decoration-2 whitespace-nowrap sm:ml-auto">Found a bug or have an idea? Open an issue ↗</a>
+                </div>
+
+                <!-- Overview -->
+                <section id="overview" class="mb-20 scroll-mt-20">
+                    <h1 class="text-4xl font-bold mb-5">State Builder</h1>
+                    <p class="text-base-content/75 text-lg leading-relaxed mb-4">
+                        <code class="badge badge-outline badge-sm">molstar-components</code> provides a visual State Builder for composing
+                        <a href="https://molstar.org/mol-view-spec-docs/" class="link link-primary" target="_blank">MolViewSpec</a> (MVS) scenes,
+                        paired with a Monaco-based code editor. The two are kept in sync — any scene built visually becomes
+                        executable JavaScript, and any script can be loaded back into the visual tree.
+                    </p>
+                    <p class="text-base-content/75 text-lg leading-relaxed mb-6">
+                        The module is designed for two kinds of users: those who prefer a graphical,
+                        point-and-click workflow with no prior knowledge of the MVS data model, and
+                        those who prefer writing code but want guided parameter input for specific node kinds.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                        <div class="card bg-base-200 p-5">
+                            <h3 class="font-semibold mb-1">Visual workflow</h3>
+                            <p class="text-sm text-base-content/65">Add nodes, configure them through dedicated dialogs, preview the result in the viewer — no code required.</p>
+                        </div>
+                        <div class="card bg-base-200 p-5">
+                            <h3 class="font-semibold mb-1">Code workflow</h3>
+                            <p class="text-sm text-base-content/65">Write MVS builder scripts with full type-checking; use hybrid mode to get helper dialogs for individual method calls.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Core Concepts -->
+                <section id="core-concepts" class="mb-20 scroll-mt-20">
+                    <h2 class="text-2xl font-bold mb-3">Core Concepts</h2>
+                    <p class="text-base-content/75 leading-relaxed mb-4">
+                        A scene in this builder is a tree of nodes. Each node is one step in the
+                        visualization pipeline — fetching data, interpreting it, selecting subsets,
+                        and rendering them. The tree can branch: the same parsed structure can have
+                        multiple components, each displayed in a different style simultaneously.
+                    </p>
+                    <p class="text-base-content/75 leading-relaxed mb-8">
+                        The steps below describe the common path. They map directly to the node tree
+                        you see in the builder. The underlying format is
+                        <a href="https://molstar.org/mol-view-spec-docs/" target="_blank" class="link link-primary">MolViewSpec ↗</a>
+                        — the full node reference is there if you need details beyond what the builder exposes.
+                    </p>
+
+                    <!-- Steps -->
+                    <div class="flex flex-col gap-5 mb-10">
+
+                        <!-- Step 1 -->
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center shrink-0">
+                                <span class="badge badge-primary w-7 h-7 text-sm font-bold shrink-0">1</span>
+                                <div class="w-px flex-1 bg-base-content/10 mt-2"></div>
+                            </div>
+                            <div class="pb-2">
+                                <h3 class="font-semibold mb-1">Add a structure source
+                                    <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#download" target="_blank" class="text-xs font-mono font-normal text-base-content/40 hover:text-primary ml-2">download / parse ↗</a>
+                                </h3>
+                                <p class="text-sm text-base-content/65 leading-relaxed">
+                                    In the builder, the first node you add is <strong>Download/Parse</strong> — a combined step
+                                    where you supply the URL of your structure file and select its format
+                                    (<code class="badge badge-xs badge-ghost font-mono">mmCIF</code>,
+                                    <code class="badge badge-xs badge-ghost font-mono">BinaryCIF</code>,
+                                    <code class="badge badge-xs badge-ghost font-mono">PDB</code>).
+                                    The Setup Wizard creates this automatically from the URL you enter in step 1.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center shrink-0">
+                                <span class="badge badge-primary w-7 h-7 text-sm font-bold shrink-0">2</span>
+                                <div class="w-px flex-1 bg-base-content/10 mt-2"></div>
+                            </div>
+                            <div class="pb-2">
+                                <h3 class="font-semibold mb-1">Choose the structure type
+                                    <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#structure" target="_blank" class="text-xs font-mono font-normal text-base-content/40 hover:text-primary ml-2">structure ↗</a>
+                                </h3>
+                                <p class="text-sm text-base-content/65 leading-relaxed mb-2">
+                                    Add a <strong>Structure</strong> node under Download/Parse. This tells the viewer how to
+                                    interpret the coordinate file — the same file can describe the molecule several ways:
+                                </p>
+                                <ul class="text-sm text-base-content/65 space-y-1 pl-4">
+                                    <li><strong class="text-base-content/80">model</strong> — the deposited asymmetric unit. The most common starting point for a PDB entry; no assembly copies are generated.</li>
+                                    <li><strong class="text-base-content/80">assembly</strong> — a biological assembly defined in the file, identified by its ID (<code class="badge badge-xs badge-ghost font-mono">"1"</code>, <code class="badge badge-xs badge-ghost font-mono">"2"</code>, …). The functional form of a protein is often assembly <code class="badge badge-xs badge-ghost font-mono">"1"</code>.</li>
+                                    <li><strong class="text-base-content/80">symmetry</strong> — a crystallographic unit cell, supercell, or individual NMR model.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center shrink-0">
+                                <span class="badge badge-primary w-7 h-7 text-sm font-bold shrink-0">3</span>
+                                <div class="w-px flex-1 bg-base-content/10 mt-2"></div>
+                            </div>
+                            <div class="pb-2">
+                                <h3 class="font-semibold mb-1">Select what to show
+                                    <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#component" target="_blank" class="text-xs font-mono font-normal text-base-content/40 hover:text-primary ml-2">component ↗</a>
+                                    <a href="https://molstar.org/mol-view-spec-docs/selectors/" target="_blank" class="text-xs font-mono font-normal text-base-content/40 hover:text-primary ml-1">selector syntax ↗</a>
+                                </h3>
+                                <p class="text-sm text-base-content/65 leading-relaxed">
+                                    Add one or more <strong>Component</strong> nodes under the Structure. Each component selects
+                                    a subset of atoms or residues. Built-in group selectors let you quickly target
+                                    <code class="badge badge-xs badge-ghost font-mono">polymer</code>,
+                                    <code class="badge badge-xs badge-ghost font-mono">protein</code>,
+                                    <code class="badge badge-xs badge-ghost font-mono">nucleic</code>,
+                                    <code class="badge badge-xs badge-ghost font-mono">branched</code>,
+                                    <code class="badge badge-xs badge-ghost font-mono">ligand</code>,
+                                    <code class="badge badge-xs badge-ghost font-mono">ion</code>, or
+                                    <code class="badge badge-xs badge-ghost font-mono">water</code>.
+                                    For finer control the selector helper lets you filter by chain, residue range, or atom.
+                                    Multiple components branch independently — use this to display the backbone as a cartoon
+                                    and a ligand as ball-and-stick in the same view.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center shrink-0">
+                                <span class="badge badge-primary w-7 h-7 text-sm font-bold shrink-0">4</span>
+                                <div class="w-px flex-1 bg-base-content/10 mt-2"></div>
+                            </div>
+                            <div class="pb-2">
+                                <h3 class="font-semibold mb-1">Add a representation
+                                    <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#representation" target="_blank" class="text-xs font-mono font-normal text-base-content/40 hover:text-primary ml-2">representation ↗</a>
+                                </h3>
+                                <p class="text-sm text-base-content/65 leading-relaxed mb-2">
+                                    Add a <strong>Representation</strong> node under each component to decide how it is drawn.
+                                    Common styles:
+                                </p>
+                                <ul class="text-sm text-base-content/65 space-y-1 pl-4">
+                                    <li><strong class="text-base-content/80">cartoon</strong> — ribbon diagram emphasising secondary structure; the default and standard view for proteins.</li>
+                                    <li><strong class="text-base-content/80">ball_and_stick</strong> — individual atoms and bonds; good for ligands and active-site residues.</li>
+                                    <li><strong class="text-base-content/80">surface</strong> — molecular surface; shows the overall shape and binding pockets.</li>
+                                    <li><strong class="text-base-content/80">spacefill</strong> — van der Waals spheres; emphasises atomic volume.</li>
+                                    <li class="text-base-content/45">Others: <code class="font-mono text-xs">backbone</code>, <code class="font-mono text-xs">line</code>, <code class="font-mono text-xs">carbohydrate</code>.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Step 5 -->
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center shrink-0">
+                                <span class="badge badge-primary w-7 h-7 text-sm font-bold shrink-0">5</span>
+                                <div class="w-px flex-1 bg-base-content/10 mt-2"></div>
+                            </div>
+                            <div class="pb-2">
+                                <h3 class="font-semibold mb-1">Apply color
+                                    <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#color" target="_blank" class="text-xs font-mono font-normal text-base-content/40 hover:text-primary ml-2">color ↗</a>
+                                </h3>
+                                <p class="text-sm text-base-content/65 leading-relaxed">
+                                    Add a <strong>Color</strong> node under a representation to color it.
+                                    Colors are entered as hex codes or SVG color names.
+                                    Stack multiple Color nodes to layer overrides — for example, a uniform base color
+                                    followed by a per-residue highlight. Scheme-based coloring (by chain, element, B-factor, etc.)
+                                    is also available via the
+                                    <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#color" target="_blank" class="link link-primary">color schema reference ↗</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Going further -->
+                    <h3 class="font-semibold mb-3 text-base-content/80">Going further</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#camera" target="_blank" class="bg-base-200 rounded-lg p-4 hover:bg-base-300 transition-colors group">
+                            <span class="font-mono text-sm font-semibold group-hover:text-primary transition-colors">camera</span>
+                            <p class="text-xs text-base-content/60 mt-1">Explicitly set camera position and target point for fully reproducible viewpoints.</p>
+                        </a>
+                        <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#label" target="_blank" class="bg-base-200 rounded-lg p-4 hover:bg-base-300 transition-colors group">
+                            <span class="font-mono text-sm font-semibold group-hover:text-primary transition-colors">label / tooltip</span>
+                            <p class="text-xs text-base-content/60 mt-1">Attach 3D text annotations to components. Tooltips appear on mouse interaction rather than always visible.</p>
+                        </a>
+                        <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#transform" target="_blank" class="bg-base-200 rounded-lg p-4 hover:bg-base-300 transition-colors group">
+                            <span class="font-mono text-sm font-semibold group-hover:text-primary transition-colors">transform</span>
+                            <p class="text-xs text-base-content/60 mt-1">Apply a rotation and translation to a structure — the basis for superimposing two structures in the same scene.</p>
+                        </a>
+                        <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#opacity" target="_blank" class="bg-base-200 rounded-lg p-4 hover:bg-base-300 transition-colors group">
+                            <span class="font-mono text-sm font-semibold group-hover:text-primary transition-colors">opacity</span>
+                            <p class="text-xs text-base-content/60 mt-1">Make a representation transparent — useful for showing buried elements through a surface.</p>
+                        </a>
+                        <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#component_from_uri" target="_blank" class="bg-base-200 rounded-lg p-4 hover:bg-base-300 transition-colors group">
+                            <span class="font-mono text-sm font-semibold group-hover:text-primary transition-colors">component / color / label from URI</span>
+                            <p class="text-xs text-base-content/60 mt-1">Drive selections, coloring, or labels from external annotation files (CIF, BinaryCIF, JSON), keeping scene description and data separate.</p>
+                        </a>
+                        <a href="https://molstar.org/mol-view-spec-docs/tree-schema/#primitives" target="_blank" class="bg-base-200 rounded-lg p-4 hover:bg-base-300 transition-colors group">
+                            <span class="font-mono text-sm font-semibold group-hover:text-primary transition-colors">primitives</span>
+                            <p class="text-xs text-base-content/60 mt-1">Draw geometric shapes — arrows, lines, spheres, boxes — to annotate or highlight regions of interest.</p>
+                        </a>
+                    </div>
+                    <p class="text-base-content/60 text-sm mt-5">
+                        See the <a href="#advanced-example" class="link">Advanced Example</a> for a live demo combining primitives, opacity animation, and ligand selections in one scene.
+                    </p>
+                </section>
+
+                <!-- State Builder -->
+                <section id="state-builder" class="mb-20 scroll-mt-20">
+                    <h2 class="text-2xl font-bold mb-3">Visual Node Tree</h2>
+                    <p class="text-base-content/75 leading-relaxed mb-4">
+                        The visual editor represents an MVS scene as a tree of typed nodes. Each node
+                        corresponds to one step in the MolViewSpec pipeline — download a file, parse it,
+                        select components, apply representations and colors, and more.
+                    </p>
+                    <ul class="list-none space-y-2 mb-6">
+                        <li class="flex items-start gap-2 text-sm text-base-content/75">
+                            <span class="text-primary mt-0.5">→</span>
+                            <span><strong>Node grammar enforced</strong> — only valid child kinds are offered in the add-child menu, preventing invalid configurations.</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-base-content/75">
+                            <span class="text-primary mt-0.5">→</span>
+                            <span><strong>Per-kind helper dialogs</strong> — clicking a node summary opens a dedicated configuration modal tailored to that node's parameter schema.</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-base-content/75">
+                            <span class="text-primary mt-0.5">→</span>
+                            <span><strong>Ref field</strong> — optional named reference on any node; used to target nodes from <code class="badge badge-sm badge-ghost font-mono">interpolate</code> steps in animations.</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-base-content/75">
+                            <span class="text-primary mt-0.5">→</span>
+                            <span><strong>Generate Code</strong> — converts the current tree into an executable JavaScript snippet using the MVS builder API.</span>
+                        </li>
+                    </ul>
+                    <div id="demo-builder"></div>
+                </section>
+
+                <!-- Setup Wizard -->
+                <section id="wizard" class="mb-20 scroll-mt-20">
+                    <h2 class="text-2xl font-bold mb-3">Setup Wizard</h2>
+                    <p class="text-base-content/75 leading-relaxed mb-4">
+                        When the node tree is empty, the Setup Wizard guides you through the most common
+                        scene composition pattern in three steps — no prior knowledge of the MVS data model required.
+                    </p>
+                    <ol class="list-none space-y-2 mb-6">
+                        <li class="flex items-start gap-3 text-sm text-base-content/75">
+                            <span class="badge badge-primary badge-sm shrink-0 mt-0.5">1</span>
+                            <span><strong>Source</strong> — enter a structure URL and select the file format. Creates the <code class="badge badge-sm badge-ghost font-mono">download</code> and <code class="badge badge-sm badge-ghost font-mono">parse</code> nodes.</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-base-content/75">
+                            <span class="badge badge-primary badge-sm shrink-0 mt-0.5">2</span>
+                            <span><strong>Structure type</strong> — choose between model, assembly, symmetry, or other structure modes.</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-base-content/75">
+                            <span class="badge badge-primary badge-sm shrink-0 mt-0.5">3</span>
+                            <span><strong>Components</strong> — define one or more component groups, each with a selector, representation type, color, and optional opacity or label.</span>
+                        </li>
+                    </ol>
+                    <div class="bg-base-200 rounded-lg px-4 py-3 mb-1 flex items-center gap-3 flex-wrap">
+                        <span class="text-xs text-base-content/50 shrink-0">Try with:</span>
+                        <code class="text-xs font-mono text-base-content/80 flex-1 min-w-0 truncate">https://www.ebi.ac.uk/pdbe/entry-files/1cbs.bcif</code>
+                        <span class="text-xs text-base-content/40 shrink-0">format: <strong class="text-base-content/60">bcif</strong></span>
+                        <button
+                            class="btn btn-xs btn-ghost shrink-0"
+                            onclick="navigator.clipboard.writeText('https://www.ebi.ac.uk/pdbe/entry-files/1cbs.bcif').then(() => { this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy', 1500); })"
+                        >Copy</button>
+                    </div>
+                    <p class="text-xs text-base-content/45 mb-4 px-1">As with most PDB structures, <strong class="text-base-content/55">model</strong> with defaults works fine here.</p>
+                    <div id="demo-wizard"></div>
+                </section>
+
+                <!-- Advanced Example -->
+                <section id="advanced-example" class="mb-20 scroll-mt-20">
+                    <h2 class="text-2xl font-bold mb-3">Advanced Example</h2>
+                    <p class="text-base-content/75 leading-relaxed mb-4">
+                        The example below loads hemoglobin (1OG5 assembly), colors two ligands individually,
+                        adds ellipsoid markers around each ligand and a distance measurement primitive,
+                        then animates the opacity of both so they fade in sequentially. Switch to the
+                        <strong>Editor</strong> tab to read or modify the code, or stay in the <strong>Builder</strong>
+                        tab to inspect the node tree visually.
+                    </p>
+                    <p class="text-base-content/75 leading-relaxed mb-6">
+                        For a broader showcase of MolViewSpec capabilities across many scene types, explore the
+                        <a href="https://molstar.org/stories-viewer/v1/?story-url=https%3A%2F%2Fraw.githubusercontent.com%2Fmolstar%2Fmol-view-stories%2Frefs%2Fheads%2Fmain%2F%2540mol-view-stories%2Fwebapp%2Fpublic%2Fexamples%2Fmvs-features%2Fstory.mvsx&data-format=mvsx&story-session-url=https%3A%2F%2Fraw.githubusercontent.com%2Fmolstar%2Fmol-view-stories%2Frefs%2Fheads%2Fmain%2F%2540mol-view-stories%2Fwebapp%2Fpublic%2Fexamples%2Fmvs-features%2Fstory.mvstory"
+                           target="_blank" class="link link-primary">MolViewSpec features story ↗</a>.
+                    </p>
+                    <div id="demo-advanced"></div>
+                </section>
+
+                <!-- Monaco & Hybrid Mode -->
+                <section id="hybrid-mode" class="mb-20 scroll-mt-20">
+                    <h2 class="text-2xl font-bold mb-3">Monaco Editor &amp; Hybrid Mode</h2>
+                    <p class="text-base-content/75 leading-relaxed mb-4">
+                        The built-in Monaco editor has the full MVS builder API injected as TypeScript
+                        definitions, giving you type-checking and autocomplete as you write scenes in code.
+                    </p>
+                    <p class="text-base-content/75 leading-relaxed mb-4">
+                        With <strong>hybrid mode</strong> enabled, right-clicking any
+                        <code class="badge badge-sm badge-ghost font-mono">.component()</code>,
+                        <code class="badge badge-sm badge-ghost font-mono">.color()</code>,
+                        <code class="badge badge-sm badge-ghost font-mono">.transform()</code>, or
+                        <code class="badge badge-sm badge-ghost font-mono">.camera()</code> call opens
+                        the same helper dialog used in the visual builder — parameters are read from
+                        the call, and writing them back updates the source code in place.
+                    </p>
+                    <div class="alert alert-info mb-6 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Switch to the <strong>Editor</strong> tab in the demo below, then right-click a <code>.component(...)</code> call and choose <strong>Edit Selector with Helper</strong>, or right-click a <code>.color(...)</code> call and choose <strong>Pick Color with Helper</strong>.</span>
+                    </div>
+                    <div id="demo-hybrid"></div>
+                </section>
+
+                <!-- Bidirectional Sync -->
+                <section id="sync" class="mb-20 scroll-mt-20">
+                    <h2 class="text-2xl font-bold mb-3">Bidirectional Sync</h2>
+                    <p class="text-base-content/75 leading-relaxed mb-4">
+                        The visual builder and the code editor are kept in sync in both directions.
+                        Clicking <strong>Generate Code</strong> in the builder tab produces a JavaScript
+                        snippet and pushes it to the editor. Going the other way, clicking <strong>→ Sync to Builder</strong>
+                        in the editor tab executes the current script and reconstructs the visual node tree
+                        from the resulting MVS data.
+                    </p>
+                    <div class="alert alert-info mb-4 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>The builder below starts empty. Switch to the <strong>Code</strong> tab — a scene is already loaded there. Click <strong>→ Sync to Builder</strong> to import it into the visual tree.</span>
+                    </div>
+                    <div class="bg-base-200 rounded-lg p-4 text-sm text-base-content/65 mb-6">
+                        <strong class="text-base-content/80">Round-trip note:</strong> sync-to-builder works by executing the code
+                        and converting the resulting MVS tree into nodes — not by parsing the source text.
+                        Control flow, helper functions, and variable abstractions in the original script are not preserved.
+                        Re-generating code from the reconstructed tree produces structurally equivalent but textually different output.
+                    </div>
+                    <div id="demo-sync"></div>
+                </section>
+
+                <!-- Installation -->
+                <section id="installation" class="mb-20 scroll-mt-20">
+                    <h2 class="text-2xl font-bold mb-5">Installation</h2>
+
+                    <h3 class="text-lg font-semibold mb-2">Install from JSR</h3>
+                    <pre class="rounded-lg overflow-x-auto text-sm mb-6"><code class="language-bash">pnpm add jsr:@molstar/molstar-components</code></pre>
+
+                    <h3 class="text-lg font-semibold mb-2">Import CSS</h3>
+                    <p class="text-sm text-base-content/65 mb-3">Import library CSS before your app's global styles so your Tailwind base resets take precedence.</p>
+                    <pre class="rounded-lg overflow-x-auto text-sm mb-6"><code class="language-typescript">// layout.tsx or equivalent
+import '@molstar/molstar-components/state-builder-ui.css';
+import 'molstar/build/viewer/molstar.css';
+import './globals.css'; // your app styles last</code></pre>
+
+                    <h3 class="text-lg font-semibold mb-2">Full combo component</h3>
+                    <p class="text-sm text-base-content/65 mb-3">The <code class="badge badge-ghost badge-sm font-mono">BuilderWithEditorAndViewer</code> component bundles the visual builder, Monaco editor, and Molstar viewer in a single two-panel layout.</p>
+                    <pre class="rounded-lg overflow-x-auto text-sm mb-6"><code class="language-jsx">import { BuilderWithEditorAndViewer } from '@molstar/molstar-components';
+
+&lt;BuilderWithEditorAndViewer
+  height="700px"
+  hybridMode={true}
+  autoRun={true}
+  onCodeGenerated={(code) =&gt; console.log(code)}
+/&gt;</code></pre>
+
+                    <h3 class="text-lg font-semibold mb-2">Custom layout</h3>
+                    <p class="text-sm text-base-content/65 mb-3">Use <code class="badge badge-ghost badge-sm font-mono">UIBuilderProvider</code> and <code class="badge badge-ghost badge-sm font-mono">UIBuilder</code> directly to embed the visual builder into your own layout.</p>
+                    <pre class="rounded-lg overflow-x-auto text-sm mb-6"><code class="language-jsx">import { UIBuilderProvider, UIBuilder } from '@molstar/molstar-components';
+
+&lt;UIBuilderProvider
+  onCodeGenerated={(code) =&gt; runCode(code)}
+  onNotification={(n) =&gt; toast(n.message)}
+&gt;
+  &lt;UIBuilder /&gt;
+&lt;/UIBuilderProvider&gt;</code></pre>
+
+                    <p class="text-sm text-base-content/60">
+                        For cross-repo development with a local build, see
+                        <a href="https://github.com/molstar/molstar-components/blob/main/DEV.md" target="_blank" class="link link-primary">DEV.md</a>
+                        for the full setup guide including pnpm <code>file:</code> protocol configuration,
+                        theming, viewer integration, and the imperative <code>UIBuilderHandle</code> API.
+                    </p>
+                </section>
+
+            </main>
+        </div>
+
+        <!-- Highlight.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+
+        <!-- Docs bundle -->
+        <script type="module" src="./docs.bundle.js"></script>
+    </body>
+</html>

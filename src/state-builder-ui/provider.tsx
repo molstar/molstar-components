@@ -13,35 +13,72 @@ import { AutoGenerateOnMountContext } from './state/auto-generate-context.ts';
 import { StateChangeContext, type StateChangeFn } from './state/state-change-context.ts';
 import { StoryConstantsContext } from './state/story-constants-context.ts';
 
+/** A point-in-time snapshot of the full builder state for a single scene. */
 export interface UIBuilderSnapshot {
+  /** MVS node tree representing the current scene structure. */
   nodes: UINode[];
+  /** Story-level constant definitions (colors, URLs, etc.). */
   constants: ConstantDefinition[];
+  /** Camera position/orientation, or `null` if not set. */
   camera: CameraParams | null;
+  /** Animation parameters, or `null` if no animation is configured. */
   animation: AnimationParams | null;
 }
 
+/** Imperative handle exposing read/write access to the builder state. */
 export interface UIBuilderHandle {
+  /** Set the camera from a Molstar snapshot (e.g. captured from the viewer). */
   setCamera: (camera: CameraParams) => void;
+  /** Return the current complete builder state as a snapshot. */
   getState: () => UIBuilderSnapshot;
   /** Bulk-set any subset of builder state. Unspecified keys are left unchanged. */
   setState: (snapshot: Partial<UIBuilderSnapshot>) => void;
 }
 
+/** Props for `UIBuilderProvider`. */
 export interface UIBuilderProviderProps {
+  /** React subtree that consumes the builder state (typically `<UIBuilder />`). */
   children: React.ReactNode;
+  /** Identifier for the active scene; used to namespace per-scene state atoms. @defaultValue "default" */
   sceneKey?: string;
+  /** Molstar plugin instance used for structure metadata and camera capture. */
   plugin?: PluginUIContext | null;
+  /** Current camera snapshot from the viewer, forwarded to camera helpers. */
   cameraSnapshot?: unknown;
+  /** Called whenever the builder generates new MVS JavaScript code. */
   onCodeGenerated?: (code: string) => void;
+  /** Called to surface toast/notification messages to the host application. */
   onNotification?: NotifyFn;
+  /** Initial state applied once on mount. Subsequent changes are ignored. */
   initialState?: Partial<UIBuilderSnapshot>;
+  /** Per-scene initial state; re-applied whenever `sceneKey` changes. */
   sceneInitialState?: Partial<UIBuilderSnapshot>;
+  /** Called on every state mutation with the new state. */
   onStateChange?: StateChangeFn;
+  /** When true, triggers code generation automatically on the first mount. @defaultValue false */
   autoGenerateOnMount?: boolean;
+  /** Story-level constants shared across all scenes (read-only from the builder). */
   storyConstants?: ConstantDefinition[];
+  /** Called when the user edits story-level constants from within the builder. */
   onStoryConstantsChange?: (constants: ConstantDefinition[]) => void;
 }
 
+/**
+ * Context provider that isolates per-scene builder state using a Jotai store.
+ *
+ * Accepts an optional `ref` (typed as `UIBuilderHandle`) for imperative access.
+ * Wrap one or more `<UIBuilder />` trees inside this provider; all builder
+ * components within share the same Jotai store and react to the same atoms.
+ *
+ * @example
+ * ```tsx
+ * const ref = useRef<UIBuilderHandle>(null);
+ *
+ * <UIBuilderProvider ref={ref} onCodeGenerated={setCode}>
+ *   <UIBuilder />
+ * </UIBuilderProvider>
+ * ```
+ */
 export const UIBuilderProvider: ForwardRefExoticComponent<
   UIBuilderProviderProps & RefAttributes<UIBuilderHandle>
 > = forwardRef<UIBuilderHandle, UIBuilderProviderProps>(

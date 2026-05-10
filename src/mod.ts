@@ -17,17 +17,17 @@
  * ## Installation
  *
  * ```bash
- * # Using JSR
- * deno add @zachcp/molstar-components
+ * # Using JSR (Deno)
+ * deno add @molstar/molstar-components
  *
  * # Using npm
- * npx jsr add @zachcp/molstar-components
+ * npx jsr add @molstar/molstar-components
  * ```
  *
  * ## Usage
  *
  * ```tsx
- * import { MolstarViewer, EditorWithViewer } from "@zachcp/molstar-components";
+ * import { MolstarViewer, EditorWithViewer } from "@molstar/molstar-components";
  *
  * // Display a molecular structure
  * function App() {
@@ -64,8 +64,9 @@
  *
  * ## Requirements
  *
- * - Molstar viewer library (loaded from CDN or bundled)
- * - Monaco editor (for code editing features)
+ * - Molstar 5.7+ (peer dependency — bundled by the consuming app)
+ * - Monaco Editor 0.55+ (for code editing features)
+ * - React 18+
  * - Modern browser with ES2022 support
  *
  * @module

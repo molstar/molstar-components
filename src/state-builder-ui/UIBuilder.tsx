@@ -63,6 +63,16 @@ import { StructureMetadataProvider } from './StructureMetadataContext.tsx';
 import { SetupWizard } from './SetupWizard.tsx';
 import { AfterApplyContext } from './state/after-apply-context.ts';
 
+/**
+ * Visual MVS node-tree builder UI.
+ *
+ * Must be rendered inside a `UIBuilderProvider`. Renders the full builder
+ * interface — structure tree, constants panel, camera section, and animation
+ * timeline — connected to the Jotai atoms provided by the parent context.
+ *
+ * For standalone use, prefer `MolViewStateBuilder` which bundles
+ * `UIBuilderProvider` and `UIBuilder` together with a fixed container size.
+ */
 export function UIBuilder(): React.ReactElement {
   const sceneKey = useAtomValue(SceneKeyAtom);
   const plugin = useAtomValue(PluginAtom) as PluginUIContext | null;

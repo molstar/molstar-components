@@ -38,7 +38,8 @@ jobs:
           name: molstar-components-bundle
           path: |
             docs/molstar-components.js
-            docs/molstar-components.css
+            docs/molstar.css
+            docs/state-builder-ui.css
             docs/editor.worker.js
             docs/ts.worker.js
 

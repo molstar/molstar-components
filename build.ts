@@ -83,7 +83,7 @@ async function build() {
         }),
       ] as any,
       entryPoints: ["./docs/docs.ts"],
-      outfile: "./docs/docs.bundle.js",
+      outfile: "./docs/state-builder-docs.bundle.js",
       bundle: true,
       format: "esm",
       platform: "browser",
@@ -101,7 +101,7 @@ async function build() {
       publicPath: "./",
     });
 
-    console.log("✓ Docs feature overview bundle created: docs/docs.bundle.js");
+    console.log("✓ Docs feature overview bundle created: docs/state-builder-docs.bundle.js");
 
     // Build Monaco editor workers
     console.log("\nBuilding Monaco editor workers...");

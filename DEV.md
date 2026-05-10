@@ -1,23 +1,75 @@
 # Cross-Repo Development Guide
 
-How to use `molstar-components` locally inside a pnpm monorepo (e.g. `mol-view-stories`)
-while actively developing both repos.
+## Standard setup (JSR)
 
-## Overview
+Install from JSR — no build step required:
 
-`molstar-components` is a Deno project published to JSR. For local development
-inside a pnpm monorepo, we build a `dist/` bundle with peer dependencies marked
-external (React, Molstar, Radix UI, etc. are provided by the host app) and
-reference it via pnpm's `file:` protocol, which pnpm installs into its virtual store.
+```bash
+pnpm add jsr:@molstar/molstar-components
+```
 
-## Prerequisites
+### CSS
 
-- `molstar-components` cloned at `~/dev/molstar-components`
-- `mol-view-stories` (or your pnpm project) cloned at `~/dev/mol-view-stories`
+The library ships CSS variables via the `state-builder-ui.css` sub-path export.
+Import it before your app's own global styles, then point Tailwind at the
+library source so it scans and generates the utility classes:
 
-## One-time setup
+```ts
+// layout.tsx (or equivalent) — import CSS variables
+import '@molstar/molstar-components/state-builder-ui.css';
+import 'molstar/build/viewer/molstar.css';
+import './globals.css';
+```
 
-### Step 1 — Build the dist bundle
+In your Tailwind entry CSS, add an `@source` pointing at the library's
+`src/state-builder-ui` directory inside `node_modules`:
+
+```css
+@source "<path-to-node_modules>/@molstar/molstar-components/src/state-builder-ui";
+```
+
+The exact relative path depends on where your CSS file lives relative to
+`node_modules` in your project. The library's `src/state-builder-ui/styles.css`
+contains only CSS variable defaults (in `@layer state-builder-ui-defaults`);
+they lose to any non-layered `:root` declarations your app defines.
+
+---
+
+## Local file: development (active editing of both repos)
+
+Use this only when actively editing `molstar-components` and `mol-view-stories`
+in parallel. Normal consumption uses JSR above.
+
+### Step 1 — Create a local `package.json`
+
+`package.json` is gitignored in this repo. Create it manually at the repo root:
+
+```json
+{
+  "name": "@molstar/molstar-components",
+  "version": "0.6.0-experimental.1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./src/mod.ts"
+    },
+    "./state-builder-ui.css": "./dist/state-builder-ui.css",
+    "./molstar.css": "./dist/molstar.css"
+  },
+  "files": ["dist", "src"],
+  "sideEffects": ["*.css"],
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "molstar": ">=5.0.0",
+    "jotai": ">=2.0.0",
+    "monaco-editor": ">=0.55.0"
+  }
+}
+```
+
+### Step 2 — Build the dist bundle
 
 ```bash
 cd ~/dev/molstar-components
@@ -25,15 +77,13 @@ deno task build:dist
 # produces dist/index.js, dist/state-builder-ui.css, dist/molstar.css
 ```
 
-### Step 2 — Add the file: dependency
+### Step 3 — Add the file: dependency
 
-In your consuming workspace package (e.g. `@mol-view-stories/webapp`), edit `package.json`:
+In the consuming workspace package (e.g. `@mol-view-stories/webapp`), set:
 
 ```json
 "@molstar/molstar-components": "file:../../../molstar-components"
 ```
-
-(adjust the relative path to wherever `molstar-components` lives relative to `package.json`)
 
 Then install:
 
@@ -42,46 +92,28 @@ cd ~/dev/mol-view-stories
 pnpm install
 ```
 
-### Step 3 — Import CSS
+### Step 4 — TypeScript paths (optional)
 
-The library ships pre-built CSS. Import it **before** your app's own global styles so
-the app's Tailwind base resets take precedence:
-
-```ts
-// layout.tsx or equivalent — library CSS first, app CSS last
-import '@molstar/molstar-components/state-builder-ui.css';
-import 'molstar/build/viewer/molstar.css';
-import './globals.css';  // app Tailwind — wins over library resets
-```
-
-### Step 4 — TypeScript paths (for type resolution through library source)
-
-Add to your `tsconfig.json` paths so TypeScript can follow types into the vendored source:
+For type resolution directly into library source, add to `tsconfig.json`:
 
 ```json
 "@molstar/state-builder": ["../../../molstar-components/src/state-builder/index.ts"],
 "@molstar/state-builder/*": ["../../../molstar-components/src/state-builder/*"]
 ```
 
-### Step 5 — Use the components
-
-```tsx
-import { BuilderWithViewer, MolViewStateBuilder, UIBuilderProvider, UIBuilder } from "@molstar/molstar-components";
-```
-
-## Day-to-day workflow
+### Day-to-day workflow
 
 After editing source in `molstar-components`:
 
 ```bash
 cd ~/dev/molstar-components
 deno task build:dist
-cd ~/dev/mol-view-stories && pnpm install   # re-copies updated dist into pnpm store
-# restart Next.js dev server to pick up changes
+cd ~/dev/mol-view-stories && pnpm install
+# restart Next.js dev server
 ```
 
-> Note: pnpm `file:` installs a copy into the virtual store (not a live symlink), so
-> `pnpm install` is needed after each rebuild to pick up changes.
+> pnpm `file:` installs a copy into the virtual store (not a symlink), so
+> `pnpm install` is required after every rebuild.
 
 ---
 
@@ -245,11 +277,3 @@ If `onNotification` is not provided, messages fall back to `console.log`.
 | `jotai` | 2.x |
 | `monaco-editor` | 0.55+ |
 | `@radix-ui/*` | as in deno.json |
-
-## Published package
-
-For production / CI, install from JSR:
-
-```bash
-pnpm add jsr:@molstar/molstar-components
-```

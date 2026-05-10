@@ -1,8 +1,11 @@
 {
   "name": "@molstar/molstar-components",
-  "version": "0.6.0-experimental.0",
+  "version": "0.6.0-experimental.1",
   "license": "MIT",
-  "exports": "./src/mod.ts",
+  "exports": {
+    ".": "./src/mod.ts",
+    "./state-builder-ui.css": "./src/state-builder-ui/styles.css"
+  },
   "imports": {
     "react": "npm:react@19.2.3",
     "react/jsx-runtime": "npm:react@19.2.3/jsx-runtime",

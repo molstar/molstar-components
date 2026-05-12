@@ -1,6 +1,6 @@
 {
   "name": "@molstar/molstar-components",
-  "version": "0.6.0-experimental.7",
+  "version": "0.6.0-experimental.8",
   "license": "MIT",
   "exports": "./dist/index.js",
   "imports": {
@@ -16,6 +16,11 @@
     "monaco-editor/markdown-language": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/markdown/markdown.js",
     "monaco-editor/workers/editor": "npm:monaco-editor@0.55.1/esm/vs/editor/editor.worker.js",
     "monaco-editor/workers/typescript": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/ts.worker.js",
+    "monaco-editor/esm/vs/language/typescript/monaco.contribution": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/monaco.contribution",
+    "monaco-editor/esm/vs/basic-languages/javascript/javascript": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/javascript/javascript",
+    "monaco-editor/esm/vs/basic-languages/markdown/markdown": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/markdown/markdown",
+    "monaco-editor/esm/vs/editor/editor.worker": "npm:monaco-editor@0.55.1/esm/vs/editor/editor.worker",
+    "monaco-editor/esm/vs/language/typescript/ts.worker": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/ts.worker",
     "molstar/lib/extensions/mvs/mvs-data.js": "npm:molstar@5.8.0/lib/extensions/mvs/mvs-data.js",
     "molstar/lib/extensions/mvs/tree/mvs/mvs-tree": "npm:molstar@5.8.0/lib/extensions/mvs/tree/mvs/mvs-tree.js",
     "molstar/lib/extensions/mvs/tree/generic/tree-schema": "npm:molstar@5.8.0/lib/extensions/mvs/tree/generic/tree-schema.js",

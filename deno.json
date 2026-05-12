@@ -1,8 +1,8 @@
 {
   "name": "@molstar/molstar-components",
-  "version": "0.6.0-experimental.3",
+  "version": "0.6.0-experimental.4",
   "license": "MIT",
-  "exports": "./src/mod.ts",
+  "exports": "./dist/index.js",
   "imports": {
     "react": "npm:react@19.2.3",
     "react/jsx-runtime": "npm:react@19.2.3/jsx-runtime",
@@ -55,13 +55,13 @@
   "tasks": {
     "test": "deno run --allow-all npm:vitest run src/state-builder",
     "mvs-types": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-sys npm:rollup@4 -c scripts/rollup-mvs-data-bundle.config.mjs && deno run --allow-read --allow-write scripts/process-mvs-types.mjs",
-    "build:dist": "deno run --allow-all build-dev.ts",
+    "build:dist": "deno run --allow-all build-dist.ts",
     "clean": "rm -f docs/bundle.js docs/bundle.js.map docs/bundle.css docs/docs.bundle.js docs/docs.bundle.css docs/molstar-components.js docs/molstar-components.js.map docs/molstar-components.css docs/editor.worker.js docs/ts.worker.js docs/state-builder-ui.css docs/molstar.css && rm -rf docs/assets dist",
     "build": "deno task clean && deno run --allow-all build.ts",
     "serve": "deno run --allow-net --allow-read jsr:@std/http/file-server --host 127.0.0.1 -p 8000 docs",
-    "dev": "deno task build && deno task serve"
+    "dev": "deno task build && deno task build:dist && deno task serve"
   },
-  "exclude": ["docs/", ".github/", "context/", ".claude/", "CLAUDE.md", "docs/superpowers/", "src/state-builder/compiler/__tests__", "src/state-builder/types/__tests__"],
+  "exclude": ["docs/", ".github/", "context/", ".claude/", "CLAUDE.md", "docs/superpowers/", "src/state-builder/compiler/__tests__", "src/state-builder/types/__tests__", "!dist/"],
   "lint": {
     "exclude": ["src/state-builder/", "src/state-builder-ui/", "scripts/"]
   },

@@ -17,26 +17,37 @@ import { resolve } from "@std/path";
 
 const configPath = resolve(Deno.cwd(), "./deno.json");
 
-// Deno import-map aliases (e.g. "monaco-editor/typescript-contribution") are not
-// valid npm package sub-paths. When esbuild marks them external verbatim they land
-// in the dist as-is and webpack/turbopack can't resolve them. Rewrite them to the
-// real sub-paths that the host app's monaco-editor installation actually exports.
-const monacoAliasRewrites: Record<string, string> = {
-  '"monaco-editor/typescript-contribution"':
-    '"monaco-editor/esm/vs/language/typescript/monaco.contribution"',
-  '"monaco-editor/javascript-language"':
-    '"monaco-editor/esm/vs/basic-languages/javascript/javascript"',
-  '"monaco-editor/workers/editor"':
-    '"monaco-editor/esm/vs/editor/editor.worker"',
-  '"monaco-editor/workers/typescript"':
-    '"monaco-editor/esm/vs/language/typescript/ts.worker"',
-};
-
+// Deno import-map aliases for monaco sub-paths (e.g. "monaco-editor/typescript-contribution")
+// are not valid npm package exports. Depending on whether esbuild's external check fires
+// before or after denoPlugins, the output contains one of two broken forms:
+//   A) verbatim alias: "monaco-editor/typescript-contribution"
+//   B) wrong prefix:   "monaco-editor/esm/vs/editor/editor.api.js/esm/vs/..."
+//      (denoPlugins resolved the alias via the npm: chain and prepended the main-entry path)
+// We fix both forms after the build.
 async function fixMonacoSubPaths(file: string) {
   let src = await Deno.readTextFile(file);
-  for (const [alias, real] of Object.entries(monacoAliasRewrites)) {
+
+  // Fix form B: strip the spurious main-entry prefix produced by denoLoaderPlugin's npm resolution
+  src = src.replaceAll(
+    "monaco-editor/esm/vs/editor/editor.api.js/",
+    "monaco-editor/",
+  );
+
+  // Fix form A: rewrite verbatim Deno aliases to real npm sub-paths
+  const aliasRewrites: Record<string, string> = {
+    '"monaco-editor/typescript-contribution"':
+      '"monaco-editor/esm/vs/language/typescript/monaco.contribution"',
+    '"monaco-editor/javascript-language"':
+      '"monaco-editor/esm/vs/basic-languages/javascript/javascript"',
+    '"monaco-editor/workers/editor"':
+      '"monaco-editor/esm/vs/editor/editor.worker"',
+    '"monaco-editor/workers/typescript"':
+      '"monaco-editor/esm/vs/language/typescript/ts.worker"',
+  };
+  for (const [alias, real] of Object.entries(aliasRewrites)) {
     src = src.replaceAll(alias, real);
   }
+
   await Deno.writeTextFile(file, src);
 }
 

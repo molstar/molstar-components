@@ -18,44 +18,58 @@ import { resolve } from "@std/path";
 const configPath = resolve(Deno.cwd(), "./deno.json");
 
 // Deno import-map aliases for monaco sub-paths (e.g. "monaco-editor/typescript-contribution")
-// are not valid npm package exports. Depending on whether esbuild's external check fires
-// before or after denoPlugins, the output contains one of two broken forms:
-//   A) verbatim alias: "monaco-editor/typescript-contribution"
-//   B) wrong prefix:   "monaco-editor/esm/vs/editor/editor.api.js/esm/vs/..."
-//      (denoPlugins resolved the alias via the npm: chain and prepended the main-entry path)
-// We fix both forms after the build.
-async function fixMonacoSubPaths(file: string) {
-  let src = await Deno.readTextFile(file);
+// are not valid npm package exports. denoResolverPlugin runs before esbuild's external check,
+// so it resolves the aliases to npm: specifiers, and denoLoaderPlugin then produces broken
+// concatenated paths in the output. We intercept ALL monaco imports before denoPlugins sees
+// them, rewriting Deno aliases to real npm sub-paths and marking everything external.
+const monacoExternalPlugin: esbuild.Plugin = {
+  name: "monaco-external",
+  setup(build) {
+    const aliasMap: Record<string, string> = {
+      "monaco-editor/typescript-contribution":
+        "monaco-editor/esm/vs/language/typescript/monaco.contribution",
+      "monaco-editor/javascript-language":
+        "monaco-editor/esm/vs/basic-languages/javascript/javascript",
+      "monaco-editor/markdown-language":
+        "monaco-editor/esm/vs/basic-languages/markdown/markdown",
+      "monaco-editor/workers/editor":
+        "monaco-editor/esm/vs/editor/editor.worker",
+      "monaco-editor/workers/typescript":
+        "monaco-editor/esm/vs/language/typescript/ts.worker",
+    };
+    build.onResolve({ filter: /^monaco-editor(\/|$)/ }, (args) => {
+      const realPath = aliasMap[args.path] ?? args.path;
+      return { path: realPath, external: true };
+    });
+  },
+};
 
-  // Fix form B: strip the spurious main-entry prefix produced by denoLoaderPlugin's npm resolution
-  src = src.replaceAll(
-    "monaco-editor/esm/vs/editor/editor.api.js/",
-    "monaco-editor/",
-  );
-
-  // Fix form A: rewrite verbatim Deno aliases to real npm sub-paths
-  const aliasRewrites: Record<string, string> = {
-    '"monaco-editor/typescript-contribution"':
-      '"monaco-editor/esm/vs/language/typescript/monaco.contribution"',
-    '"monaco-editor/javascript-language"':
-      '"monaco-editor/esm/vs/basic-languages/javascript/javascript"',
-    '"monaco-editor/workers/editor"':
-      '"monaco-editor/esm/vs/editor/editor.worker"',
-    '"monaco-editor/workers/typescript"':
-      '"monaco-editor/esm/vs/language/typescript/ts.worker"',
-  };
-  for (const [alias, real] of Object.entries(aliasRewrites)) {
-    src = src.replaceAll(alias, real);
+async function verifyDist(file: string) {
+  const src = await Deno.readTextFile(file);
+  const broken = "monaco-editor/esm/vs/editor/editor.api.js/";
+  if (src.includes(broken)) {
+    throw new Error(
+      `dist still contains broken monaco path: ${broken}\nRun locally to debug.`,
+    );
   }
-
-  await Deno.writeTextFile(file, src);
+  const aliases = [
+    "monaco-editor/typescript-contribution",
+    "monaco-editor/javascript-language",
+    "monaco-editor/workers/editor",
+    "monaco-editor/workers/typescript",
+  ];
+  for (const alias of aliases) {
+    if (src.includes(`"${alias}"`)) {
+      throw new Error(`dist still contains unresolved Deno alias: "${alias}"`);
+    }
+  }
 }
 
 try {
   // 1. Build the JS bundle with peer deps external
   console.log("Building dist/index.js (peer deps external)...");
   await esbuild.build({
-    plugins: [...denoPlugins({ configPath })] as any,
+    plugins: [monacoExternalPlugin, ...denoPlugins({ configPath })] as any,
     entryPoints: ["./src/mod.ts"],
     outfile: "./dist/index.js",
     bundle: true,
@@ -82,7 +96,7 @@ try {
     assetNames: "assets/[name]-[hash]",
     publicPath: "./",
   });
-  await fixMonacoSubPaths("./dist/index.js");
+  await verifyDist("./dist/index.js");
   console.log("✓ dist/index.js");
 
   // 2. Build Tailwind CSS for state-builder-ui components

@@ -1,6 +1,6 @@
 {
   "name": "@molstar/molstar-components",
-  "version": "0.6.0-experimental.6",
+  "version": "0.6.0-experimental.7",
   "license": "MIT",
   "exports": "./dist/index.js",
   "imports": {
@@ -49,7 +49,7 @@
     "tailwindcss": "npm:tailwindcss@4.2.2",
     "vitest": "npm:vitest@2",
     "esbuild": "npm:esbuild@0.28.0",
-    "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.1",
+    "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@0.11.1",
     "@std/path": "jsr:@std/path@^1.1.4"
   },
   "tasks": {

@@ -1,5 +1,3 @@
-/// <reference path="./monaco-aliases.d.ts" />
-
 /**
  * Molstar Components - React components for molecular visualization
  *

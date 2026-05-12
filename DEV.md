@@ -10,22 +10,36 @@ pnpm add jsr:@molstar/molstar-components
 
 ### CSS
 
-The library ships CSS variables via the `state-builder-ui.css` sub-path export.
-Import it before your app's own global styles, then point Tailwind at the
-library source so it scans and generates the utility classes:
+The library's CSS lives at `src/state-builder-ui/styles.css` (CSS custom property
+defaults) and is included in the JSR package. There is no compiled CSS bundle —
+choose the approach that fits your setup:
+
+**Tailwind v4 consumers (recommended)**
+
+Add `@source` in your Tailwind entry CSS pointing at the library source so
+Tailwind scans and generates the utility classes. Import only the CSS variables:
 
 ```ts
-// layout.tsx (or equivalent) — import CSS variables
-import '@molstar/molstar-components/state-builder-ui.css';
+// layout.tsx — import CSS variables before your own globals
+import '@molstar/molstar-components/src/state-builder-ui/styles.css';
 import 'molstar/build/viewer/molstar.css';
 import './globals.css';
 ```
 
-In your Tailwind entry CSS, add an `@source` pointing at the library's
-`src/state-builder-ui` directory inside `node_modules`:
-
 ```css
+/* your Tailwind entry CSS */
 @source "<path-to-node_modules>/@molstar/molstar-components/src/state-builder-ui";
+```
+
+Adjust the path so it resolves from your CSS file to the package in `node_modules`.
+
+**Non-Tailwind consumers**
+
+Import the CSS variables directly — your own stylesheets are responsible for
+providing any utility classes the builder UI expects:
+
+```ts
+import '@molstar/molstar-components/src/state-builder-ui/styles.css';
 ```
 
 The exact relative path depends on where your CSS file lives relative to
@@ -53,12 +67,9 @@ in parallel. Normal consumption uses JSR above.
     ".": {
       "import": "./dist/index.js",
       "types": "./src/mod.ts"
-    },
-    "./state-builder-ui.css": "./dist/state-builder-ui.css",
-    "./molstar.css": "./dist/molstar.css"
+    }
   },
   "files": ["dist", "src"],
-  "sideEffects": ["*.css"],
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18",

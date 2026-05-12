@@ -17,39 +17,34 @@ import { resolve } from "@std/path";
 
 const configPath = resolve(Deno.cwd(), "./deno.json");
 
-// esbuild checks `external` against the raw import specifier *before* plugins run,
-// so Deno import-map aliases like "monaco-editor/typescript-contribution" would be
-// kept verbatim if caught by the "monaco-editor/*" wildcard — producing an import
-// that webpack/turbopack cannot resolve at runtime. Instead we let this plugin run
-// first: it rewrites the known Deno aliases to their real npm sub-paths and marks
-// those real paths as external, so the output contains valid resolvable specifiers.
-const monacoAliasExternals: esbuild.Plugin = {
-  name: "monaco-alias-externals",
-  setup(build) {
-    const aliasMap: Record<string, string> = {
-      "monaco-editor/typescript-contribution":
-        "monaco-editor/esm/vs/language/typescript/monaco.contribution",
-      "monaco-editor/javascript-language":
-        "monaco-editor/esm/vs/basic-languages/javascript/javascript",
-      "monaco-editor/workers/editor":
-        "monaco-editor/esm/vs/editor/editor.worker",
-      "monaco-editor/workers/typescript":
-        "monaco-editor/esm/vs/language/typescript/ts.worker",
-    };
-    build.onResolve({ filter: /^monaco-editor\// }, (args) => {
-      const real = aliasMap[args.path] ?? args.path;
-      return { path: real, external: true };
-    });
-  },
+// Deno import-map aliases (e.g. "monaco-editor/typescript-contribution") are not
+// valid npm package sub-paths. When esbuild marks them external verbatim they land
+// in the dist as-is and webpack/turbopack can't resolve them. Rewrite them to the
+// real sub-paths that the host app's monaco-editor installation actually exports.
+const monacoAliasRewrites: Record<string, string> = {
+  '"monaco-editor/typescript-contribution"':
+    '"monaco-editor/esm/vs/language/typescript/monaco.contribution"',
+  '"monaco-editor/javascript-language"':
+    '"monaco-editor/esm/vs/basic-languages/javascript/javascript"',
+  '"monaco-editor/workers/editor"':
+    '"monaco-editor/esm/vs/editor/editor.worker"',
+  '"monaco-editor/workers/typescript"':
+    '"monaco-editor/esm/vs/language/typescript/ts.worker"',
 };
+
+async function fixMonacoSubPaths(file: string) {
+  let src = await Deno.readTextFile(file);
+  for (const [alias, real] of Object.entries(monacoAliasRewrites)) {
+    src = src.replaceAll(alias, real);
+  }
+  await Deno.writeTextFile(file, src);
+}
 
 try {
   // 1. Build the JS bundle with peer deps external
   console.log("Building dist/index.js (peer deps external)...");
   await esbuild.build({
-    // monacoAliasExternals must be listed before denoPlugins so it intercepts
-    // the Deno import-map aliases before esbuild's external wildcard can catch them.
-    plugins: [monacoAliasExternals, ...denoPlugins({ configPath })] as any,
+    plugins: [...denoPlugins({ configPath })] as any,
     entryPoints: ["./src/mod.ts"],
     outfile: "./dist/index.js",
     bundle: true,
@@ -62,7 +57,7 @@ try {
       "react", "react/jsx-runtime", "react/jsx-dev-runtime",
       "react-dom", "react-dom/*",
       "jotai", "jotai/*",
-      "monaco-editor",   // exact match for the main entry; sub-paths handled by plugin above
+      "monaco-editor", "monaco-editor/*",
       "molstar", "molstar/*",
       "@radix-ui/*",
       "lucide-react",
@@ -76,6 +71,7 @@ try {
     assetNames: "assets/[name]-[hash]",
     publicPath: "./",
   });
+  await fixMonacoSubPaths("./dist/index.js");
   console.log("✓ dist/index.js");
 
   // 2. Build Tailwind CSS for state-builder-ui components

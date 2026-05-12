@@ -1,16 +1,20 @@
 /**
  * Molstar Components - React components for molecular visualization
  *
- * This package provides ready-to-use Preact components for integrating the Molstar
- * molecular viewer into your web applications. It includes components for displaying
- * molecular structures, editing Mol* View Stories code, and combining both in an
- * interactive development environment.
+ * This package provides React components for integrating the Molstar molecular
+ * viewer into your web applications. It includes components for displaying
+ * molecular structures, editing Mol* View Stories code, a visual state builder UI,
+ * and combinations of all three.
  *
  * ## Features
  *
  * - **MolstarViewer**: Display molecular structures from MVS (Mol* View State) data
  * - **MolViewEditor**: Monaco-based code editor with MVS syntax highlighting and autocompletion
  * - **EditorWithViewer**: Integrated editor and viewer with live code execution
+ * - **UIBuilderProvider + UIBuilder**: Form-based visual builder for constructing MVS node trees
+ * - **MolViewStateBuilder**: Standalone state builder (UIBuilderProvider + UIBuilder combined)
+ * - **BuilderWithViewer**: Visual builder with a live Molstar viewer
+ * - **BuilderWithEditorAndViewer**: Full combo — builder, Monaco editor, and viewer
  *
  * ## Installation
  *
@@ -25,7 +29,12 @@
  * ## Usage
  *
  * ```tsx
- * import { MolstarViewer, EditorWithViewer } from "@molstar/molstar-components";
+ * import {
+ *   MolstarViewer,
+ *   EditorWithViewer,
+ *   UIBuilderProvider,
+ *   UIBuilder,
+ * } from "@molstar/molstar-components";
  *
  * // Display a molecular structure
  * function App() {
@@ -35,6 +44,15 @@
  *       config={{ layoutShowControls: true }}
  *       style={{ height: "600px" }}
  *     />
+ *   );
+ * }
+ *
+ * // Visual state builder with custom layout
+ * function BuilderApp() {
+ *   return (
+ *     <UIBuilderProvider onCodeGenerated={(code) => console.log(code)}>
+ *       <UIBuilder />
+ *     </UIBuilderProvider>
  *   );
  * }
  *
@@ -62,9 +80,10 @@
  *
  * ## Requirements
  *
+ * - React 19+
  * - Molstar 5.7+ (peer dependency — bundled by the consuming app)
  * - Monaco Editor 0.55+ (for code editing features)
- * - React 18+
+ * - Jotai 2.x (for state builder)
  * - Modern browser with ES2022 support
  *
  * @module

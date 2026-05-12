@@ -41,8 +41,8 @@ development, build the npm-compatible dist bundle first:
 deno task build:dist
 ```
 
-This produces `dist/index.js` (React, Molstar, etc. marked external) and the
-required CSS files. See [DEV.md](./DEV.md) for the full cross-repo setup guide.
+This produces `dist/index.js` (React, Molstar, etc. marked external) and
+`dist/state-builder-ui.css` (Tailwind utilities). See [DEV.md](./DEV.md) for the full cross-repo setup guide.
 
 ## Updating molstar
 

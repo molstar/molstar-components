@@ -176,6 +176,70 @@ export const UIBuilderProvider: ForwardRefExoticComponent<
     }));
 
     return (
+      <>
+      {/* Styles are inlined here rather than shipped as a separate CSS file.
+          JSR's generated package.json only exposes the root "." entry in exports,
+          which makes CSS sub-path imports unreliable across bundlers without extra
+          consumer configuration. Inlining via React 19's <style precedence> keeps
+          the component self-contained — no import required, works with any bundler.
+
+          Theme variables live in @layer state-builder-ui-defaults so any unlayered
+          :root declaration in the consumer's stylesheet wins automatically.
+          Override by declaring the same variable names outside a @layer in your CSS.
+
+          The input[type=number] rule is scoped to [data-ui-builder] to avoid
+          affecting number inputs elsewhere on the page. */}
+      <style precedence='low'>{`
+@layer state-builder-ui-defaults {
+  :root {
+    --radius: 0.625rem;
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.129 0.042 264.695);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.129 0.042 264.695);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.129 0.042 264.695);
+    --primary: oklch(0.208 0.042 265.755);
+    --primary-foreground: oklch(0.984 0.003 247.858);
+    --secondary: oklch(0.968 0.007 247.896);
+    --secondary-foreground: oklch(0.208 0.042 265.755);
+    --muted: oklch(0.968 0.007 247.896);
+    --muted-foreground: oklch(0.554 0.046 257.417);
+    --accent: oklch(0.968 0.007 247.896);
+    --accent-foreground: oklch(0.208 0.042 265.755);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.929 0.013 255.508);
+    --input: oklch(0.929 0.013 255.508);
+    --ring: oklch(0.704 0.04 256.788);
+  }
+  .dark {
+    --background: oklch(0.129 0.042 264.695);
+    --foreground: oklch(0.984 0.003 247.858);
+    --card: oklch(0.208 0.042 265.755);
+    --card-foreground: oklch(0.984 0.003 247.858);
+    --popover: oklch(0.208 0.042 265.755);
+    --popover-foreground: oklch(0.984 0.003 247.858);
+    --primary: oklch(0.929 0.013 255.508);
+    --primary-foreground: oklch(0.208 0.042 265.755);
+    --secondary: oklch(0.279 0.041 260.031);
+    --secondary-foreground: oklch(0.984 0.003 247.858);
+    --muted: oklch(0.279 0.041 260.031);
+    --muted-foreground: oklch(0.704 0.04 256.788);
+    --accent: oklch(0.279 0.041 260.031);
+    --accent-foreground: oklch(0.984 0.003 247.858);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.551 0.027 264.364);
+  }
+}
+.no-spinners::-webkit-outer-spin-button,
+.no-spinners::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.no-spinners { -moz-appearance: textfield; }
+[data-ui-builder] input[type=number]::-webkit-outer-spin-button,
+[data-ui-builder] input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+[data-ui-builder] input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+`}</style>
       <JotaiProvider store={store}>
         <NotificationContext.Provider value={onNotification ?? null}>
           <AutoGenerateOnMountContext.Provider value={autoGenerateOnMount ?? false}>
@@ -192,6 +256,7 @@ export const UIBuilderProvider: ForwardRefExoticComponent<
           </AutoGenerateOnMountContext.Provider>
         </NotificationContext.Provider>
       </JotaiProvider>
+      </>
     );
   }
 );

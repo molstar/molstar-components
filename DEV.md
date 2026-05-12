@@ -10,21 +10,12 @@ pnpm add jsr:@molstar/molstar-components
 
 ### CSS
 
-The library's CSS lives at `src/state-builder-ui/styles.css` (CSS custom property
-defaults) and is included in the JSR package. There is no compiled CSS bundle —
-choose the approach that fits your setup:
+**Theme variables and utility styles are injected automatically** by `UIBuilderProvider`
+via React 19's `<style precedence>` mechanism — no CSS import is required. The styles
+are self-contained in the component and work with any bundler without extra configuration.
 
-**Tailwind v4 consumers (recommended)**
-
-Add `@source` in your Tailwind entry CSS pointing at the library source so
-Tailwind scans and generates the utility classes. Import only the CSS variables:
-
-```ts
-// layout.tsx — import CSS variables before your own globals
-import '@molstar/molstar-components/src/state-builder-ui/styles.css';
-import 'molstar/build/viewer/molstar.css';
-import './globals.css';
-```
+**Tailwind v4 consumers** — add `@source` in your Tailwind entry CSS so Tailwind scans
+the library source and generates the utility classes used by the builder:
 
 ```css
 /* your Tailwind entry CSS */
@@ -32,20 +23,12 @@ import './globals.css';
 ```
 
 Adjust the path so it resolves from your CSS file to the package in `node_modules`.
+No CSS import from the library is needed — only the `@source` directive.
 
-**Non-Tailwind consumers**
-
-Import the CSS variables directly — your own stylesheets are responsible for
-providing any utility classes the builder UI expects:
-
-```ts
-import '@molstar/molstar-components/src/state-builder-ui/styles.css';
-```
-
-The exact relative path depends on where your CSS file lives relative to
-`node_modules` in your project. The library's `src/state-builder-ui/styles.css`
-contains only CSS variable defaults (in `@layer state-builder-ui-defaults`);
-they lose to any non-layered `:root` declarations your app defines.
+**Non-Tailwind consumers** — the component renders correctly without Tailwind. The builder
+uses utility class names (e.g. `flex`, `gap-2`) that you are responsible for providing
+if not using Tailwind. Theme variables (`--background`, `--primary`, etc.) are injected
+automatically and can be overridden — see the Theming section below.
 
 ---
 
@@ -71,8 +54,8 @@ in parallel. Normal consumption uses JSR above.
   },
   "files": ["dist", "src"],
   "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18",
+    "react": ">=19",
+    "react-dom": ">=19",
     "molstar": ">=5.0.0",
     "jotai": ">=2.0.0",
     "monaco-editor": ">=0.55.0"
@@ -169,22 +152,105 @@ interface UIBuilderProviderProps {
 }
 ```
 
-## Theming
+## Styling
 
-CSS variables are declared in `@layer state-builder-ui-defaults`, so any consumer
-variable declarations outside a layer (or in a higher-priority layer) win automatically:
+`UIBuilderProvider` injects a `<style>` tag (via React 19's `precedence` mechanism)
+containing default theme variables and a small number of utility rules. There is no
+external CSS file to import. Below are the options for customising or replacing these
+styles.
+
+### How the defaults work
+
+All theme variables ship inside `@layer state-builder-ui-defaults`. CSS layers have
+lower priority than unlayered rules, so **any `:root` variable you declare outside a
+`@layer` automatically wins**, regardless of load order. You don't need to import
+anything or coordinate timing.
+
+### Option 1 — Override individual variables (recommended)
+
+Declare the variables you want to change in your own `:root` outside any layer:
 
 ```css
 :root {
   --primary: oklch(0.5 0.2 220);
   --radius: 0.25rem;
+  --background: oklch(0.98 0 0);
 }
 ```
 
-The library follows Shadcn variable naming (`--primary`, `--muted-foreground`, `--radius`, etc.).
-If your app already defines these variables, the builder inherits them with no extra config.
+The library uses Shadcn-compatible variable names. If your app already defines these
+(e.g. via a Shadcn setup), the builder inherits them automatically with no extra work.
 
-Dark mode: add the `.dark` class to `<html>` or a container element.
+Full variable list (light / dark):
+
+| Variable | Role |
+|---|---|
+| `--background` / `--foreground` | Page background and text |
+| `--card` / `--card-foreground` | Card surfaces |
+| `--popover` / `--popover-foreground` | Dropdown/popover surfaces |
+| `--primary` / `--primary-foreground` | Primary action colour |
+| `--secondary` / `--secondary-foreground` | Secondary surfaces |
+| `--muted` / `--muted-foreground` | Muted/disabled text and backgrounds |
+| `--accent` / `--accent-foreground` | Hover/focus highlights |
+| `--destructive` | Destructive action colour |
+| `--border` | Border colour |
+| `--input` | Input border colour |
+| `--ring` | Focus ring colour |
+| `--radius` | Border radius base value |
+
+### Option 2 — Dark mode
+
+Add the `.dark` class to `<html>` or any ancestor container of the builder:
+
+```tsx
+<html className={isDark ? 'dark' : ''}>
+```
+
+### Option 3 — Scoped overrides per container
+
+Wrap the builder in a container and scope variable overrides to it. This lets the builder
+use a different theme from the rest of the app:
+
+```tsx
+<div className="my-builder-theme">
+  <UIBuilderProvider>
+    <UIBuilder />
+  </UIBuilderProvider>
+</div>
+```
+
+```css
+.my-builder-theme {
+  --primary: oklch(0.5 0.2 220);
+  --radius: 0;
+}
+```
+
+> **Note:** Radix UI components (dropdowns, dialogs, selects) render into portals at
+> `document.body`, outside the scoping container. Variables used by portal content must
+> also be set on `:root` or `body` to be inherited correctly. Use this option when your
+> overrides only affect non-portal elements, or set variables on both.
+
+### Option 4 — Tailwind v4 `@theme`
+
+If you use Tailwind v4, map your design tokens to the library's variable names in your
+`@theme` block so both systems share the same values:
+
+```css
+@theme inline {
+  --color-primary: var(--primary);
+  --color-background: var(--background);
+  --radius-lg: var(--radius);
+}
+```
+
+### Option 5 — Complete style replacement
+
+To fully replace the defaults, declare all variables listed above in your own `:root`.
+The `@layer state-builder-ui-defaults` block is completely overridden and acts only as
+a fallback for variables you don't define. There is currently no prop to suppress the
+injected `<style>` tag, but since the layer has the lowest possible cascade priority,
+any declaration you make wins without requiring `!important`.
 
 ## Mol* viewer integration
 
@@ -283,7 +349,7 @@ If `onNotification` is not provided, messages fall back to `console.log`.
 
 | Package | Minimum |
 |---------|---------|
-| `react` + `react-dom` | 18+ |
+| `react` + `react-dom` | 19+ |
 | `molstar` | 5.0.0+ |
 | `jotai` | 2.x |
 | `monaco-editor` | 0.55+ |

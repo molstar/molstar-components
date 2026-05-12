@@ -12,13 +12,11 @@
 /* Explicitly scope scanning to the state-builder-ui source */
 @source "../src/state-builder-ui";
 
-/* Component-level CSS variables and utilities defined in state-builder-ui */
-@import "../src/state-builder-ui/styles.css";
-
 /* Map semantic CSS variables to Tailwind v4 theme tokens so that utilities
    like bg-background, bg-popover, text-muted-foreground etc. are generated.
    @theme inline means the generated utilities reference the CSS variables
-   directly, so .dark overrides in styles.css take effect at runtime. */
+   directly. The actual variable values are injected at runtime by
+   UIBuilderProvider via React 19's <style precedence> mechanism. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

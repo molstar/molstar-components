@@ -1,12 +1,33 @@
 # Changelog
 
+## 0.6.0-experimental.3 (2026-05-12)
+
+### Breaking changes
+
+- **React 19+ required.** `UIBuilderProvider` now injects theme styles via React 19's
+  `<style precedence>` API. React 18 is no longer supported.
+
+### Changes
+
+- **CSS is self-contained.** Theme variables and utility styles are injected automatically
+  by `UIBuilderProvider` — no CSS file import is needed. The `styles.css` file is removed.
+  Tailwind v4 consumers only need an `@source` directive pointing at the library's
+  `src/state-builder-ui` directory.
+
+- `input[type=number]` spinner-hiding rule is now scoped to `[data-ui-builder]` instead
+  of being a global selector.
+
+- Module documentation updated to cover all components including the state builder.
+
+---
+
 ## 0.6.0-experimental.0 (2026-05-10)
 
 Experimental React migration. The API may still change before a stable 0.6.x release.
 
 ### Breaking changes
 
-- **React instead of Preact.** The peer dependency is now `react@18+` and `react-dom@18+`.
+- **React instead of Preact.** The peer dependency is now `react@19+` and `react-dom@19+`.
   Replace `preact` and `preact/hooks` imports with `react` in your application.
 
 - **Molstar is a peer dependency — CDN loading removed.** Version 0.5.x could inject

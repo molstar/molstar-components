@@ -424,12 +424,11 @@
                     <h3 class="text-lg font-semibold mb-2">Install from JSR</h3>
                     <pre class="rounded-lg overflow-x-auto text-sm mb-6"><code class="language-bash">pnpm add jsr:@molstar/molstar-components</code></pre>
 
-                    <h3 class="text-lg font-semibold mb-2">Import CSS</h3>
-                    <p class="text-sm text-base-content/65 mb-3">Import library CSS before your app's global styles so your Tailwind base resets take precedence.</p>
-                    <pre class="rounded-lg overflow-x-auto text-sm mb-6"><code class="language-typescript">// layout.tsx or equivalent
-import '@molstar/molstar-components/state-builder-ui.css';
-import 'molstar/build/viewer/molstar.css';
-import './globals.css'; // your app styles last</code></pre>
+                    <h3 class="text-lg font-semibold mb-2">CSS</h3>
+                    <p class="text-sm text-base-content/65 mb-3">Theme variables and utility styles are injected automatically by <code class="badge badge-ghost badge-sm font-mono">UIBuilderProvider</code> — no CSS import required. For Tailwind v4 consumers, add an <code class="badge badge-ghost badge-sm font-mono">@source</code> directive so Tailwind scans the library source for utility classes:</p>
+                    <pre class="rounded-lg overflow-x-auto text-sm mb-6"><code class="language-css">/* your Tailwind entry CSS */
+@source "&lt;path-to-node_modules&gt;/@molstar/molstar-components/src/state-builder-ui";</code></pre>
+                    <p class="text-sm text-base-content/65 mb-6">Molstar's own CSS still needs to be imported explicitly: <code class="badge badge-ghost badge-sm font-mono">import 'molstar/build/viewer/molstar.css'</code></p>
 
                     <h3 class="text-lg font-semibold mb-2">Full combo component</h3>
                     <p class="text-sm text-base-content/65 mb-3">The <code class="badge badge-ghost badge-sm font-mono">BuilderWithEditorAndViewer</code> component bundles the visual builder, Monaco editor, and Molstar viewer in a single two-panel layout.</p>

@@ -404,7 +404,7 @@ export function UIBuilder(): React.ReactElement {
   return (
     <AfterApplyContext.Provider value={() => { pendingCodeGenRef.current = true; }}>
     <StructureMetadataProvider plugin={plugin ?? null} onGenerateCode={generateCode}>
-      <div className='flex flex-col gap-2 h-full p-2'>
+      <div data-ui-builder='' className='flex flex-col gap-2 h-full p-2'>
         <div className='flex items-center justify-between pb-2 border-b'>
           <h3 className='text-sm font-medium'>Visual Builder</h3>
         <div className='flex gap-2'>

@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
-import type { AnimationParams, CameraParams } from '@molstar/state-builder';
-import type { UINode, ConstantDefinition } from '@molstar/state-builder';
+import type { AnimationParams, CameraParams } from '../../state-builder/index.ts';
+import type { UINode, ConstantDefinition } from '../../state-builder/index.ts';
 
 export const SceneKeyAtom = atom<string>('default');
 export const CameraSnapshotAtom = atom(null as unknown);

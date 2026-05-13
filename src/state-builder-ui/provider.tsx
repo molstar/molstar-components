@@ -2,7 +2,7 @@ import { createStore, Provider as JotaiProvider } from 'jotai';
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context';
-import type { CameraParams, AnimationParams, UINode, ConstantDefinition } from '@molstar/state-builder';
+import type { CameraParams, AnimationParams, UINode, ConstantDefinition } from '../state-builder/index.ts';
 import {
   SceneKeyAtom, CameraSnapshotAtom, PluginAtom,
   UIBuilderNodesAtom, UIBuilderConstantsAtom, UIBuilderCameraAtom, UIBuilderAnimationAtom

@@ -8,8 +8,8 @@ import {
   SelectValue,
 } from '../../base/select.tsx';
 import { Label } from '../../base/label.tsx';
-import { PRIMITIVE_KINDS } from '@molstar/state-builder';
-import type { PrimitiveKind } from '@molstar/state-builder';
+import { PRIMITIVE_KINDS } from '../../../state-builder/index.ts';
+import type { PrimitiveKind } from '../../../state-builder/index.ts';
 import type { PrimitiveKindFieldsProps } from './types.ts';
 import { AngleFields } from './AngleFields.tsx';
 import { ArrowFields } from './ArrowFields.tsx';

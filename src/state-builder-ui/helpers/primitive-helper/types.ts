@@ -4,7 +4,7 @@
  * Shared types and helpers for the primitive-helper panel components.
  */
 
-import type { ComponentSelectorValue } from '@molstar/state-builder';
+import type { ComponentSelectorValue } from '../../../state-builder/index.ts';
 
 export type PositionMode = 'selector' | 'vec3' | 'expression';
 

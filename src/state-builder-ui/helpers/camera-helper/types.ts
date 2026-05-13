@@ -1,5 +1,5 @@
 // Re-export data types from state-builder
-export type { CameraParams, CameraPresetDef } from '@molstar/state-builder';
+export type { CameraParams, CameraPresetDef } from '../../../state-builder/index.ts';
 
 /** Vectors panel props */
 export interface VectorsPanelProps {
@@ -13,7 +13,7 @@ export interface VectorsPanelProps {
 
 /** Presets panel props */
 export interface PresetsPanelProps {
-  onSelect: (params: import('@molstar/state-builder').CameraParams) => void;
+  onSelect: (params: import('../../../state-builder/index.ts').CameraParams) => void;
 }
 
 /** Raw panel props */

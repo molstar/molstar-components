@@ -1,7 +1,7 @@
 import { Input } from '../../ui/input.tsx';
 import { Label } from '../../ui/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select.tsx';
-import { STRUCTURE_TYPES, getActiveValues } from '@molstar/state-builder';
+import { STRUCTURE_TYPES, getActiveValues } from '../../../state-builder/index.ts';
 
 interface StructureFieldsProps {
   params: Record<string, unknown>;

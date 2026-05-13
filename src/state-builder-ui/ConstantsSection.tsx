@@ -8,7 +8,7 @@ import {
   ConstantDefinition,
   ConstantEntry,
   ConstantType,
-} from '@molstar/state-builder';
+} from '../state-builder/index.ts';
 import { ChevronDownIcon, ChevronRightIcon, PlusIcon, XIcon } from 'lucide-react';
 
 interface ConstantsSectionProps {

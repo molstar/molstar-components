@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { ConstantDefinition } from '@molstar/state-builder';
+import type { ConstantDefinition } from '../../state-builder/index.ts';
 
 interface StoryConstantsContextValue {
   storyConstants: ConstantDefinition[];

@@ -1,7 +1,7 @@
 import { Input } from '../../ui/input.tsx';
 import { Label } from '../../ui/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select.tsx';
-import { REPRESENTATION_TYPES, getActiveValues } from '@molstar/state-builder';
+import { REPRESENTATION_TYPES, getActiveValues } from '../../../state-builder/index.ts';
 
 interface RepresentationFieldsProps {
   params: Record<string, unknown>;

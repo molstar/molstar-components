@@ -6,13 +6,13 @@ import {
   createConstantRef,
   MOLSTAR_COLOR_THEMES,
   getActiveValues,
-} from '@molstar/state-builder';
-import type { UINode, ConstantDefinition, ConstantRef, ComponentSelectorValue } from '@molstar/state-builder';
+} from '../../state-builder/index.ts';
+import type { UINode, ConstantDefinition, ConstantRef, ComponentSelectorValue } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { SimplePanel, ThemePanel, ConstantPanel } from './color-helper/index.ts';
 import { SelectorHelperContent } from './SelectorHelperContent.tsx';
 import { useAncestorComponentSelector } from '../AncestorComponentContext.tsx';
-import { filterMetadataBySelector } from '@molstar/state-builder';
+import { filterMetadataBySelector } from '../../state-builder/index.ts';
 import { useStructureMetadataContext } from '../StructureMetadataContext.tsx';
 import { ChevronRightIcon } from 'lucide-react';
 import { cn } from '../lib/utils.ts';

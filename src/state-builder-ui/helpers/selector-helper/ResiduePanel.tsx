@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../base/select.tsx';
-import type { StructureMetadata } from '@molstar/state-builder';
+import type { StructureMetadata } from '../../../state-builder/index.ts';
 import type { LabeledOption } from './types.ts';
 
 interface ResiduePanelProps {

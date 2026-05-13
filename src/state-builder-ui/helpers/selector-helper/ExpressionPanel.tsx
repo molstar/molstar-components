@@ -3,7 +3,7 @@
 import { Input } from '../../base/input.tsx';
 import { Label } from '../../base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../base/select.tsx';
-import type { ComponentSelectorObject } from '@molstar/state-builder';
+import type { ComponentSelectorObject } from '../../../state-builder/index.ts';
 import { NumericInput } from '../../components/NumericInput.tsx';
 
 interface ExpressionPanelProps {

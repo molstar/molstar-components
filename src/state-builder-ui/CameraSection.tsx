@@ -5,8 +5,8 @@ import { CameraIcon, ChevronDownIcon, ChevronRightIcon, CrosshairIcon, XIcon } f
 import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { CameraSnapshotAtom } from './state/atoms.ts';
-import type { CameraData, UINode } from '@molstar/state-builder';
-import { snapshotToCameraParams, isDefaultUp } from '@molstar/state-builder';
+import type { CameraData, UINode } from '../state-builder/index.ts';
+import { snapshotToCameraParams, isDefaultUp } from '../state-builder/index.ts';
 import { CameraHelper } from './helpers/CameraHelper.tsx';
 import type { CameraParams } from './helpers/camera-helper/index.ts';
 

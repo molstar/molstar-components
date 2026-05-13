@@ -32,9 +32,6 @@ jobs:
       - name: Build and bundle for GitHub Pages
         run: deno task build
 
-      - name: Build npm-compatible dist
-        run: deno task build:dist
-
       - name: Upload library build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -56,4 +53,4 @@ jobs:
         uses: actions/deploy-pages@v4
 
       - name: Publish to JSR
-        run: deno publish --allow-slow-types
+        run: deno publish

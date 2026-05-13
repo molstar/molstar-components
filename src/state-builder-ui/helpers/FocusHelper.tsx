@@ -4,7 +4,7 @@ import { FocusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { VectorsPanel, RadiusPanel, PresetsPanel, FocusPreview, FOCUS_PRESETS } from './focus-helper/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
-import type { UINode } from '@molstar/state-builder';
+import type { UINode } from '../../state-builder/index.ts';
 
 export interface FocusHelperProps {
   node: UINode;

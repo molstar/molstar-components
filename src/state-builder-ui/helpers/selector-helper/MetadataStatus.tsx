@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '../../base/button.tsx';
-import type { StructureMetadata } from '@molstar/state-builder';
+import type { StructureMetadata } from '../../../state-builder/index.ts';
 import { DatabaseIcon, Loader2Icon } from 'lucide-react';
 
 interface MetadataStatusProps {

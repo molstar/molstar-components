@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { ComponentSelectorValue, StructureMetadata, UINode } from '@molstar/state-builder';
+import type { ComponentSelectorValue, StructureMetadata, UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { SelectorHelperContent, type SelectorTab } from './SelectorHelperContent.tsx';
 

@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '../../base/select.tsx';
 import { Switch } from '../../base/switch.tsx';
-import { LABEL_ATTACHMENT_OPTIONS } from '@molstar/state-builder';
+import { LABEL_ATTACHMENT_OPTIONS } from '../../../state-builder/index.ts';
 
 export interface PrimitivesConfig {
   color?: string;

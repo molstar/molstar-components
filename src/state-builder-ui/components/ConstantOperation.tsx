@@ -2,7 +2,7 @@ import { Button } from '../base/button.tsx';
 import { Input } from '../base/input.tsx';
 import { Label } from '../base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../base/select.tsx';
-import type { UINode } from '@molstar/state-builder';
+import type { UINode } from '../../state-builder/index.ts';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { PlusIcon, XIcon } from 'lucide-react';
 import { TreeLines } from './TreeLines.tsx';

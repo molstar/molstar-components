@@ -1,7 +1,7 @@
 // src/state-builder-ui/node-summary.ts
-import type { UINode } from '@molstar/state-builder';
-import { formatSelectorPreview, isConstantRef } from '@molstar/state-builder';
-import type { ConstantRef } from '@molstar/state-builder';
+import type { UINode } from '../state-builder/index.ts';
+import { formatSelectorPreview, isConstantRef } from '../state-builder/index.ts';
+import type { ConstantRef } from '../state-builder/index.ts';
 
 function truncateUrl(url: string, maxLen = 50): string {
   try {

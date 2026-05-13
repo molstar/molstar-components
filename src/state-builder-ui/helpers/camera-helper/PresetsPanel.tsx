@@ -2,7 +2,7 @@
 
 import { Button } from '../../base/button.tsx';
 import { Label } from '../../base/label.tsx';
-import { CAMERA_PRESETS } from '@molstar/state-builder';
+import { CAMERA_PRESETS } from '../../../state-builder/index.ts';
 import type { PresetsPanelProps } from './types.ts';
 
 export function PresetsPanel({ onSelect }: PresetsPanelProps) {

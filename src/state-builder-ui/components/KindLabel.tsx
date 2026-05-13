@@ -7,8 +7,8 @@ import {
   MVS_SELECTABLE_KINDS,
   DOWNLOAD_PARSE_SEQUENCE,
   UINode,
-} from '@molstar/state-builder';
-import { createDownloadParseNodes } from '@molstar/state-builder/types/composite-sequences';
+} from '../../state-builder/index.ts';
+import { createDownloadParseNodes } from '../../state-builder/types/composite-sequences.ts';
 import { getColorForKind } from '../node-categories.ts';
 import { cn } from '../lib/utils.ts';
 

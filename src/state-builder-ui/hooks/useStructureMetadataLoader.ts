@@ -10,7 +10,7 @@ import {
   type RawChainData,
   type RawLigandData,
   type StructureMetadata,
-} from '@molstar/state-builder';
+} from '../../state-builder/index.ts';
 import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context';
 import { PluginStateObject } from 'molstar/lib/mol-plugin-state/objects';
 import { Structure } from 'molstar/lib/mol-model/structure';

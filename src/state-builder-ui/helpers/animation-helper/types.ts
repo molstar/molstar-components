@@ -3,7 +3,7 @@ import type {
   InterpolationStep,
   RefInfo,
   TrackballSpin,
-} from '@molstar/state-builder';
+} from '../../../state-builder/index.ts';
 
 export interface TimelinePanelProps {
   frameTimeMs: number | undefined;

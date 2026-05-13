@@ -5,14 +5,14 @@ import { useState } from 'react';
 import { cn } from '../lib/utils.ts';
 import {
   createDefaultAnimationParams,
-} from '@molstar/state-builder';
+} from '../../state-builder/index.ts';
 import type {
   AnimationParams,
   InterpolationStep,
   RefInfo,
   TrackballSpin,
   UINode,
-} from '@molstar/state-builder';
+} from '../../state-builder/index.ts';
 import { TimelinePanel } from './animation-helper/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 

@@ -1,5 +1,5 @@
 import { FocusHelper } from '../../helpers/FocusHelper.tsx';
-import type { UINode } from '@molstar/state-builder';
+import type { UINode } from '../../../state-builder/index.ts';
 
 interface FocusFieldsProps {
   params: Record<string, unknown>;

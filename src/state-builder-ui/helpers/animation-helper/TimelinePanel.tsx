@@ -30,7 +30,7 @@ import {
   getAnimatableProperties,
   filterRefsForKind,
   IDENTITY_3x3,
-} from '@molstar/state-builder';
+} from '../../../state-builder/index.ts';
 import type {
   InterpolationStep,
   InterpolationKind,
@@ -38,7 +38,7 @@ import type {
   SimpleInterpolationStep,
   TransformMatrixInterpolationStep,
   RefInfo,
-} from '@molstar/state-builder';
+} from '../../../state-builder/index.ts';
 import type { TimelinePanelProps } from './types.ts';
 import { SliderAngleRow } from '../../components/SliderAngleRow.tsx';
 import { SliderVec3Row } from '../../components/SliderVec3Row.tsx';

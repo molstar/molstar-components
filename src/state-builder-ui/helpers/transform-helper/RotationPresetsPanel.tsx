@@ -2,7 +2,7 @@
 
 import { Button } from '../../base/button.tsx';
 import { Label } from '../../base/label.tsx';
-import { ROTATION_PRESETS } from '@molstar/state-builder';
+import { ROTATION_PRESETS } from '../../../state-builder/index.ts';
 import type { RotationPresetsPanelProps } from './types.ts';
 
 export function RotationPresetsPanel({ onSelect }: RotationPresetsPanelProps) {

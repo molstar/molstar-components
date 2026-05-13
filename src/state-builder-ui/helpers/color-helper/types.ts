@@ -1,4 +1,4 @@
-import type { ConstantDefinition } from '@molstar/state-builder';
+import type { ConstantDefinition } from '../../../state-builder/index.ts';
 
 export interface SimplePanelProps {
   color: string;

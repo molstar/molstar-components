@@ -2,7 +2,7 @@
 
 import { Button } from '../../base/button.tsx';
 import { Label } from '../../base/label.tsx';
-import { QUICK_SELECTOR_PRESETS } from '@molstar/state-builder';
+import { QUICK_SELECTOR_PRESETS } from '../../../state-builder/index.ts';
 
 interface QuickPanelProps {
   onSelect: (value: string) => void;

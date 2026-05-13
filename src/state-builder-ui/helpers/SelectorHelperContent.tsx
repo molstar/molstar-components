@@ -19,7 +19,7 @@ import {
   type ComponentSelectorValue,
   type SelectorBuilderMode,
   type StructureMetadata,
-} from '@molstar/state-builder';
+} from '../../state-builder/index.ts';
 import {
   ChainPanel,
   ExpressionPanel,

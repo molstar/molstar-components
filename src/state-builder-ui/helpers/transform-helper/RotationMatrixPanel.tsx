@@ -2,7 +2,7 @@
 
 import { Label } from '../../base/label.tsx';
 import { NumericInput } from '../../components/NumericInput.tsx';
-import { isValidRotationMatrix } from '@molstar/state-builder';
+import { isValidRotationMatrix } from '../../../state-builder/index.ts';
 import type { RotationMatrixPanelProps } from './types.ts';
 
 export function RotationMatrixPanel({ matrix, onChange }: RotationMatrixPanelProps) {

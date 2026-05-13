@@ -1,8 +1,11 @@
 {
   "name": "@molstar/molstar-components",
-  "version": "0.6.0-experimental.14",
+  "version": "0.6.0-experimental.15",
   "license": "MIT",
-  "exports": "./dist/index.js",
+  "exports": {
+    ".": "./src/mod.ts",
+    "./aliases": "./src/aliases.ts"
+  },
   "imports": {
     "react": "npm:react@19.2.3",
     "react/jsx-runtime": "npm:react@19.2.3/jsx-runtime",
@@ -11,14 +14,11 @@
     "@types/react": "npm:@types/react@19.2.14",
     "jotai": "npm:jotai@2.12.2",
     "monaco-editor": "npm:monaco-editor@0.55.1/esm/vs/editor/editor.api.js",
-    "monaco-editor/typescript-contribution": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/monaco.contribution.js",
-    "monaco-editor/javascript-language": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/javascript/javascript.js",
-    "monaco-editor/markdown-language": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/markdown/markdown.js",
+    "monaco-editor/esm/vs/language/typescript/monaco.contribution": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/monaco.contribution.js",
+    "monaco-editor/esm/vs/basic-languages/javascript/javascript": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/javascript/javascript.js",
+    "monaco-editor/esm/vs/basic-languages/markdown/markdown": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/markdown/markdown.js",
     "monaco-editor/workers/editor": "npm:monaco-editor@0.55.1/esm/vs/editor/editor.worker.js",
     "monaco-editor/workers/typescript": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/ts.worker.js",
-    "monaco-editor/esm/vs/language/typescript/monaco.contribution": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/monaco.contribution",
-    "monaco-editor/esm/vs/basic-languages/javascript/javascript": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/javascript/javascript",
-    "monaco-editor/esm/vs/basic-languages/markdown/markdown": "npm:monaco-editor@0.55.1/esm/vs/basic-languages/markdown/markdown",
     "monaco-editor/esm/vs/editor/editor.worker": "npm:monaco-editor@0.55.1/esm/vs/editor/editor.worker",
     "monaco-editor/esm/vs/language/typescript/ts.worker": "npm:monaco-editor@0.55.1/esm/vs/language/typescript/ts.worker",
     "molstar/lib/extensions/mvs/mvs-data.js": "npm:molstar@5.9.0/lib/extensions/mvs/mvs-data.js",
@@ -35,11 +35,6 @@
     "molstar/lib/mol-plugin-state/objects": "npm:molstar@5.9.0/lib/mol-plugin-state/objects.js",
     "molstar/lib/mol-model/structure": "npm:molstar@5.9.0/lib/mol-model/structure.js",
     "molstar/": "npm:molstar@5.9.0/",
-    "@molstar/state-builder": "./src/state-builder/index.ts",
-    "@molstar/state-builder/compiler/ast/factory": "./src/state-builder/compiler/ast/factory.ts",
-    "@molstar/state-builder/compiler/codegen/generator": "./src/state-builder/compiler/codegen/generator.ts",
-    "@molstar/state-builder/types/composite-sequences": "./src/state-builder/types/composite-sequences.ts",
-    "@molstar/state-builder/": "./src/state-builder/",
     "@radix-ui/react-dialog": "npm:@radix-ui/react-dialog@1.1.14",
     "@radix-ui/react-dropdown-menu": "npm:@radix-ui/react-dropdown-menu@2.1.15",
     "@radix-ui/react-label": "npm:@radix-ui/react-label@2.1.7",
@@ -59,16 +54,17 @@
   },
   "tasks": {
     "test": "deno run --allow-all npm:vitest run src/state-builder",
+    "generate-aliases": "deno run --allow-read --allow-write scripts/generate-aliases.ts",
     "mvs-types": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-sys npm:rollup@4 -c scripts/rollup-mvs-data-bundle.config.mjs && deno run --allow-read --allow-write scripts/process-mvs-types.mjs",
-    "build:dist": "deno run --allow-all build-dist.ts",
-    "clean": "rm -f docs/bundle.js docs/bundle.js.map docs/bundle.css docs/docs.bundle.js docs/docs.bundle.css docs/molstar-components.js docs/molstar-components.js.map docs/molstar-components.css docs/editor.worker.js docs/ts.worker.js docs/state-builder-ui.css docs/molstar.css && rm -rf docs/assets dist",
+    "clean": "rm -f docs/bundle.js docs/bundle.js.map docs/bundle.css docs/docs.bundle.js docs/docs.bundle.css docs/molstar-components.js docs/molstar-components.js.map docs/molstar-components.css docs/editor.worker.js docs/ts.worker.js docs/state-builder-ui.css docs/molstar.css && rm -rf docs/assets",
     "build": "deno task clean && deno run --allow-all build.ts",
     "serve": "deno run --allow-net --allow-read jsr:@std/http/file-server --host 127.0.0.1 -p 8000 docs",
-    "dev": "deno task build && deno task build:dist && deno task serve"
+    "dev": "deno task build && deno task serve"
   },
-  "exclude": ["docs/", ".github/", "context/", ".claude/", "CLAUDE.md", "docs/superpowers/", "src/state-builder/compiler/__tests__", "src/state-builder/types/__tests__"],
+  "exclude": ["docs/", ".github/", "context/", ".claude/", "CLAUDE.md", "docs/superpowers/",
+    "src/state-builder/compiler/__tests__", "src/state-builder/types/__tests__"],
   "publish": {
-    "include": ["src/", "dist/", "deno.json", "tsconfig.json", "tsconfig.declarations.json", "build-dist.ts", "LICENSE", "README.md"]
+    "include": ["src/", "deno.json", "LICENSE", "README.md"]
   },
   "lint": {
     "exclude": ["dist/", "src/state-builder/", "src/state-builder-ui/", "scripts/"]

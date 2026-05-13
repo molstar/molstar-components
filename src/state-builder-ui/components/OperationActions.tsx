@@ -13,8 +13,8 @@ import {
 import { Button } from '../base/button.tsx';
 import { MoreHorizontalIcon } from 'lucide-react';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
-import type { UINode } from '@molstar/state-builder';
-import { MVS_KIND_LABELS, getTemplatesForParentKind, instantiateTemplate } from '@molstar/state-builder';
+import type { UINode } from '../../state-builder/index.ts';
+import { MVS_KIND_LABELS, getTemplatesForParentKind, instantiateTemplate } from '../../state-builder/index.ts';
 
 interface OperationActionsProps {
   canHaveChildren?: boolean;

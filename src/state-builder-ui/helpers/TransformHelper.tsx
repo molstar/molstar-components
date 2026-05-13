@@ -13,8 +13,8 @@ import {
 } from './transform-helper/index.ts';
 import type { TransformParams } from './transform-helper/index.ts';
 import { SliderAngleRow } from '../components/SliderAngleRow.tsx';
-import { IDENTITY_3x3 } from '@molstar/state-builder';
-import type { UINode } from '@molstar/state-builder';
+import { IDENTITY_3x3 } from '../../state-builder/index.ts';
+import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 
 interface TransformHelperProps {

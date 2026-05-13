@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { projectIsometric } from '@molstar/state-builder';
-import type { Vec3 } from '@molstar/state-builder';
+import { projectIsometric } from '../../../state-builder/index.ts';
+import type { Vec3 } from '../../../state-builder/index.ts';
 import type { CameraPreviewProps } from './types.ts';
 
 const SIZE = 180;

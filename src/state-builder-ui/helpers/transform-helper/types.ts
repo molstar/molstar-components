@@ -1,5 +1,5 @@
 // Re-export data types from state-builder
-export type { TransformParams } from '@molstar/state-builder';
+export type { TransformParams } from '../../../state-builder/index.ts';
 
 /** Translation panel props */
 export interface TranslationPanelProps {

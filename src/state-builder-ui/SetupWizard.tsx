@@ -8,7 +8,7 @@ import { Label } from './base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './base/select.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './base/tabs.tsx';
 import { PlusIcon, XIcon } from 'lucide-react';
-import type { UINode } from '@molstar/state-builder';
+import type { UINode } from '../state-builder/index.ts';
 import {
   PARSE_FORMATS,
   REPRESENTATION_TYPES,
@@ -16,7 +16,7 @@ import {
   getActiveValues,
   createEmptyNode,
   assignMissingRefs,
-} from '@molstar/state-builder';
+} from '../state-builder/index.ts';
 import { SelectorHelperContent, type SelectorTab } from './helpers/SelectorHelperContent.tsx';
 
 interface SetupWizardProps {

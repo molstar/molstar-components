@@ -4,8 +4,8 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Label } from '../base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../base/select.tsx';
-import type { UINode } from '@molstar/state-builder';
-import { VOLUME_REPRESENTATION_TYPES, getActiveValues } from '@molstar/state-builder';
+import type { UINode } from '../../state-builder/index.ts';
+import { VOLUME_REPRESENTATION_TYPES, getActiveValues } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 
 interface VolumeRepresentationHelperProps {

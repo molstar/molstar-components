@@ -3,7 +3,7 @@
 import { Label } from '../../base/label.tsx';
 import { Button } from '../../base/button.tsx';
 import { NumericInput } from '../../components/NumericInput.tsx';
-import { columnToRowMajor4, rowToColumnMajor4, IDENTITY_4x4 } from '@molstar/state-builder';
+import { columnToRowMajor4, rowToColumnMajor4, IDENTITY_4x4 } from '../../../state-builder/index.ts';
 import type { MatrixPanelProps } from './types.ts';
 
 export function MatrixPanel({ matrix, onChange }: MatrixPanelProps) {

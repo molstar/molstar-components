@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Stack } from './stack.ts';
-import type { UINode, ConstantDefinition, CameraParams, AnimationParams } from '@molstar/state-builder';
+import type { UINode, ConstantDefinition, CameraParams, AnimationParams } from '../../state-builder/index.ts';
 
 export type UndoSnapshot = {
   nodes: UINode[];

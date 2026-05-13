@@ -5,7 +5,7 @@ import { Input } from '../../base/input.tsx';
 import { Label } from '../../base/label.tsx';
 import { PlusIcon, XIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../base/select.tsx';
-import type { LabeledValue } from '@molstar/state-builder';
+import type { LabeledValue } from '../../../state-builder/index.ts';
 import type { UnionEntry } from './types.ts';
 
 interface UnionPanelProps {

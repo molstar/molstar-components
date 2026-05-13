@@ -1,6 +1,6 @@
 import { Label } from '../../base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../base/select.tsx';
-import { MOLSTAR_COLOR_THEMES, CARBON_COLOR_OPTIONS } from '@molstar/state-builder';
+import { MOLSTAR_COLOR_THEMES, CARBON_COLOR_OPTIONS } from '../../../state-builder/index.ts';
 import type { ThemePanelProps } from './types.ts';
 
 export function ThemePanel({

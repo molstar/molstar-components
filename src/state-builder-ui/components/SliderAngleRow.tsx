@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Label } from '../base/label.tsx';
 import { Button } from '../base/button.tsx';
 import { NumericInput } from './NumericInput.tsx';
-import { eulerToMatrix, matrixToEuler, isValidRotationMatrix, IDENTITY_3x3 } from '@molstar/state-builder';
+import { eulerToMatrix, matrixToEuler, isValidRotationMatrix, IDENTITY_3x3 } from '../../state-builder/index.ts';
 
 interface SliderAngleRowProps {
   matrix: number[];

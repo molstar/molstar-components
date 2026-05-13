@@ -1,4 +1,4 @@
-import type { StructureMetadata } from '@molstar/state-builder';
+import type { StructureMetadata } from '../../../state-builder/index.ts';
 
 /** Labeled value for chain/ligand options */
 export interface LabeledOption {

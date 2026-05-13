@@ -2,7 +2,7 @@ import { Label } from '../../ui/label.tsx';
 import { Button } from '../../ui/button.tsx';
 import { TransformHelper } from '../../helpers/TransformHelper.tsx';
 import { XIcon } from 'lucide-react';
-import type { UINode } from '@molstar/state-builder';
+import type { UINode } from '../../../state-builder/index.ts';
 
 interface TransformFieldsProps {
   node: UINode;

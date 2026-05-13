@@ -6,10 +6,10 @@ import { setupMonacoCodeCompletion, clearMonacoEditHistory } from "./utils/monac
 import * as monaco from "monaco-editor";
 
 // Import TypeScript language defaults directly from contribution module
-import * as typescriptModule from "monaco-editor/typescript-contribution";
+import * as typescriptModule from "monaco-editor/esm/vs/language/typescript/monaco.contribution";
 
 // Import JavaScript syntax highlighting
-import { conf, language } from "monaco-editor/javascript-language";
+import { conf, language } from "monaco-editor/esm/vs/basic-languages/javascript/javascript";
 
 import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context';
 import { UIBuilderProvider } from './state-builder-ui/provider.tsx';

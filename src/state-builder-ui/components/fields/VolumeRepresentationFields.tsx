@@ -2,7 +2,7 @@ import { Label } from '../../ui/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select.tsx';
 import { Switch } from '../../ui/switch.tsx';
 import { NumericInput } from '../NumericInput.tsx';
-import { VOLUME_REPRESENTATION_TYPES } from '@molstar/state-builder';
+import { VOLUME_REPRESENTATION_TYPES } from '../../../state-builder/index.ts';
 
 interface VolumeRepresentationFieldsProps {
   params: Record<string, unknown>;

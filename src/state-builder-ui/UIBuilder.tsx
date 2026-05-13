@@ -18,8 +18,8 @@ import {
   DialogTrigger,
 } from './base/dialog.tsx';
 import { Textarea } from './base/textarea.tsx';
-import { ASTFactory } from '@molstar/state-builder/compiler/ast/factory';
-import { CodeGenerator } from '@molstar/state-builder/compiler/codegen/generator';
+import { ASTFactory } from '../state-builder/compiler/ast/factory.ts';
+import { CodeGenerator } from '../state-builder/compiler/codegen/generator.ts';
 import { useAtom, useAtomValue } from 'jotai';
 import {
   DropdownMenu,
@@ -57,8 +57,8 @@ import {
   type RawMVSTree,
   type CameraParams,
   type AnimationParams,
-} from '@molstar/state-builder';
-import { createDownloadParseNodes } from '@molstar/state-builder/types/composite-sequences';
+} from '../state-builder/index.ts';
+import { createDownloadParseNodes } from '../state-builder/types/composite-sequences.ts';
 import { StructureMetadataProvider } from './StructureMetadataContext.tsx';
 import { SetupWizard } from './SetupWizard.tsx';
 import { AfterApplyContext } from './state/after-apply-context.ts';

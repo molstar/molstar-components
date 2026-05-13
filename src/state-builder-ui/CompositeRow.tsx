@@ -1,11 +1,11 @@
 'use client';
 
 import { Button } from './base/button.tsx';
-import type { UINode, ConstantDefinition } from '@molstar/state-builder';
-import { createEmptyNode, deepCopyNode, countSubtreeNodes } from '@molstar/state-builder';
+import type { UINode, ConstantDefinition } from '../state-builder/index.ts';
+import { createEmptyNode, deepCopyNode, countSubtreeNodes } from '../state-builder/index.ts';
 import { ConfirmDialog } from './base/confirm-dialog.tsx';
-import type { CompositeSequence } from '@molstar/state-builder/types/composite-sequences';
-import { getCompositeValidChildren } from '@molstar/state-builder/types/composite-sequences';
+import type { CompositeSequence } from '../state-builder/types/composite-sequences.ts';
+import { getCompositeValidChildren } from '../state-builder/types/composite-sequences.ts';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';

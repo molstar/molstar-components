@@ -5,8 +5,8 @@ import { Label } from '../base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../base/select.tsx';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../base/dialog.tsx';
 import { Button } from '../base/button.tsx';
-import type { UINode } from '@molstar/state-builder';
-import { PARSE_FORMATS, getActiveValues } from '@molstar/state-builder';
+import type { UINode } from '../../state-builder/index.ts';
+import { PARSE_FORMATS, getActiveValues } from '../../state-builder/index.ts';
 
 interface CompositeHelperProps {
   downloadNode: UINode;

@@ -8,7 +8,7 @@ import type { PositionEditorState } from './types.ts';
 import { positionToParam, tryParseExpressionJson } from './types.ts';
 import { SelectorHelperContent } from '../SelectorHelperContent.tsx';
 import { useStructureMetadataContext } from '../../StructureMetadataContext.tsx';
-import type { ComponentSelectorValue } from '@molstar/state-builder';
+import type { ComponentSelectorValue } from '../../../state-builder/index.ts';
 
 interface PositionEditorProps {
   label: string;

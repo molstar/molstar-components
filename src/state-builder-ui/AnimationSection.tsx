@@ -4,8 +4,8 @@ import { Button } from './base/button.tsx';
 import { ChevronDownIcon, ChevronRightIcon, FilmIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import { AnimationHelper } from './helpers/AnimationHelper.tsx';
-import type { AnimationParams, RefInfo, UINode } from '@molstar/state-builder';
-import { computeAnimationDuration } from '@molstar/state-builder';
+import type { AnimationParams, RefInfo, UINode } from '../state-builder/index.ts';
+import { computeAnimationDuration } from '../state-builder/index.ts';
 
 interface AnimationSectionProps {
   animation: AnimationParams | null;

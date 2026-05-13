@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../base/select.tsx';
-import { LABEL_ATTACHMENT_OPTIONS } from '@molstar/state-builder';
+import { LABEL_ATTACHMENT_OPTIONS } from '../../../state-builder/index.ts';
 import { PositionEditor } from './PositionEditor.tsx';
 import { positionFromParam, positionToParam } from './types.ts';
 import type { PrimitiveKindFieldsProps } from './types.ts';

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Label } from '../base/label.tsx';
 import { Textarea } from '../base/textarea.tsx';
-import type { UINode } from '@molstar/state-builder';
+import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 
 interface TooltipHelperProps {

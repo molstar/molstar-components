@@ -1,13 +1,13 @@
 import { Input } from '../../ui/input.tsx';
 import { Label } from '../../ui/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select.tsx';
-import type { UINode, ConstantDefinition, ConstantRef } from '@molstar/state-builder';
+import type { UINode, ConstantDefinition, ConstantRef } from '../../../state-builder/index.ts';
 import {
   createConstantRef,
   isConstantRef,
   PARSE_FORMATS,
   getActiveValues,
-} from '@molstar/state-builder';
+} from '../../../state-builder/index.ts';
 
 interface DownloadParseFieldsProps {
   downloadNode: UINode;

@@ -14,7 +14,7 @@ import {
   formatSelectorPreview,
   getActiveValues,
   type ComponentSelectorValue,
-} from '@molstar/state-builder';
+} from '../../../state-builder/index.ts';
 import { ListIcon } from 'lucide-react';
 import { SelectorHelperContent } from '../../helpers/SelectorHelperContent.tsx';
 

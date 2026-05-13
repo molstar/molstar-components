@@ -7,8 +7,8 @@ import { useState } from 'react';
 import { cn } from '../lib/utils.ts';
 import { useAtomValue } from 'jotai';
 import { CameraSnapshotAtom } from '../state/atoms.ts';
-import type { CameraData } from '@molstar/state-builder';
-import { snapshotToCameraParams, isDefaultUp } from '@molstar/state-builder';
+import type { CameraData } from '../../state-builder/index.ts';
+import { snapshotToCameraParams, isDefaultUp } from '../../state-builder/index.ts';
 import {
   VectorsPanel,
   PresetsPanel,
@@ -17,7 +17,7 @@ import {
 } from './camera-helper/index.ts';
 import type { CameraParams } from './camera-helper/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
-import type { UINode } from '@molstar/state-builder';
+import type { UINode } from '../../state-builder/index.ts';
 
 export interface CameraHelperProps {
   node: UINode;

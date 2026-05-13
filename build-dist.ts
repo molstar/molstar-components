@@ -17,6 +17,15 @@ import { resolve } from "@std/path";
 
 const configPath = resolve(Deno.cwd(), "./deno.json");
 
+async function stripExtensionsInDts(path: string): Promise<void> {
+  if (!path.endsWith(".d.ts")) return;
+  const src = await Deno.readTextFile(path);
+  // Replace .tsx and .ts extensions in relative import/export paths so that
+  // TypeScript resolves to companion .d.ts files rather than source files.
+  const out = src.replace(/(from\s+["'])(\.\.?\/[^"']*)\.(tsx?)(?=["'])/g, "$1$2");
+  if (out !== src) await Deno.writeTextFile(path, out);
+}
+
 // Deno import-map aliases for monaco sub-paths (e.g. "monaco-editor/typescript-contribution")
 // are not valid npm package exports. denoResolverPlugin runs before esbuild's external check,
 // so it resolves the aliases to npm: specifiers, and denoLoaderPlugin then produces broken
@@ -143,6 +152,20 @@ try {
   if (!tscResult.success) throw new Error("TypeScript declaration generation failed");
   // Rename entry declaration to match dist/index.js convention
   await Deno.rename("./dist/mod.d.ts", "./dist/index.d.ts");
+
+  // Strip .ts/.tsx extensions from relative imports in all generated .d.ts files.
+  // tsc preserves source extensions (e.g. `from "./MolstarViewer.tsx"`), which
+  // causes TypeScript in the consumer to follow the path into the actual source
+  // files that contain Deno-specific npm: specifiers it cannot resolve. Without
+  // the extension, TypeScript resolves to the companion .d.ts files instead.
+  async function walkAndStrip(dir: string): Promise<void> {
+    for await (const entry of Deno.readDir(dir)) {
+      const path = `${dir}/${entry.name}`;
+      if (entry.isDirectory) await walkAndStrip(path);
+      else await stripExtensionsInDts(path);
+    }
+  }
+  await walkAndStrip("./dist");
   console.log("✓ dist/index.d.ts");
 
   console.log("\nDist build complete.");

@@ -126,12 +126,16 @@ try {
   console.log("✓ dist/molstar.css");
 
   // 4. Generate TypeScript declarations
-  // tsc is run via node directly to pass --stack-size, which is required because
-  // molstar's type graph is deep enough to overflow node's default call stack.
+  // --v8-flags=--stack-size=65536 is required because molstar's type graph is
+  // deep enough to overflow V8's default call stack during declaration emit.
   console.log("Generating TypeScript declarations...");
-  const tscPath = new URL("./node_modules/.bin/tsc", import.meta.url).pathname;
-  const tscCmd = new Deno.Command("node", {
-    args: ["--stack-size=65536", tscPath, "-p", "tsconfig.declarations.json"],
+  const tscCmd = new Deno.Command("deno", {
+    args: [
+      "run", "--allow-all",
+      "--v8-flags=--stack-size=65536",
+      "npm:typescript/bin/tsc",
+      "-p", "tsconfig.declarations.json",
+    ],
     stdout: "inherit",
     stderr: "inherit",
   });

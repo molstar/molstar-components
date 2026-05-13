@@ -17,13 +17,29 @@ import { resolve } from "@std/path";
 
 const configPath = resolve(Deno.cwd(), "./deno.json");
 
-async function stripExtensionsInDts(path: string): Promise<void> {
-  if (!path.endsWith(".d.ts")) return;
-  const src = await Deno.readTextFile(path);
-  // Replace .tsx and .ts extensions in relative import/export paths so that
-  // TypeScript resolves to companion .d.ts files rather than source files.
-  const out = src.replace(/(from\s+["'])(\.\.?\/[^"']*)\.(tsx?)(?=["'])/g, "$1$2");
-  if (out !== src) await Deno.writeTextFile(path, out);
+async function stripExtensionsInDts(filePath: string): Promise<void> {
+  if (!filePath.endsWith(".d.ts")) return;
+  let src = await Deno.readTextFile(filePath);
+
+  // Rewrite paths that escape dist back into src/ (e.g. ../../src/state-builder/index.ts)
+  // to their companion .d.ts locations inside dist/ (e.g. ../state-builder/index).
+  // This happens because tsc resolves @molstar/state-builder path aliases to the
+  // absolute source path and encodes them as relative paths in the emitted .d.ts.
+  src = src.replace(
+    /(from\s+["'])((?:\.\.\/)+)src\/state-builder\/([^"']+)(?=["'])/g,
+    (_match, from, upSegments, subPath) => {
+      const depth = (upSegments.match(/\.\.\//g) ?? []).length;
+      const newUp = "../".repeat(depth - 1);
+      const cleanPath = subPath.replace(/\.tsx?$/, "");
+      return `${from}${newUp}state-builder/${cleanPath}`;
+    },
+  );
+
+  // Strip any remaining .ts/.tsx extensions from relative import/export paths so
+  // that TypeScript resolves to companion .d.ts files rather than source files.
+  src = src.replace(/(from\s+["'])(\.\.?\/[^"']*)\.(tsx?)(?=["'])/g, "$1$2");
+
+  await Deno.writeTextFile(filePath, src);
 }
 
 async function walkAndStrip(dir: string): Promise<void> {

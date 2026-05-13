@@ -1,6 +1,6 @@
 {
   "name": "@molstar/molstar-components",
-  "version": "0.6.0-experimental.13",
+  "version": "0.6.0-experimental.14",
   "license": "MIT",
   "exports": "./dist/index.js",
   "imports": {
@@ -66,9 +66,12 @@
     "serve": "deno run --allow-net --allow-read jsr:@std/http/file-server --host 127.0.0.1 -p 8000 docs",
     "dev": "deno task build && deno task build:dist && deno task serve"
   },
-  "exclude": ["docs/", ".github/", "context/", ".claude/", "CLAUDE.md", "docs/superpowers/", "src/state-builder/compiler/__tests__", "src/state-builder/types/__tests__", "!dist/"],
+  "exclude": ["docs/", ".github/", "context/", ".claude/", "CLAUDE.md", "docs/superpowers/", "src/state-builder/compiler/__tests__", "src/state-builder/types/__tests__"],
+  "publish": {
+    "include": ["src/", "dist/", "deno.json", "tsconfig.json", "tsconfig.declarations.json", "build-dist.ts", "LICENSE", "README.md"]
+  },
   "lint": {
-    "exclude": ["src/state-builder/", "src/state-builder-ui/", "scripts/"]
+    "exclude": ["dist/", "src/state-builder/", "src/state-builder-ui/", "scripts/"]
   },
   "nodeModulesDir": "auto",
   "compilerOptions": {

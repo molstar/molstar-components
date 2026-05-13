@@ -3,8 +3,8 @@ import type { AnimationParams, CameraParams } from '@molstar/state-builder';
 import type { UINode, ConstantDefinition } from '@molstar/state-builder';
 
 export const SceneKeyAtom = atom<string>('default');
-export const CameraSnapshotAtom = atom<unknown>(null);
-export const PluginAtom = atom<unknown>(null);
+export const CameraSnapshotAtom = atom(null as unknown);
+export const PluginAtom = atom(null as unknown);
 
 export const UIBuilderNodesAtom = atom<Record<string, UINode[]>>({});
 export const UIBuilderConstantsAtom = atom<Record<string, ConstantDefinition[]>>({});

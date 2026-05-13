@@ -125,6 +125,22 @@ try {
   );
   console.log("✓ dist/molstar.css");
 
+  // 4. Generate TypeScript declarations
+  // tsc is run via node directly to pass --stack-size, which is required because
+  // molstar's type graph is deep enough to overflow node's default call stack.
+  console.log("Generating TypeScript declarations...");
+  const tscPath = new URL("./node_modules/.bin/tsc", import.meta.url).pathname;
+  const tscCmd = new Deno.Command("node", {
+    args: ["--stack-size=65536", tscPath, "-p", "tsconfig.declarations.json"],
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+  const tscResult = await tscCmd.output();
+  if (!tscResult.success) throw new Error("TypeScript declaration generation failed");
+  // Rename entry declaration to match dist/index.js convention
+  await Deno.rename("./dist/mod.d.ts", "./dist/index.d.ts");
+  console.log("✓ dist/index.d.ts");
+
   console.log("\nDist build complete.");
 } catch (error) {
   console.error("Build failed:", error);

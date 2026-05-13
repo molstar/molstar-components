@@ -1,6 +1,6 @@
 {
   "name": "@molstar/molstar-components",
-  "version": "0.6.0-experimental.12",
+  "version": "0.6.0-experimental.13",
   "license": "MIT",
   "exports": "./dist/index.js",
   "imports": {

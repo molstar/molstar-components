@@ -26,6 +26,14 @@ async function stripExtensionsInDts(path: string): Promise<void> {
   if (out !== src) await Deno.writeTextFile(path, out);
 }
 
+async function walkAndStrip(dir: string): Promise<void> {
+  for await (const entry of Deno.readDir(dir)) {
+    const path = `${dir}/${entry.name}`;
+    if (entry.isDirectory) await walkAndStrip(path);
+    else await stripExtensionsInDts(path);
+  }
+}
+
 // Deno import-map aliases for monaco sub-paths (e.g. "monaco-editor/typescript-contribution")
 // are not valid npm package exports. denoResolverPlugin runs before esbuild's external check,
 // so it resolves the aliases to npm: specifiers, and denoLoaderPlugin then produces broken
@@ -158,13 +166,6 @@ try {
   // causes TypeScript in the consumer to follow the path into the actual source
   // files that contain Deno-specific npm: specifiers it cannot resolve. Without
   // the extension, TypeScript resolves to the companion .d.ts files instead.
-  async function walkAndStrip(dir: string): Promise<void> {
-    for await (const entry of Deno.readDir(dir)) {
-      const path = `${dir}/${entry.name}`;
-      if (entry.isDirectory) await walkAndStrip(path);
-      else await stripExtensionsInDts(path);
-    }
-  }
   await walkAndStrip("./dist");
   console.log("✓ dist/index.d.ts");
 

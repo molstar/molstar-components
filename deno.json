@@ -56,7 +56,7 @@
     "test": "deno run --allow-all npm:vitest run src/state-builder",
     "generate-aliases": "deno run --allow-read --allow-write scripts/generate-aliases.ts",
     "mvs-types": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-sys npm:rollup@4 -c scripts/rollup-mvs-data-bundle.config.mjs && deno run --allow-read --allow-write scripts/process-mvs-types.mjs",
-    "clean": "rm -f docs/bundle.js docs/bundle.js.map docs/bundle.css docs/docs.bundle.js docs/docs.bundle.css docs/molstar-components.js docs/molstar-components.js.map docs/molstar-components.css docs/editor.worker.js docs/ts.worker.js docs/state-builder-ui.css docs/molstar.css && rm -rf docs/assets",
+    "clean": "rm -f docs/bundle.js docs/bundle.js.map docs/bundle.css docs/docs.bundle.js docs/docs.bundle.css docs/molstar-components.js docs/molstar-components.js.map docs/molstar-components.css docs/editor.worker.js docs/ts.worker.js docs/state-builder-ui.css docs/molstar.css docs/*.d.ts && rm -rf docs/assets",
     "build": "deno task clean && deno run --allow-all build.ts",
     "serve": "deno run --allow-net --allow-read jsr:@std/http/file-server --host 127.0.0.1 -p 8000 docs",
     "dev": "deno task build && deno task serve"

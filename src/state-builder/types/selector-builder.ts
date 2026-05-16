@@ -206,8 +206,12 @@ export interface ParsedSelector {
  * Used to populate the selector builder UI from an existing selector.
  */
 export function parseSelector(value: unknown): ParsedSelector {
-  // String selector (preset or custom)
+  // String selector — known quick presets go to quick mode, everything else to raw
   if (typeof value === 'string') {
+    const isQuickPreset = QUICK_SELECTOR_PRESETS.some((p) => p.value === value);
+    if (isQuickPreset) {
+      return { mode: 'quick' };
+    }
     return { mode: 'raw', rawValue: value };
   }
 

@@ -5,6 +5,7 @@ package.json
 deno.lock
 docs/assets
 dist/
+docs/*.d.ts
 docs/bundle.js
 docs/bundle.js.map
 docs/bundle.css

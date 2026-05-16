@@ -54,6 +54,7 @@ const MODE_LABELS: { mode: SelectorBuilderMode; label: string }[] = [
   { mode: 'ligand', label: 'Ligand' },
   { mode: 'expression', label: 'Expression' },
   { mode: 'union', label: 'Union' },
+  { mode: 'raw', label: 'Raw' },
 ];
 
 export function SelectorHelperContent({
@@ -339,7 +340,7 @@ export function SelectorHelperContent({
         />
       )}
 
-      {mode === 'quick' && <QuickPanel onSelect={quickSelect} />}
+      {mode === 'quick' && <QuickPanel onSelect={quickSelect} activeValue={typeof value === 'string' ? value : undefined} />}
 
       {mode === 'raw' && (
         <RawPanel

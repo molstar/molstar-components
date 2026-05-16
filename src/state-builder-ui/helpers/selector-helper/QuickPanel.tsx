@@ -6,9 +6,10 @@ import { QUICK_SELECTOR_PRESETS } from '../../../state-builder/index.ts';
 
 interface QuickPanelProps {
   onSelect: (value: string) => void;
+  activeValue?: string;
 }
 
-export function QuickPanel({ onSelect }: QuickPanelProps) {
+export function QuickPanel({ onSelect, activeValue }: QuickPanelProps) {
   return (
     <div>
       <Label className='text-sm'>Quick Select Patterns</Label>
@@ -17,7 +18,7 @@ export function QuickPanel({ onSelect }: QuickPanelProps) {
           <Button
             key={preset.value}
             size='sm'
-            variant='outline'
+            variant={activeValue === preset.value ? 'default' : 'outline'}
             onClick={() => onSelect(preset.value)}
             className='justify-start'
             title={preset.description}

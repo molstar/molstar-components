@@ -32,6 +32,8 @@ export interface ComponentSelectorObject {
   entity_type?: string;
   auth_asym_id?: string;
   auth_seq_id?: number;
+  beg_auth_seq_id?: number;
+  end_auth_seq_id?: number;
 }
 
 /**

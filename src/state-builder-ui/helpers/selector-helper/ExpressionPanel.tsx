@@ -105,6 +105,22 @@ export function ExpressionPanel({ value, onChange }: ExpressionPanelProps) {
           onChange={(v) => set('end_label_seq_id', v)}
         />
       </div>
+      <div>
+        <Label className='text-xs'>beg_auth_seq_id</Label>
+        <NumericInput
+          className='h-8 text-xs no-spinners'
+          value={value.beg_auth_seq_id}
+          onChange={(v) => set('beg_auth_seq_id', v)}
+        />
+      </div>
+      <div>
+        <Label className='text-xs'>end_auth_seq_id</Label>
+        <NumericInput
+          className='h-8 text-xs no-spinners'
+          value={value.end_auth_seq_id}
+          onChange={(v) => set('end_auth_seq_id', v)}
+        />
+      </div>
     </div>
   );
 }

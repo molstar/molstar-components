@@ -3,6 +3,7 @@ import { MVSNode } from './node.ts';
 import type { AST, CustomProps, NodeParams } from './types.ts';
 import { ASTError } from './types.ts';
 import { VALID_MVS_KINDS } from '../constants.ts';
+import { canHaveChild } from '../../types/mvs-tree-grammar.ts';
 
 
 function isValidNodeStructure(value: unknown): value is {
@@ -105,6 +106,17 @@ export class ASTFactory {
 
       if (!isValidMVSKind(kind)) {
         throw new ASTError(`Unknown node kind: ${kind}`, node, path);
+      }
+
+      // Validate parent-child relationships before recursing
+      for (const child of children) {
+        if (isValidNodeStructure(child) && isValidMVSKind(child.kind) && !canHaveChild(kind, child.kind)) {
+          throw new ASTError(
+            `Invalid parent-child relationship: "${child.kind}" cannot be a child of "${kind}"`,
+            node,
+            path,
+          );
+        }
       }
 
       // Recursively convert children

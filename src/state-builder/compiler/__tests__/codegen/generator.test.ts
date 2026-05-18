@@ -174,9 +174,15 @@ describe('CodeGenerator', () => {
                           children: [],
                         },
                         {
-                          kind: 'focus',
-                          params: {},
-                          children: [],
+                          kind: 'component',
+                          params: { selector: 'all' },
+                          children: [
+                            {
+                              kind: 'focus',
+                              params: {},
+                              children: [],
+                            },
+                          ],
                         },
                       ],
                     },
@@ -198,7 +204,7 @@ describe('CodeGenerator', () => {
       expect(code).toContain('structure_0.transform(');
       expect(code).toContain('rotation: [1, 0, 0, 0, 1, 0, 0, 0, 1]');
       expect(code).toContain('translation: [10, 20, 30]');
-      expect(code).toContain('structure_0.focus({});');
+      expect(code).toContain('component_0.focus({});');
     });
   });
 

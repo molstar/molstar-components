@@ -302,13 +302,25 @@ describe('ASTFactory', () => {
               children: [],
             },
             {
-              kind: 'structure',
-              params: {
-                type: 'model',
-                model_index: 5,
-                block_header: 'test_block',
-              },
-              children: [],
+              kind: 'download',
+              params: { url: 'test.cif' },
+              children: [
+                {
+                  kind: 'parse',
+                  params: { format: 'mmcif' },
+                  children: [
+                    {
+                      kind: 'structure',
+                      params: {
+                        type: 'model',
+                        model_index: 5,
+                        block_header: 'test_block',
+                      },
+                      children: [],
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
@@ -326,7 +338,7 @@ describe('ASTFactory', () => {
       expect(camera!.getParam('up')).toEqual([0, 1, 0]);
       expect(camera!.getParam('near')).toBe(0.1);
 
-      const structure = ast.root.getChildAt(1);
+      const structure = ast.root.getChildAt(1)!.getChildAt(0)!.getChildAt(0);
       expect(structure).toBeDefined();
       expect(structure!.getParam('type')).toBe('model');
       expect(structure!.getParam('model_index')).toBe(5);
@@ -339,15 +351,33 @@ describe('ASTFactory', () => {
           kind: 'root',
           children: [
             {
-              kind: 'component',
-              params: {
-                selector: {
-                  label_asym_id: 'A',
-                  label_seq_id: 10,
-                  label_atom_id: 'CA',
+              kind: 'download',
+              params: { url: 'test.cif' },
+              children: [
+                {
+                  kind: 'parse',
+                  params: { format: 'mmcif' },
+                  children: [
+                    {
+                      kind: 'structure',
+                      params: { type: 'model' },
+                      children: [
+                        {
+                          kind: 'component',
+                          params: {
+                            selector: {
+                              label_asym_id: 'A',
+                              label_seq_id: 10,
+                              label_atom_id: 'CA',
+                            },
+                          },
+                          children: [],
+                        },
+                      ],
+                    },
+                  ],
                 },
-              },
-              children: [],
+              ],
             },
           ],
         },
@@ -357,7 +387,7 @@ describe('ASTFactory', () => {
       };
 
       const ast = ASTFactory.fromMVSData(json);
-      const component = ast.root.getChildAt(0);
+      const component = ast.root.getChildAt(0)!.getChildAt(0)!.getChildAt(0)!.getChildAt(0);
       expect(component).toBeDefined();
 
       expect(component!.getParam('selector')).toEqual({
@@ -374,9 +404,21 @@ describe('ASTFactory', () => {
           params: {},
           children: [
             {
-              kind: 'coordinates',
-              params: {},
-              children: [],
+              kind: 'download',
+              params: { url: 'test.cif' },
+              children: [
+                {
+                  kind: 'parse',
+                  params: { format: 'mmcif' },
+                  children: [
+                    {
+                      kind: 'coordinates',
+                      params: {},
+                      children: [],
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
@@ -386,37 +428,24 @@ describe('ASTFactory', () => {
       };
 
       const ast = ASTFactory.fromMVSData(json);
-      const coords = ast.root.getChildAt(0);
+      const coords = ast.root.getChildAt(0)!.getChildAt(0)!.getChildAt(0);
       expect(coords).toBeDefined();
 
       expect(coords!.params).toEqual({});
     });
 
-    test('handles all valid node kinds', () => {
-      const allKinds = [
-        'download',
-        'parse',
-        'coordinates',
-        'structure',
-        'transform',
-        'instance',
-        'component',
-        'representation',
-        'color',
-        'opacity',
-        'clip',
-        'volume',
-        'volume_representation',
-        'label',
-        'tooltip',
-        'focus',
+    test('handles valid root children', () => {
+      // Only these kinds are valid direct children of root per MVSTreeSchema
+      const rootChildren = [
         'camera',
         'canvas',
+        'download',
+        'focus',
         'primitives',
-        'primitive',
+        'primitives_from_uri',
       ];
 
-      const children = allKinds.map(kind => ({
+      const children = rootChildren.map(kind => ({
         kind,
         params: {},
         children: [],
@@ -434,8 +463,8 @@ describe('ASTFactory', () => {
 
       const ast = ASTFactory.fromMVSData(json);
 
-      expect(ast.root.getChildrenCount()).toBe(allKinds.length);
-      allKinds.forEach((kind, index) => {
+      expect(ast.root.getChildrenCount()).toBe(rootChildren.length);
+      rootChildren.forEach((kind, index) => {
         expect(ast.root.getChildAt(index)?.kind).toBe(kind);
       });
     });
@@ -845,8 +874,8 @@ describe('ASTFactory', () => {
           kind: 'root',
           children: [
             {
-              kind: 'label',
-              params: { text: 'Protéine α-hélix 中文' },
+              kind: 'download',
+              params: { url: 'https://example.com/Protéine_α-hélix_中文.cif' },
               children: [],
             },
           ],
@@ -857,10 +886,10 @@ describe('ASTFactory', () => {
       });
 
       const ast = ASTFactory.fromJSON(jsonString);
-      const label = ast.root.getChildAt(0);
-      expect(label).toBeDefined();
+      const download = ast.root.getChildAt(0);
+      expect(download).toBeDefined();
 
-      expect(label!.getParam('text')).toBe('Protéine α-hélix 中文');
+      expect(download!.getParam('url')).toBe('https://example.com/Protéine_α-hélix_中文.cif');
     });
 
     test('handles JSON with escaped characters', () => {
@@ -869,8 +898,8 @@ describe('ASTFactory', () => {
           kind: 'root',
           children: [
             {
-              kind: 'label',
-              params: { text: 'Line1\nLine2\tTabbed' },
+              kind: 'download',
+              params: { url: 'https://example.com/path\twith\ttabs' },
               children: [],
             },
           ],
@@ -881,10 +910,105 @@ describe('ASTFactory', () => {
       });
 
       const ast = ASTFactory.fromJSON(jsonString);
-      const label = ast.root.getChildAt(0);
-      expect(label).toBeDefined();
+      const download = ast.root.getChildAt(0);
+      expect(download).toBeDefined();
 
-      expect(label!.getParam('text')).toBe('Line1\nLine2\tTabbed');
+      expect(download!.getParam('url')).toBe('https://example.com/path\twith\ttabs');
+    });
+  });
+
+  describe('Parent-Child Relationship Validation', () => {
+    test('throws error when child kind is invalid for its parent at root level', () => {
+      // 'parse' must be a child of 'download', not 'root'
+      const json = {
+        root: {
+          kind: 'root',
+          children: [
+            { kind: 'parse', params: { format: 'mmcif' }, children: [] },
+          ],
+        },
+        metadata: { timestamp: '2024-01-01T00:00:00Z' },
+      };
+
+      expect(() => ASTFactory.fromMVSData(json)).toThrow(ASTError);
+      expect(() => ASTFactory.fromMVSData(json)).toThrow('Invalid parent-child relationship');
+    });
+
+    test('throws error when child kind is invalid for its parent deep in tree', () => {
+      // 'color' must be a child of 'representation', not 'download'
+      const json = {
+        root: {
+          kind: 'root',
+          children: [
+            {
+              kind: 'download',
+              params: { url: 'test.cif' },
+              children: [
+                { kind: 'color', params: { color: '#FF0000' }, children: [] },
+              ],
+            },
+          ],
+        },
+        metadata: { timestamp: '2024-01-01T00:00:00Z' },
+      };
+
+      expect(() => ASTFactory.fromMVSData(json)).toThrow(ASTError);
+      expect(() => ASTFactory.fromMVSData(json)).toThrow('Invalid parent-child relationship');
+    });
+
+    test('error message names both the parent and child kinds', () => {
+      const json = {
+        root: {
+          kind: 'root',
+          children: [
+            { kind: 'color', params: {}, children: [] },
+          ],
+        },
+        metadata: { timestamp: '2024-01-01T00:00:00Z' },
+      };
+
+      try {
+        ASTFactory.fromMVSData(json);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ASTError);
+        const msg = (error as ASTError).message;
+        expect(msg).toContain('color');
+        expect(msg).toContain('root');
+      }
+    });
+
+    test('reports unknown kind error rather than parent-child error for unknown child kind', () => {
+      // 'unknown_kind' is not a valid MVS kind at all — the unknown-kind error
+      // takes priority over the parent-child check
+      const json = {
+        root: {
+          kind: 'root',
+          children: [
+            { kind: 'unknown_kind', params: {}, children: [] },
+          ],
+        },
+        metadata: { timestamp: '2024-01-01T00:00:00Z' },
+      };
+
+      expect(() => ASTFactory.fromMVSData(json)).toThrow(ASTError);
+      expect(() => ASTFactory.fromMVSData(json)).toThrow('Unknown node kind: unknown_kind');
+    });
+
+    test('reports structure error rather than parent-child error for malformed child', () => {
+      // Child is missing 'kind' entirely — the structure error takes priority
+      const json = {
+        root: {
+          kind: 'root',
+          children: [
+            { params: {}, children: [] },
+          ],
+        },
+        metadata: { timestamp: '2024-01-01T00:00:00Z' },
+      };
+
+      expect(() => ASTFactory.fromMVSData(json)).toThrow(ASTError);
+      expect(() => ASTFactory.fromMVSData(json)).toThrow('Invalid node structure');
     });
   });
 

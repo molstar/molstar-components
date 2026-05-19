@@ -100,8 +100,7 @@ export function getNodeSummary(node: UINode): string | null {
     }
     case 'canvas': {
       const bg = p.background_color;
-      if (typeof bg === 'number') return '#' + bg.toString(16).padStart(6, '0');
-      return null;
+      return typeof bg === 'string' ? bg : null;
     }
     case 'camera': {
       const pos = p.position;

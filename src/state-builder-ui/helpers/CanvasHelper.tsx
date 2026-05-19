@@ -16,29 +16,16 @@ interface CanvasHelperProps {
   onCustomChange?: (custom: unknown) => void;
 }
 
-function numericToHex(value: number): string {
-  return '#' + value.toString(16).padStart(6, '0');
-}
-
-function hexToNumeric(hex: string): number {
-  return parseInt(hex.replace('#', ''), 16) || 0;
-}
-
 export function CanvasHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: CanvasHelperProps) {
-  const initColor = typeof node.params.background_color === 'number'
-    ? numericToHex(node.params.background_color as number)
-    : '#ffffff';
+  const initColor = (node.params.background_color as string) ?? '#ffffff';
   const [colorHex, setColorHex] = useState(initColor);
 
   const handleDialogOpen = () => {
-    const c = typeof node.params.background_color === 'number'
-      ? numericToHex(node.params.background_color as number)
-      : '#ffffff';
-    setColorHex(c);
+    setColorHex((node.params.background_color as string) ?? '#ffffff');
   };
 
   const handleApply = (ref: string) => {
-    onUpdate({ params: { ...node.params, background_color: hexToNumeric(colorHex) }, ...(ref ? { ref } : {}) });
+    onUpdate({ params: { ...node.params, background_color: colorHex }, ...(ref ? { ref } : {}) });
   };
 
   const handleRawApply = (params: Record<string, unknown>, ref: string) => {

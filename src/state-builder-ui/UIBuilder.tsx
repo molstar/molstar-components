@@ -176,6 +176,11 @@ export function UIBuilder(): React.ReactElement {
     updateNodes([...nodes, newNode]);
   };
 
+  const addCanvas = () => {
+    const canvasNode = createEmptyNode('canvas');
+    updateNodes([...nodes, canvasNode]);
+  };
+
   const addConstant = () => {
     const newConstant = createEmptyConstant('colors');
     updateConstants([...constants, newConstant]);
@@ -474,6 +479,9 @@ export function UIBuilder(): React.ReactElement {
             <DropdownMenuContent align='end'>
               <DropdownMenuItem onClick={addNode}>
                 Download / Parse
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={addCanvas}>
+                Canvas Configuration
               </DropdownMenuItem>
               <DropdownMenuItem onClick={addConstant}>
                 Scene Constant

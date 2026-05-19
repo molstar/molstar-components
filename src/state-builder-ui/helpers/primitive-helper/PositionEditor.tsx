@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../base/button.tsx';
-import { Input } from '../../base/input.tsx';
 import { Label } from '../../base/label.tsx';
+import { NumericInput } from '../../components/NumericInput.tsx';
 import type { PositionEditorState } from './types.ts';
 import { positionToParam, tryParseExpressionJson } from './types.ts';
 import { SelectorHelperContent } from '../SelectorHelperContent.tsx';
@@ -52,8 +52,8 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
     // before the user has had a chance to interact.
   };
 
-  const handleAxis = (axis: 'x' | 'y' | 'z', str: string) => {
-    emitChange({ ...state, mode: 'vec3', [axis]: parseFloat(str) || 0 });
+  const handleAxis = (axis: 'x' | 'y' | 'z', v: number | undefined) => {
+    emitChange({ ...state, mode: 'vec3', [axis]: v ?? state[axis] });
   };
 
   return (
@@ -124,12 +124,10 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
           {(['x', 'y', 'z'] as const).map((axis) => (
             <div key={axis}>
               <Label className='text-xs text-muted-foreground uppercase'>{axis}</Label>
-              <Input
+              <NumericInput
                 className='h-8 text-sm font-mono'
-                type='number'
-                step='0.1'
                 value={state[axis]}
-                onChange={(e) => handleAxis(axis, e.target.value)}
+                onChange={(v) => handleAxis(axis, v)}
                 title={`${label} ${axis.toUpperCase()}`}
               />
             </div>

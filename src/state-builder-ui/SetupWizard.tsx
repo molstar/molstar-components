@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './base/dialog.tsx';
 import { Button } from './base/button.tsx';
 import { Input } from './base/input.tsx';
@@ -18,6 +18,7 @@ import {
   assignMissingRefs,
 } from '../state-builder/index.ts';
 import { SelectorHelperContent, type SelectorTab } from './helpers/SelectorHelperContent.tsx';
+import { NumericInput } from './components/NumericInput.tsx';
 
 interface SetupWizardProps {
   open: boolean;
@@ -96,6 +97,16 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
   const [components, setComponents] = useState<ComponentConfig[]>([newComponent()]);
   const [activeCompTab, setActiveCompTab] = useState('0');
 
+  useEffect(() => {
+    if (!open) return;
+    setStep(1);
+    setUrl(''); setFormat('bcif');
+    setStructureType('model'); setAssemblyId('');
+    setRadius(5); setIjkMin([0, 0, 0]); setIjkMax([1, 1, 1]);
+    setModelIndex(undefined); setBlockIndex(undefined); setBlockHeader(undefined); setCoordinatesRef(undefined);
+    setComponents([newComponent()]); setActiveCompTab('0');
+  }, [open]);
+
   const formats = getActiveValues(PARSE_FORMATS);
   const reprTypes = getActiveValues(REPRESENTATION_TYPES);
   const presetSelectors = getActiveValues(COMPONENT_SELECTORS);
@@ -164,7 +175,7 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[520px] gap-0 p-0 overflow-hidden'>
+      <DialogContent className='sm:max-w-[860px] gap-0 p-0 overflow-hidden'>
         <DialogHeader className='pb-0'>
           <StepIndicator currentStep={step} />
           <DialogTitle className='px-5 pt-3 pb-0 text-base'>
@@ -216,7 +227,7 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
             {structureType === 'symmetry_mates' && (
               <div className='flex flex-col gap-1 w-28'>
                 <Label className='text-xs'>Radius (Å)</Label>
-                <Input className='h-7 text-xs font-mono' type='number' min='0' step='1' placeholder='5' value={radius} onChange={(e) => setRadius(parseFloat(e.target.value) || 5)} />
+                <NumericInput className='h-7 text-xs font-mono' placeholder='5' value={radius} onChange={(v) => setRadius(v ?? radius)} />
               </div>
             )}
             {structureType === 'symmetry' && (
@@ -229,16 +240,14 @@ export function SetupWizard({ open, onOpenChange, onComplete }: SetupWizardProps
                       <Label className='text-xs'>IJK {bound}</Label>
                       <div className='flex gap-1'>
                         {(['i', 'j', 'k'] as const).map((axis, idx) => (
-                          <Input
+                          <NumericInput
                             key={axis}
                             className='h-7 text-xs font-mono w-14'
-                            type='number'
-                            step='1'
                             placeholder={axis}
                             value={val[idx]}
-                            onChange={(e) => {
+                            onChange={(v) => {
                               const next = [...val] as [number, number, number];
-                              next[idx] = parseInt(e.target.value) || 0;
+                              next[idx] = v ?? next[idx];
                               set(next);
                             }}
                           />

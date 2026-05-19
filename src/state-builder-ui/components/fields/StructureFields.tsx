@@ -1,6 +1,7 @@
-import { Input } from '../../ui/input.tsx';
-import { Label } from '../../ui/label.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select.tsx';
+import { Input } from '../../base/input.tsx';
+import { Label } from '../../base/label.tsx';
+import { NumericInput } from '../NumericInput.tsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../base/select.tsx';
 import { STRUCTURE_TYPES, getActiveValues } from '../../../state-builder/index.ts';
 
 interface StructureFieldsProps {
@@ -27,16 +28,14 @@ function IjkInput({
       <Label className='text-xs'>{label}</Label>
       <div className='flex gap-1 mt-1'>
         {(['i', 'j', 'k'] as const).map((axis, idx) => (
-          <Input
+          <NumericInput
             key={axis}
             className='h-8 text-xs font-mono w-14'
-            type='number'
-            step='1'
             placeholder={axis}
             value={value[idx]}
-            onChange={(e) => {
+            onChange={(v) => {
               const next = [...value] as [number, number, number];
-              next[idx] = parseInt(e.target.value) || 0;
+              next[idx] = v ?? next[idx];
               onChange(next);
             }}
           />

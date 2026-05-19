@@ -6,6 +6,7 @@ import { Input } from '../base/input.tsx';
 import { Label } from '../base/label.tsx';
 import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
+import { NumericInput } from '../components/NumericInput.tsx';
 
 interface StructureHelperProps {
   node: UINode;
@@ -27,16 +28,14 @@ function IjkInput({ label, value, onChange }: { label: string; value: [number, n
       <Label className='text-xs'>{label}</Label>
       <div className='flex gap-1'>
         {(['i', 'j', 'k'] as const).map((axis, idx) => (
-          <Input
+          <NumericInput
             key={axis}
             className='h-7 text-xs font-mono w-14'
-            type='number'
-            step='1'
             placeholder={axis}
             value={value[idx]}
-            onChange={(e) => {
+            onChange={(v) => {
               const next = [...value] as [number, number, number];
-              next[idx] = parseInt(e.target.value) || 0;
+              next[idx] = v ?? next[idx];
               onChange(next);
             }}
           />
@@ -181,7 +180,7 @@ export function StructureHelper({ node, onUpdate, open, onOpenChange, trigger, o
         <div className='flex flex-col gap-3'>
           <div className='flex flex-col gap-1 w-28'>
             <Label className='text-xs'>Radius (Å)</Label>
-            <Input className='h-7 text-xs font-mono' type='number' min='0' step='1' placeholder='5' value={radius} onChange={(e) => setRadius(parseFloat(e.target.value) || 5)} />
+            <NumericInput className='h-7 text-xs font-mono' placeholder='5' value={radius} onChange={(v) => setRadius(v ?? radius)} />
           </div>
           <SharedFields {...sharedProps} />
         </div>

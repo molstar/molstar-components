@@ -2,6 +2,7 @@
 
 import { Input } from '../../base/input.tsx';
 import { Label } from '../../base/label.tsx';
+import { NumericInput } from '../../components/NumericInput.tsx';
 import { PositionEditor } from './PositionEditor.tsx';
 import { positionFromParam, positionToParam, defaultPositionState } from './types.ts';
 import type { PrimitiveKindFieldsProps } from './types.ts';
@@ -15,9 +16,9 @@ export function EllipsoidFields({ params, onUpdate }: PrimitiveKindFieldsProps) 
     return [0, 0, 0];
   };
 
-  const handleVec3 = (key: string, axis: 0 | 1 | 2, str: string) => {
+  const handleVec3 = (key: string, axis: 0 | 1 | 2, v: number | undefined) => {
     const next = [...getVec3(key)] as [number, number, number];
-    next[axis] = parseFloat(str) || 0;
+    next[axis] = v ?? next[axis];
     onUpdate({ ...params, [key]: next });
   };
 
@@ -35,12 +36,10 @@ export function EllipsoidFields({ params, onUpdate }: PrimitiveKindFieldsProps) 
           {(['X', 'Y', 'Z'] as const).map((ax, i) => (
             <div key={ax}>
               <Label className='text-xs text-muted-foreground'>{ax}</Label>
-              <Input
+              <NumericInput
                 className='h-8 text-sm font-mono'
-                type='number'
-                step='0.1'
                 value={getVec3('major_axis')[i]}
-                onChange={(e) => handleVec3('major_axis', i as 0 | 1 | 2, e.target.value)}
+                onChange={(v) => handleVec3('major_axis', i as 0 | 1 | 2, v)}
               />
             </div>
           ))}
@@ -53,12 +52,10 @@ export function EllipsoidFields({ params, onUpdate }: PrimitiveKindFieldsProps) 
           {(['X', 'Y', 'Z'] as const).map((ax, i) => (
             <div key={ax}>
               <Label className='text-xs text-muted-foreground'>{ax}</Label>
-              <Input
+              <NumericInput
                 className='h-8 text-sm font-mono'
-                type='number'
-                step='0.1'
                 value={getVec3('minor_axis')[i]}
-                onChange={(e) => handleVec3('minor_axis', i as 0 | 1 | 2, e.target.value)}
+                onChange={(v) => handleVec3('minor_axis', i as 0 | 1 | 2, v)}
               />
             </div>
           ))}

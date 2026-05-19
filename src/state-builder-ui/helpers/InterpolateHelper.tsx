@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Input } from '../base/input.tsx';
+import { NumericInput } from '../components/NumericInput.tsx';
 import { Label } from '../base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../base/select.tsx';
 import type { UINode } from '../../state-builder/index.ts';
@@ -113,14 +114,11 @@ export function InterpolateHelper({ node, onUpdate, open, onOpenChange, trigger,
             </div>
             <div className='flex flex-col gap-1 w-36'>
               <Label className='text-xs'>Duration (ms)</Label>
-              <Input
+              <NumericInput
                 className='h-7 text-xs font-mono'
-                type='number'
-                min='0'
-                step='100'
                 placeholder='1000'
                 value={durationMs}
-                onChange={(e) => setDurationMs(parseInt(e.target.value) || 0)}
+                onChange={(v) => setDurationMs(v ?? durationMs)}
               />
             </div>
           </div>

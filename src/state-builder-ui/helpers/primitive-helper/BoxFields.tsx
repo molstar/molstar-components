@@ -2,6 +2,7 @@
 
 import { Input } from '../../base/input.tsx';
 import { Label } from '../../base/label.tsx';
+import { NumericInput } from '../../components/NumericInput.tsx';
 import { PositionEditor } from './PositionEditor.tsx';
 import { positionFromParam, positionToParam } from './types.ts';
 import type { PrimitiveKindFieldsProps } from './types.ts';
@@ -15,9 +16,9 @@ export function BoxFields({ params, onUpdate }: PrimitiveKindFieldsProps) {
     return [1, 1, 1];
   };
 
-  const handleExtent = (axis: 0 | 1 | 2, str: string) => {
+  const handleExtent = (axis: 0 | 1 | 2, v: number | undefined) => {
     const next = [...getVec3('extent')] as [number, number, number];
-    next[axis] = parseFloat(str) || 0;
+    next[axis] = v ?? next[axis];
     onUpdate({ ...params, extent: next });
   };
 
@@ -35,13 +36,10 @@ export function BoxFields({ params, onUpdate }: PrimitiveKindFieldsProps) {
           {(['X', 'Y', 'Z'] as const).map((ax, i) => (
             <div key={ax}>
               <Label className='text-xs text-muted-foreground'>{ax}</Label>
-              <Input
+              <NumericInput
                 className='h-8 text-sm font-mono'
-                type='number'
-                step='0.1'
-                min='0'
                 value={getVec3('extent')[i]}
-                onChange={(e) => handleExtent(i as 0 | 1 | 2, e.target.value)}
+                onChange={(v) => handleExtent(i as 0 | 1 | 2, v)}
               />
             </div>
           ))}

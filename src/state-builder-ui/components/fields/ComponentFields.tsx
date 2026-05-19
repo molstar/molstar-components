@@ -64,7 +64,7 @@ function SelectorDialog({
         <span className='truncate'>{preview}</span>
       </Button>
 
-      <DialogContent className='sm:max-w-lg'>
+      <DialogContent className='sm:max-w-2xl'>
         <DialogHeader>
           <DialogTitle>Build Component Selector</DialogTitle>
         </DialogHeader>

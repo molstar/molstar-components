@@ -7,6 +7,7 @@ import { Label } from '../base/label.tsx';
 import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { FieldRemappingSection, type RemapEntry } from '../components/FieldRemappingSection.tsx';
+import { PaletteSection, paletteFromParams, paletteToParams, type PaletteValue } from '../components/PaletteSection.tsx';
 
 interface ColorFromSourceHelperProps {
   node: UINode;
@@ -18,12 +19,13 @@ interface ColorFromSourceHelperProps {
 }
 
 function initFromNode(node: UINode) {
-  const p = node.params;
+  const p = node.params as Record<string, unknown>;
   return {
     categoryName: (p.category_name as string) ?? '',
     fieldName: (p.field_name as string) ?? '',
     blockIndex: p.block_index as number | undefined,
     fieldRemapping: Object.entries((p.field_remapping as Record<string, string>) ?? {}).map(([key, value]) => ({ key, value })),
+    palette: paletteFromParams(p),
   };
 }
 
@@ -33,6 +35,7 @@ export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trig
   const [fieldName, setFieldName] = useState(init.fieldName);
   const [blockIndex, setBlockIndex] = useState<number | undefined>(init.blockIndex);
   const [fieldRemapping, setFieldRemapping] = useState<RemapEntry[]>(init.fieldRemapping);
+  const [palette, setPalette] = useState<PaletteValue | null>(init.palette);
 
   const handleDialogOpen = () => {
     const s = initFromNode(node);
@@ -40,6 +43,7 @@ export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trig
     setFieldName(s.fieldName);
     setBlockIndex(s.blockIndex);
     setFieldRemapping(s.fieldRemapping);
+    setPalette(s.palette);
   };
 
   const handleApply = (ref: string) => {
@@ -49,6 +53,9 @@ export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trig
     const remapping = Object.fromEntries(fieldRemapping.filter(e => e.key).map(e => [e.key, e.value]));
     if (Object.keys(remapping).length > 0) params.field_remapping = remapping;
     else delete params.field_remapping;
+    const paletteParams = paletteToParams(palette);
+    if (paletteParams) params.palette = paletteParams;
+    else delete params.palette;
     onUpdate({ params, ...(ref ? { ref } : {}) });
   };
 
@@ -82,6 +89,7 @@ export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trig
               <Label className='text-xs'>Block index</Label>
               <Input className='h-7 text-xs font-mono' type='number' min='0' placeholder='optional' value={blockIndex ?? ''} onChange={(e) => setBlockIndex(e.target.value === '' ? undefined : parseInt(e.target.value))} />
             </div>
+            <PaletteSection value={palette} onChange={setPalette} />
             <FieldRemappingSection entries={fieldRemapping} onChange={setFieldRemapping} />
           </div>
         ),

@@ -7,6 +7,7 @@ import { Label } from '../base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../base/select.tsx';
 import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
+import { PaletteSection, paletteFromParams, paletteToParams, type PaletteValue } from '../components/PaletteSection.tsx';
 
 interface ColorFromUriHelperProps {
   node: UINode;
@@ -25,13 +26,14 @@ const SCHEMAS = [
 ] as const;
 
 function initFromNode(node: UINode) {
-  const p = node.params;
+  const p = node.params as Record<string, unknown>;
   return {
     uri: (p.uri as string) ?? '',
     format: (p.format as string) ?? 'cif',
     schema: (p.schema as string) ?? 'all_atomic',
     categoryName: (p.category_name as string) ?? '',
     fieldName: (p.field_name as string) ?? '',
+    palette: paletteFromParams(p),
   };
 }
 
@@ -42,6 +44,7 @@ export function ColorFromUriHelper({ node, onUpdate, open, onOpenChange, trigger
   const [schema, setSchema] = useState(init.schema);
   const [categoryName, setCategoryName] = useState(init.categoryName);
   const [fieldName, setFieldName] = useState(init.fieldName);
+  const [palette, setPalette] = useState<PaletteValue | null>(init.palette);
 
   const handleDialogOpen = () => {
     const s = initFromNode(node);
@@ -50,6 +53,7 @@ export function ColorFromUriHelper({ node, onUpdate, open, onOpenChange, trigger
     setSchema(s.schema);
     setCategoryName(s.categoryName);
     setFieldName(s.fieldName);
+    setPalette(s.palette);
   };
 
   const handleApply = (ref: string) => {
@@ -61,6 +65,9 @@ export function ColorFromUriHelper({ node, onUpdate, open, onOpenChange, trigger
       category_name: categoryName || undefined,
       field_name: fieldName || undefined,
     };
+    const paletteParams = paletteToParams(palette);
+    if (paletteParams) params.palette = paletteParams;
+    else delete params.palette;
     onUpdate({ params, ...(ref ? { ref } : {}) });
   };
 
@@ -112,6 +119,7 @@ export function ColorFromUriHelper({ node, onUpdate, open, onOpenChange, trigger
                 <Input className='h-7 text-xs font-mono' placeholder='color' value={fieldName} onChange={(e) => setFieldName(e.target.value)} />
               </div>
             </div>
+            <PaletteSection value={palette} onChange={setPalette} />
           </div>
         ),
       }]}

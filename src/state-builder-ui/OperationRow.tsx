@@ -265,8 +265,13 @@ export function OperationRow({
           </Button>
         )}
 
-        {/* Kind label */}
-        <KindLabel value={node.kind} />
+        {/* Kind label / selector (selector shown only when no kind set yet) */}
+        <KindLabel
+          value={node.kind}
+          onChange={isUnconfigured ? (kind) => onUpdate({ kind, params: {}, children: [] }) : undefined}
+          onCompositeSelect={isUnconfigured ? (compositeNode) => onUpdate({ kind: compositeNode.kind, params: compositeNode.params, children: compositeNode.children }) : undefined}
+          allowedKinds={allowedKinds}
+        />
 
         {/* Summary button */}
         <button

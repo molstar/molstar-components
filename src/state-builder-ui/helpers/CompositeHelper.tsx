@@ -11,13 +11,12 @@ import { PARSE_FORMATS, getActiveValues } from '../../state-builder/index.ts';
 interface CompositeHelperProps {
   downloadNode: UINode;
   parseNode: UINode;
-  onUpdateDownload: (updates: Partial<UINode>) => void;
-  onUpdateParse: (updates: Partial<UINode>) => void;
+  onApply: (downloadUpdates: Partial<UINode>, parseUpdates: Partial<UINode>) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function CompositeHelper({ downloadNode, parseNode, onUpdateDownload, onUpdateParse, open, onOpenChange }: CompositeHelperProps) {
+export function CompositeHelper({ downloadNode, parseNode, onApply, open, onOpenChange }: CompositeHelperProps) {
   const [url, setUrl] = useState((downloadNode.params.url as string) ?? '');
   const [format, setFormat] = useState((parseNode.params.format as string) ?? '');
   const formats = getActiveValues(PARSE_FORMATS);
@@ -32,8 +31,10 @@ export function CompositeHelper({ downloadNode, parseNode, onUpdateDownload, onU
   };
 
   const handleApply = () => {
-    onUpdateDownload({ params: { ...downloadNode.params, url } });
-    onUpdateParse({ params: { ...parseNode.params, format } });
+    onApply(
+      { params: { ...downloadNode.params, url } },
+      { params: { ...parseNode.params, format } },
+    );
     onOpenChange(false);
   };
 

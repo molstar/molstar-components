@@ -473,7 +473,7 @@ export function UIBuilder(): React.ReactElement {
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               <DropdownMenuItem onClick={addNode}>
-                Empty Node
+                Download / Parse
               </DropdownMenuItem>
               <DropdownMenuItem onClick={addConstant}>
                 Scene Constant
@@ -553,7 +553,7 @@ export function UIBuilder(): React.ReactElement {
               </DropdownMenuTrigger>
               <DropdownMenuContent align='center'>
                 <DropdownMenuItem onClick={addNode}>
-                  Empty Node
+                  Download / Parse
                 </DropdownMenuItem>
                 {getTemplatesForParentKind('root').length > 0 && (
                   <>

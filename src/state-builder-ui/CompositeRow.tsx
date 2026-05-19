@@ -2,13 +2,14 @@
 
 import { Button } from './base/button.tsx';
 import type { UINode, ConstantDefinition } from '../state-builder/index.ts';
-import { createEmptyNode, deepCopyNode, countSubtreeNodes } from '../state-builder/index.ts';
+import { createEmptyNode, deepCopyNode, countSubtreeNodes, generateDefaultRef } from '../state-builder/index.ts';
 import { ConfirmDialog } from './base/confirm-dialog.tsx';
 import type { CompositeSequence } from '../state-builder/types/composite-sequences.ts';
 import { getCompositeValidChildren } from '../state-builder/types/composite-sequences.ts';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
+import { useAfterApply } from './state/after-apply-context.ts';
 import { TreeLines } from './components/TreeLines.tsx';
 import { OperationActions } from './components/OperationActions.tsx';
 import { OperationRow } from './OperationRow.tsx';
@@ -65,6 +66,7 @@ export function CompositeRow({
   const [pendingAction, setPendingAction] = useState<{
     type: 'delete';
   } | null>(null);
+  const afterApply = useAfterApply();
 
   const childCount = exitNode.children?.length || 0;
   const subtreeCount = countSubtreeNodes(exitNode);
@@ -83,15 +85,13 @@ export function CompositeRow({
     setPendingAction(null);
   };
 
-  const handleUpdateDownload = (updates: Partial<UINode>) => {
-    onUpdate(updates);
-  };
-
-  const handleUpdateParse = (updates: Partial<UINode>) => {
-    const updatedExitNode = { ...exitNode, ...updates };
+  const handleApply = (downloadUpdates: Partial<UINode>, parseUpdates: Partial<UINode>) => {
+    const updatedExitNode = { ...exitNode, ...parseUpdates };
     onUpdate({
+      ...downloadUpdates,
       children: [updatedExitNode, ...(rootNode.children?.slice(1) || [])],
     });
+    afterApply?.();
   };
 
   const handleAddChild = () => {
@@ -260,16 +260,25 @@ export function CompositeRow({
           onMoveUp={onMoveUp}
           onMoveDown={onMoveDown}
           onAddChild={handleAddChild}
+          onAddChildWithKind={(kind) => {
+            const ref = generateDefaultRef(kind, allNodes);
+            const newChild = { id: crypto.randomUUID(), kind, params: {}, children: [], ref };
+            const updatedExitNode = {
+              ...exitNode,
+              children: [...(exitNode.children || []), newChild],
+            };
+            onUpdate({ children: [updatedExitNode, ...(rootNode.children?.slice(1) || [])] });
+          }}
           onAddTemplateChildren={handleAddTemplateChildren}
           onCopy={onCopy}
           onRemove={handleRemove}
+          validChildKinds={validChildKinds}
         />
 
         <CompositeHelper
           downloadNode={rootNode}
           parseNode={exitNode}
-          onUpdateDownload={handleUpdateDownload}
-          onUpdateParse={handleUpdateParse}
+          onApply={handleApply}
           open={helperOpen}
           onOpenChange={setHelperOpen}
         />

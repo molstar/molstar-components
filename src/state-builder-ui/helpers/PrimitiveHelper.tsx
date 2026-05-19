@@ -30,21 +30,21 @@ function kindLabel(kind: unknown): string {
 function defaultParamsForKind(kind: PrimitiveKind): Record<string, unknown> {
   switch (kind) {
     case 'label':
-      return { kind, position: [0, 0, 0], text: 'Label' };
+      return { kind, position: {}, text: 'Label' };
     case 'ellipsoid':
-      return { kind, center: [0, 0, 0], major_axis: [1, 0, 0], minor_axis: [0, 1, 0] };
+      return { kind, center: {}, major_axis: [1, 0, 0], minor_axis: [0, 1, 0] };
     case 'distance_measurement':
-      return { kind, start: [0, 0, 0], end: [1, 0, 0] };
+      return { kind, start: {}, end: {} };
     case 'angle_measurement':
-      return { kind, a: [0, 0, 0], b: [1, 0, 0], c: [2, 0, 0] };
+      return { kind, a: {}, b: {}, c: {} };
     case 'arrow':
-      return { kind, start: [0, 0, 0], end: [1, 0, 0] };
+      return { kind, start: {}, end: {} };
     case 'tube':
-      return { kind, start: [0, 0, 0], end: [1, 0, 0] };
+      return { kind, start: {}, end: {} };
     case 'box':
-      return { kind, center: [0, 0, 0], extent: [1, 1, 1] };
+      return { kind, center: {}, extent: [1, 1, 1] };
     case 'ellipse':
-      return { kind, center: [0, 0, 0], major_axis: [1, 0, 0], minor_axis: [0, 1, 0] };
+      return { kind, center: {}, major_axis: [1, 0, 0], minor_axis: [0, 1, 0] };
     case 'mesh':
       return { kind, vertices: [], indices: [] };
     case 'lines':

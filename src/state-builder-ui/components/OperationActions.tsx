@@ -94,8 +94,6 @@ export function OperationActions({
                     {t.name}
                   </DropdownMenuItem>
                 ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onAddChild}>Empty node</DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
           ) : (

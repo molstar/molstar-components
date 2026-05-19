@@ -20,12 +20,12 @@ interface ComponentFromUriHelperProps {
 
 export function ComponentFromUriHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: ComponentFromUriHelperProps) {
   const [uri, setUri] = useState((node.params.uri as string) ?? '');
-  const [selector, setSelector] = useState<ComponentSelectorValue | undefined>(node.params.selector as ComponentSelectorValue | undefined);
-  const [selectorTab, setSelectorTab] = useState<SelectorTab>('chain');
+  const [selector, setSelector] = useState<ComponentSelectorValue | undefined>((node.params.selector as ComponentSelectorValue | undefined) ?? 'all');
+  const [selectorTab, setSelectorTab] = useState<SelectorTab>('quick');
 
   const handleDialogOpen = () => {
     setUri((node.params.uri as string) ?? '');
-    setSelector(node.params.selector as ComponentSelectorValue | undefined);
+    setSelector((node.params.selector as ComponentSelectorValue | undefined) ?? 'all');
   };
 
   const handleApply = (ref: string) => {

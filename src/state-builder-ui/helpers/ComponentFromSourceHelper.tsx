@@ -32,15 +32,15 @@ export function ComponentFromSourceHelper({ node, onUpdate, open, onOpenChange, 
   const [categoryName, setCategoryName] = useState(init.categoryName);
   const [fieldName, setFieldName] = useState(init.fieldName);
   const [blockIndex, setBlockIndex] = useState<number | undefined>(init.blockIndex);
-  const [selector, setSelector] = useState<ComponentSelectorValue | undefined>(node.params.selector as ComponentSelectorValue | undefined);
-  const [selectorTab, setSelectorTab] = useState<SelectorTab>('chain');
+  const [selector, setSelector] = useState<ComponentSelectorValue | undefined>((node.params.selector as ComponentSelectorValue | undefined) ?? 'all');
+  const [selectorTab, setSelectorTab] = useState<SelectorTab>('quick');
 
   const handleDialogOpen = () => {
     const s = initFromNode(node);
     setCategoryName(s.categoryName);
     setFieldName(s.fieldName);
     setBlockIndex(s.blockIndex);
-    setSelector(node.params.selector as ComponentSelectorValue | undefined);
+    setSelector((node.params.selector as ComponentSelectorValue | undefined) ?? 'all');
   };
 
   const handleApply = (ref: string) => {

@@ -25,12 +25,12 @@ export function SelectorHelper({
   onCustomChange,
 }: SelectorHelperProps) {
   const [selectorValue, setSelectorValue] = useState<ComponentSelectorValue | undefined>(
-    node.params.selector as ComponentSelectorValue | undefined
+    (node.params.selector as ComponentSelectorValue | undefined) ?? 'all'
   );
-  const [activeTab, setActiveTab] = useState<SelectorTab>('chain');
+  const [activeTab, setActiveTab] = useState<SelectorTab>('quick');
 
   const handleDialogOpen = () => {
-    setSelectorValue(node.params.selector as ComponentSelectorValue | undefined);
+    setSelectorValue((node.params.selector as ComponentSelectorValue | undefined) ?? 'all');
   };
 
   const handleApply = (ref: string) => {

@@ -69,7 +69,7 @@ export function SelectorHelperContent({
   // Initialize to undefined (not value) so the initial mount sync always runs
   // and pre-populates the correct tab from the incoming value.
   const lastEmittedRef = useRef<ComponentSelectorValue | undefined>(undefined);
-  const [internalMode, setInternalMode] = useState<SelectorBuilderMode>('chain');
+  const [internalMode, setInternalMode] = useState<SelectorBuilderMode>('quick');
   const mode = activeTab ?? internalMode;
   const setMode = (m: SelectorBuilderMode) => {
     if (onTabChange) onTabChange(m);

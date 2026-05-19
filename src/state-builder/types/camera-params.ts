@@ -19,6 +19,7 @@ export interface CameraParams {
   position: [number, number, number];
   target: [number, number, number];
   up?: [number, number, number];
+  ref?: string;
 }
 
 /** Camera preset definition */
@@ -94,6 +95,7 @@ export function extractCameraFromUINodes(nodes: UINode[]): {
       position: params.position as [number, number, number],
       target: params.target as [number, number, number],
       up: params.up as [number, number, number] | undefined,
+      ref: cameraNodes[0].ref,
     };
   }
 

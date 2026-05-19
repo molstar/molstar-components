@@ -261,7 +261,7 @@ export function UIBuilder(): React.ReactElement {
         if (cameraToInclude.up && !isDefaultUp(cameraToInclude.up)) {
           cameraParams.up = cameraToInclude.up;
         }
-        children.push({ kind: 'camera', params: cameraParams });
+        children.push({ kind: 'camera', params: cameraParams, ref: cameraToInclude.ref ?? 'camera' });
       }
 
       // Append animation node if set

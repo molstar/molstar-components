@@ -17,12 +17,12 @@ interface TooltipHelperProps {
 }
 
 export function TooltipHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: TooltipHelperProps) {
-  const [content, setContent] = useState((node.params.content as string) ?? '');
+  const [content, setContent] = useState((node.params.text as string) ?? '');
 
-  const handleDialogOpen = () => setContent((node.params.content as string) ?? '');
+  const handleDialogOpen = () => setContent((node.params.text as string) ?? '');
 
   const handleApply = (ref: string) => {
-    onUpdate({ params: { ...node.params, content }, ...(ref ? { ref } : {}) });
+    onUpdate({ params: { ...node.params, text: content }, ...(ref ? { ref } : {}) });
   };
 
   const handleRawApply = (params: Record<string, unknown>, ref: string) => {

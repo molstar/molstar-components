@@ -45,13 +45,13 @@ interface ComponentConfig {
 function newComponent(): ComponentConfig {
   return {
     id: Math.random().toString(36).slice(2),
-    selector: 'polymer',
+    selector: 'all',
     customSelector: undefined,
     representation: 'cartoon',
     color: QUICK_COLORS[0],
     opacity: 1,
     label: '',
-    selectorTab: 'chain',
+    selectorTab: 'quick',
     selectorExpanded: false,
   };
 }

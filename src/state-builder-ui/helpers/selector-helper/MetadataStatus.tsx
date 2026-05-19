@@ -27,7 +27,7 @@ export function MetadataStatus({
 }: MetadataStatusProps) {
   return (
     <div className='space-y-2'>
-      {/* Show load button when no metadata */}
+      {/* TODO: restore load-metadata banner once working
       {!metadata && (
         <div className='flex items-center gap-2 p-2 rounded-md bg-muted/50 border text-sm'>
           <DatabaseIcon className='size-4 text-muted-foreground shrink-0' />
@@ -51,7 +51,7 @@ export function MetadataStatus({
             </Button>
           ) : null}
         </div>
-      )}
+      )} */}
 
       {/* Show error if present */}
       {error && (

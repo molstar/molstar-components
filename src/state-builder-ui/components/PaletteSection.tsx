@@ -180,8 +180,18 @@ export function PaletteSection({ value, onChange }: PaletteSectionProps) {
                 <Label className='text-xs'>Colors <span className='text-muted-foreground font-normal'>(color, from, to)</span></Label>
                 {value.colors.map((entry, i) => (
                   <div key={i} className='flex items-center gap-1'>
+                    <input
+                      type='color'
+                      className='h-6 w-8 cursor-pointer rounded border shrink-0'
+                      value={entry.color.match(/^#[0-9a-fA-F]{6}$/) ? entry.color : '#000000'}
+                      onChange={(e) => {
+                        const next = [...value.colors];
+                        next[i] = { ...next[i], color: e.target.value };
+                        onChange({ ...value, colors: next });
+                      }}
+                    />
                     <Input
-                      className='h-6 text-xs font-mono w-24'
+                      className='h-6 text-xs font-mono w-20'
                       placeholder='#rrggbb'
                       value={entry.color}
                       onChange={(e) => {

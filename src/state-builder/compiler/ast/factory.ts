@@ -110,7 +110,10 @@ export class ASTFactory {
 
       // Validate parent-child relationships before recursing
       for (const child of children) {
-        if (isValidNodeStructure(child) && isValidMVSKind(child.kind) && !canHaveChild(kind, child.kind)) {
+        // TODO: animation is a separate MVSAnimationSchema tree in the real molstar API (a sibling to the
+        // scene tree, not a child of root). The compiler currently treats it as a child of root as a
+        // workaround — skip schema grammar validation for it until that is properly restructured.
+        if (isValidNodeStructure(child) && isValidMVSKind(child.kind) && child.kind !== 'animation' && !canHaveChild(kind, child.kind)) {
           throw new ASTError(
             `Invalid parent-child relationship: "${child.kind}" cannot be a child of "${kind}"`,
             node,

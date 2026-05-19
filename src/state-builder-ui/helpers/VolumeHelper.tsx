@@ -19,7 +19,7 @@ interface VolumeHelperProps {
 function initFromNode(node: UINode) {
   const p = node.params;
   return {
-    sourceId: (p.source_id as string) ?? '',
+    sourceId: (p.channel_id as string) ?? '',
     blockIndex: p.block_index as number | undefined,
     blockHeader: (p.block_header as string) ?? '',
   };
@@ -39,7 +39,7 @@ export function VolumeHelper({ node, onUpdate, open, onOpenChange, trigger, onCu
   };
 
   const handleApply = (ref: string) => {
-    const params: Record<string, unknown> = { ...node.params, source_id: sourceId };
+    const params: Record<string, unknown> = { ...node.params, channel_id: sourceId };
     if (blockIndex !== undefined) params.block_index = blockIndex;
     else delete params.block_index;
     if (blockHeader) params.block_header = blockHeader;
@@ -66,7 +66,7 @@ export function VolumeHelper({ node, onUpdate, open, onOpenChange, trigger, onCu
         content: (
           <div className='flex flex-col gap-3'>
             <div className='flex flex-col gap-1'>
-              <Label className='text-xs'>Source ID</Label>
+              <Label className='text-xs'>Channel ID</Label>
               <Input
                 className='text-sm font-mono'
                 placeholder='source identifier'

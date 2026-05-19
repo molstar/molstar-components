@@ -120,7 +120,7 @@ export function getNodeSummary(node: UINode): string | null {
       return pos ? `[${vec3String(pos)}]` : null;
     }
     case 'volume': {
-      const id = p.source_id as string | undefined;
+      const id = p.channel_id as string | undefined;
       return id ?? null;
     }
     case 'volume_representation': {

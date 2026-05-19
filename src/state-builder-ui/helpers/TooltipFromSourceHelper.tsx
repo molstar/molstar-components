@@ -6,6 +6,7 @@ import { Input } from '../base/input.tsx';
 import { Label } from '../base/label.tsx';
 import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
+import { FieldRemappingSection, type RemapEntry } from '../components/FieldRemappingSection.tsx';
 
 interface TooltipFromSourceHelperProps {
   node: UINode;
@@ -22,6 +23,7 @@ function initFromNode(node: UINode) {
     categoryName: (p.category_name as string) ?? '',
     fieldName: (p.field_name as string) ?? '',
     blockIndex: p.block_index as number | undefined,
+    fieldRemapping: Object.entries((p.field_remapping as Record<string, string>) ?? {}).map(([key, value]) => ({ key, value })),
   };
 }
 
@@ -30,18 +32,23 @@ export function TooltipFromSourceHelper({ node, onUpdate, open, onOpenChange, tr
   const [categoryName, setCategoryName] = useState(init.categoryName);
   const [fieldName, setFieldName] = useState(init.fieldName);
   const [blockIndex, setBlockIndex] = useState<number | undefined>(init.blockIndex);
+  const [fieldRemapping, setFieldRemapping] = useState<RemapEntry[]>(init.fieldRemapping);
 
   const handleDialogOpen = () => {
     const s = initFromNode(node);
     setCategoryName(s.categoryName);
     setFieldName(s.fieldName);
     setBlockIndex(s.blockIndex);
+    setFieldRemapping(s.fieldRemapping);
   };
 
   const handleApply = (ref: string) => {
     const params: Record<string, unknown> = { ...node.params, category_name: categoryName, field_name: fieldName };
     if (blockIndex !== undefined) params.block_index = blockIndex;
     else delete params.block_index;
+    const remapping = Object.fromEntries(fieldRemapping.filter(e => e.key).map(e => [e.key, e.value]));
+    if (Object.keys(remapping).length > 0) params.field_remapping = remapping;
+    else delete params.field_remapping;
     onUpdate({ params, ...(ref ? { ref } : {}) });
   };
 
@@ -75,6 +82,7 @@ export function TooltipFromSourceHelper({ node, onUpdate, open, onOpenChange, tr
               <Label className='text-xs'>Block index</Label>
               <Input className='h-7 text-xs font-mono' type='number' min='0' placeholder='optional' value={blockIndex ?? ''} onChange={(e) => setBlockIndex(e.target.value === '' ? undefined : parseInt(e.target.value))} />
             </div>
+            <FieldRemappingSection entries={fieldRemapping} onChange={setFieldRemapping} />
           </div>
         ),
       }]}

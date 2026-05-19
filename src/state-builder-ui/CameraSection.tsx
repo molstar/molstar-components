@@ -23,7 +23,7 @@ function cameraParamsToUINode(camera: CameraParams | null): UINode {
   const params: Record<string, unknown> = camera
     ? { position: camera.position, target: camera.target, ...(camera.up ? { up: camera.up } : {}) }
     : {};
-  return { id: '__camera__', kind: 'camera', params, children: [] };
+  return { id: '__camera__', kind: 'camera', params, children: [], ref: camera?.ref };
 }
 
 export function CameraSection({ camera, onCameraChange }: CameraSectionProps) {
@@ -37,15 +37,17 @@ export function CameraSection({ camera, onCameraChange }: CameraSectionProps) {
 
   const cameraNode = cameraParamsToUINode(camera);
   const handleUpdate = (updates: Partial<UINode>) => {
-    if (updates.params) {
-      const p = updates.params;
-      if (p.position && p.target) {
-        onCameraChange({
-          position: p.position as [number, number, number],
-          target: p.target as [number, number, number],
-          ...(p.up ? { up: p.up as [number, number, number] } : {}),
-        });
-      }
+    const p = updates.params;
+    const newRef = updates.ref !== undefined ? updates.ref : camera?.ref;
+    if (p && p.position && p.target) {
+      onCameraChange({
+        position: p.position as [number, number, number],
+        target: p.target as [number, number, number],
+        ...(p.up ? { up: p.up as [number, number, number] } : {}),
+        ref: newRef,
+      });
+    } else if (updates.ref !== undefined && camera) {
+      onCameraChange({ ...camera, ref: newRef });
     }
   };
 

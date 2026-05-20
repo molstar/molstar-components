@@ -19,6 +19,9 @@ and editor and want a stable API.
 **0.6.x** is an experimental React migration that adds the visual State Builder.
 The API may still change before a stable release.
 
+For installation, bundler setup, and component usage see the
+[Installation docs →](https://molstar.org/molstar-components/state-builder-docs.html#installation)
+
 ## Development
 
 ```bash

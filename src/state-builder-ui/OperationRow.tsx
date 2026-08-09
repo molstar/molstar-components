@@ -12,7 +12,7 @@ import {
   isConstantRef,
 } from '../state-builder/index.ts';
 import { ConfirmDialog } from './base/confirm-dialog.tsx';
-import { detectCompositeSequence } from '../state-builder/types/composite-sequences.ts';
+import { detectCompositeSequence } from '../state-builder/index.ts';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';

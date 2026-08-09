@@ -3,8 +3,8 @@ import { AST, ASTNode } from '../ast/types.ts';
 import { CodeGenContext } from './context.ts';
 import { NodeMethodMapper } from './mappings.ts';
 import { ParamFormatter } from './formatters.ts';
-import type { ConstantDefinition, ConstantRef } from '../../types/ui-builder.ts';
-import { isConstantRef } from '../../types/ui-builder.ts';
+import type { ConstantDefinition, ConstantRef } from '../../core/index.ts';
+import { isConstantRef } from '../../core/index.ts';
 
 export interface GeneratorOptions {
   /**

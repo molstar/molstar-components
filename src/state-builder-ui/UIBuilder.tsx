@@ -58,7 +58,7 @@ import {
   type CameraParams,
   type AnimationParams,
 } from '../state-builder/index.ts';
-import { createDownloadParseNodes } from '../state-builder/types/composite-sequences.ts';
+import { createDownloadParseNodes } from '../state-builder/index.ts';
 import { StructureMetadataProvider } from './StructureMetadataContext.tsx';
 import { SetupWizard } from './SetupWizard.tsx';
 import { AfterApplyContext } from './state/after-apply-context.ts';

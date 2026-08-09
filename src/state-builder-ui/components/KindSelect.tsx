@@ -2,7 +2,7 @@ import { Label } from '../base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../base/select.tsx';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { MVS_KIND_LABELS, MVS_SELECTABLE_KINDS, DOWNLOAD_PARSE_SEQUENCE } from '../../state-builder/index.ts';
-import { createDownloadParseNodes } from '../../state-builder/types/composite-sequences.ts';
+import { createDownloadParseNodes } from '../../state-builder/index.ts';
 
 interface KindSelectProps {
   value: MVSKind | '';

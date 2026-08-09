@@ -1,5 +1,5 @@
 import { ASTNode } from '../ast/types.ts';
-import { isConstantRef } from '../../types/ui-builder.ts';
+import { isConstantRef } from '../../core/index.ts';
 
 export class ParamFormatter {
   static formatParams(node: ASTNode): string {

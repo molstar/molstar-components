@@ -1,14 +1,14 @@
 'use client';
 
-import { Button } from './base/button.tsx';
-import { Input } from './base/input.tsx';
-import { Label } from './base/label.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './base/select.tsx';
+import { Button } from '../base/button.tsx';
+import { Input } from '../base/input.tsx';
+import { Label } from '../base/label.tsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../base/select.tsx';
 import {
   ConstantDefinition,
   ConstantEntry,
   ConstantType,
-} from '../state-builder/index.ts';
+} from '../../state-builder/index.ts';
 import { ChevronDownIcon, ChevronRightIcon, PlusIcon, XIcon } from 'lucide-react';
 
 interface ConstantsSectionProps {

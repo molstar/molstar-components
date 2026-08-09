@@ -1,20 +1,20 @@
 'use client';
 
-import { Button } from './base/button.tsx';
-import type { UINode, ConstantDefinition } from '../state-builder/index.ts';
-import { createEmptyNode, deepCopyNode, countSubtreeNodes, generateDefaultRef } from '../state-builder/index.ts';
-import { ConfirmDialog } from './base/confirm-dialog.tsx';
-import type { CompositeSequence } from '../state-builder/index.ts';
-import { getCompositeValidChildren } from '../state-builder/index.ts';
+import { Button } from '../base/button.tsx';
+import type { UINode, ConstantDefinition } from '../../state-builder/index.ts';
+import { createEmptyNode, deepCopyNode, countSubtreeNodes, generateDefaultRef } from '../../state-builder/index.ts';
+import { ConfirmDialog } from '../base/confirm-dialog.tsx';
+import type { CompositeSequence } from '../../state-builder/index.ts';
+import { getCompositeValidChildren } from '../../state-builder/index.ts';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
-import { useAfterApply } from './state/after-apply-context.ts';
-import { TreeLines } from './components/TreeLines.tsx';
-import { OperationActions } from './components/OperationActions.tsx';
+import { useAfterApply } from '../state/after-apply-context.ts';
+import { TreeLines } from '../components/TreeLines.tsx';
+import { OperationActions } from '../components/OperationActions.tsx';
 import { OperationRow } from './OperationRow.tsx';
-import { CompositeHelper } from './helpers/CompositeHelper.tsx';
-import { getColorForKind } from './node-categories.ts';
+import { CompositeHelper } from '../helpers/CompositeHelper.tsx';
+import { getColorForKind } from '../node-categories.ts';
 
 function truncateUrl(url: string): string {
   try {

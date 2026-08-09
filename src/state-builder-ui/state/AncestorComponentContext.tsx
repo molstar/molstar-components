@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext } from 'react';
-import type { ComponentSelectorValue } from '../state-builder/index.ts';
+import type { ComponentSelectorValue } from '../../state-builder/index.ts';
 
 /**
  * Carries the nearest ancestor `component` node's selector value down the

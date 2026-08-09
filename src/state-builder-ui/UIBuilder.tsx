@@ -33,10 +33,10 @@ import { useUndoRedo } from './state/undo-redo.ts';
 import type { UndoSnapshot } from './state/undo-redo.ts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAutoGenerateOnMount } from './state/auto-generate-context.ts';
-import { OperationRow } from './OperationRow.tsx';
-import { AnimationSection } from './AnimationSection.tsx';
-import { CameraSection } from './CameraSection.tsx';
-import { ConstantsSection } from './ConstantsSection.tsx';
+import { OperationRow } from './rows/OperationRow.tsx';
+import { AnimationSection } from './sections/AnimationSection.tsx';
+import { CameraSection } from './sections/CameraSection.tsx';
+import { ConstantsSection } from './sections/ConstantsSection.tsx';
 import {
   createEmptyNode,
   createEmptyConstant,
@@ -59,7 +59,7 @@ import {
   type AnimationParams,
 } from '../state-builder/index.ts';
 import { createDownloadParseNodes } from '../state-builder/index.ts';
-import { StructureMetadataProvider } from './StructureMetadataContext.tsx';
+import { StructureMetadataProvider } from './state/StructureMetadataContext.tsx';
 import { SetupWizard } from './SetupWizard.tsx';
 import { AfterApplyContext } from './state/after-apply-context.ts';
 

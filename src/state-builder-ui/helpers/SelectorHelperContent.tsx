@@ -31,7 +31,7 @@ import {
   UnionPanel,
   type UnionEntry,
 } from './selector-helper/index.ts';
-import { useStructureMetadataContext } from '../StructureMetadataContext.tsx';
+import { useStructureMetadataContext } from '../state/StructureMetadataContext.tsx';
 
 export type SelectorTab = SelectorBuilderMode;
 

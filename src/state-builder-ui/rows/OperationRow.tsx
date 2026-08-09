@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from './base/button.tsx';
-import type { UINode, ConstantDefinition, ComponentSelectorValue, ConstantRef } from '../state-builder/index.ts';
-import { AncestorComponentProvider } from './AncestorComponentContext.tsx';
+import { Button } from '../base/button.tsx';
+import type { UINode, ConstantDefinition, ComponentSelectorValue, ConstantRef } from '../../state-builder/index.ts';
+import { AncestorComponentProvider } from '../state/AncestorComponentContext.tsx';
 import {
   getValidChildren,
   isTerminalKind,
@@ -10,44 +10,44 @@ import {
   deepCopyNode,
   generateDefaultRef,
   isConstantRef,
-} from '../state-builder/index.ts';
-import { ConfirmDialog } from './base/confirm-dialog.tsx';
-import { detectCompositeSequence } from '../state-builder/index.ts';
+} from '../../state-builder/index.ts';
+import { ConfirmDialog } from '../base/confirm-dialog.tsx';
+import { detectCompositeSequence } from '../../state-builder/index.ts';
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from './lib/utils.ts';
-import { TreeLines } from './components/TreeLines.tsx';
-import { KindLabel } from './components/KindLabel.tsx';
-import { OperationActions } from './components/OperationActions.tsx';
+import { cn } from '../lib/utils.ts';
+import { TreeLines } from '../components/TreeLines.tsx';
+import { KindLabel } from '../components/KindLabel.tsx';
+import { OperationActions } from '../components/OperationActions.tsx';
 import { CompositeRow } from './CompositeRow.tsx';
 import { PrimitivesRow } from './PrimitivesRow.tsx';
-import { getNodeSummary } from './node-summary.ts';
-import { DownloadHelper } from './helpers/DownloadHelper.tsx';
-import { ParseHelper } from './helpers/ParseHelper.tsx';
-import { StructureHelper } from './helpers/StructureHelper.tsx';
-import { RepresentationHelper } from './helpers/RepresentationHelper.tsx';
-import { ColorHelper } from './helpers/ColorHelper.tsx';
-import { TransformHelper } from './helpers/TransformHelper.tsx';
-import { OpacityHelper } from './helpers/OpacityHelper.tsx';
-import { LabelHelper } from './helpers/LabelHelper.tsx';
-import { TooltipHelper } from './helpers/TooltipHelper.tsx';
-import { CanvasHelper } from './helpers/CanvasHelper.tsx';
-import { ClipHelper } from './helpers/ClipHelper.tsx';
-import { VolumeHelper } from './helpers/VolumeHelper.tsx';
-import { VolumeRepresentationHelper } from './helpers/VolumeRepresentationHelper.tsx';
-import { SelectorHelper } from './helpers/SelectorHelper.tsx';
-import { PrimitiveHelper } from './helpers/PrimitiveHelper.tsx';
-import { FocusHelper } from './helpers/FocusHelper.tsx';
-import { ColorFromUriHelper } from './helpers/ColorFromUriHelper.tsx';
-import { ColorFromSourceHelper } from './helpers/ColorFromSourceHelper.tsx';
-import { LabelFromUriHelper } from './helpers/LabelFromUriHelper.tsx';
-import { LabelFromSourceHelper } from './helpers/LabelFromSourceHelper.tsx';
-import { TooltipFromUriHelper } from './helpers/TooltipFromUriHelper.tsx';
-import { TooltipFromSourceHelper } from './helpers/TooltipFromSourceHelper.tsx';
-import { ComponentFromUriHelper } from './helpers/ComponentFromUriHelper.tsx';
-import { ComponentFromSourceHelper } from './helpers/ComponentFromSourceHelper.tsx';
-import { InterpolateHelper } from './helpers/InterpolateHelper.tsx';
+import { getNodeSummary } from '../node-summary.ts';
+import { DownloadHelper } from '../helpers/DownloadHelper.tsx';
+import { ParseHelper } from '../helpers/ParseHelper.tsx';
+import { StructureHelper } from '../helpers/StructureHelper.tsx';
+import { RepresentationHelper } from '../helpers/RepresentationHelper.tsx';
+import { ColorHelper } from '../helpers/ColorHelper.tsx';
+import { TransformHelper } from '../helpers/TransformHelper.tsx';
+import { OpacityHelper } from '../helpers/OpacityHelper.tsx';
+import { LabelHelper } from '../helpers/LabelHelper.tsx';
+import { TooltipHelper } from '../helpers/TooltipHelper.tsx';
+import { CanvasHelper } from '../helpers/CanvasHelper.tsx';
+import { ClipHelper } from '../helpers/ClipHelper.tsx';
+import { VolumeHelper } from '../helpers/VolumeHelper.tsx';
+import { VolumeRepresentationHelper } from '../helpers/VolumeRepresentationHelper.tsx';
+import { SelectorHelper } from '../helpers/SelectorHelper.tsx';
+import { PrimitiveHelper } from '../helpers/PrimitiveHelper.tsx';
+import { FocusHelper } from '../helpers/FocusHelper.tsx';
+import { ColorFromUriHelper } from '../helpers/ColorFromUriHelper.tsx';
+import { ColorFromSourceHelper } from '../helpers/ColorFromSourceHelper.tsx';
+import { LabelFromUriHelper } from '../helpers/LabelFromUriHelper.tsx';
+import { LabelFromSourceHelper } from '../helpers/LabelFromSourceHelper.tsx';
+import { TooltipFromUriHelper } from '../helpers/TooltipFromUriHelper.tsx';
+import { TooltipFromSourceHelper } from '../helpers/TooltipFromSourceHelper.tsx';
+import { ComponentFromUriHelper } from '../helpers/ComponentFromUriHelper.tsx';
+import { ComponentFromSourceHelper } from '../helpers/ComponentFromSourceHelper.tsx';
+import { InterpolateHelper } from '../helpers/InterpolateHelper.tsx';
 
 interface OperationRowProps {
   node: UINode;

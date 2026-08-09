@@ -7,13 +7,13 @@
  * structure metadata without prop drilling through the component tree.
  */
 
-import type { StructureMetadata } from '../state-builder/index.ts';
+import type { StructureMetadata } from '../../state-builder/index.ts';
 import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context';
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import {
   extractMetadataFromPlugin,
   hasLoadedStructures,
-} from './hooks/useStructureMetadataLoader.ts';
+} from '../hooks/useStructureMetadataLoader.ts';
 
 interface StructureMetadataContextValue {
   /** Extracted structure metadata, or null if not loaded */

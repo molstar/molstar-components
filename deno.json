@@ -62,7 +62,7 @@
     "dev": "deno task build && deno task serve"
   },
   "exclude": ["docs/", ".github/", "context/", ".claude/", "CLAUDE.md", "docs/superpowers/",
-    "src/state-builder/compiler/__tests__", "src/state-builder/types/__tests__"],
+    "src/state-builder/**/__tests__"],
   "publish": {
     "include": ["src/", "deno.json", "LICENSE", "README.md"]
   },

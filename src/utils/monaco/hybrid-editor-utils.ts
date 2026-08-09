@@ -1,7 +1,7 @@
-// src/utils/hybrid-editor-utils.ts
+// src/utils/monaco/hybrid-editor-utils.ts
 
 import * as monaco from 'monaco-editor';
-import { ParamFormatter } from '../state-builder/compiler/codegen/formatters.ts';
+import { ParamFormatter } from '../../state-builder/compiler/codegen/formatters.ts';
 
 /**
  * Builder methods that have visual helpers, mapped to UINode kind.

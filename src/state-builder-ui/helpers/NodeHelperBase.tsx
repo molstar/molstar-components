@@ -20,6 +20,7 @@ import { getColorForKind } from '../node-categories.ts';
 import { ChevronRightIcon } from 'lucide-react';
 import { cn } from '../lib/utils.ts';
 import { useAfterApply } from '../state/after-apply-context.ts';
+import { RawJsonPanel } from '../components/RawJsonPanel.tsx';
 
 export interface HelperTab {
   id: string;
@@ -130,16 +131,12 @@ export function NodeHelperBase({
           id: 'raw',
           label: 'Raw',
           content: (
-            <div className='flex flex-col gap-2'>
-              <Textarea
-                className='font-mono text-xs min-h-[160px] resize-y'
-                value={rawJson}
-                onChange={(e) => { setRawJson(e.target.value); setRawError(''); }}
-                spellCheck={false}
-                placeholder='{"type": "model"}'
-              />
-              {rawError && <p className='text-xs text-destructive'>{rawError}</p>}
-            </div>
+            <RawJsonPanel
+              value={rawJson}
+              error={rawError}
+              onChange={(v) => { setRawJson(v); setRawError(''); }}
+              placeholder='{"type": "model"}'
+            />
           ),
         },
       ];

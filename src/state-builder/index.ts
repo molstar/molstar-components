@@ -71,6 +71,8 @@ export {
   MOLSTAR_COLOR_THEMES,
   CARBON_COLOR_OPTIONS,
   LABEL_ATTACHMENT_OPTIONS,
+  ANNOTATION_URI_FORMATS,
+  ANNOTATION_URI_SCHEMAS,
   getActiveValues,
   isValidStructureType,
   isValidParseFormat,

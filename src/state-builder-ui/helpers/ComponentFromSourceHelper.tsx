@@ -8,6 +8,7 @@ import type { UINode } from '../../state-builder/index.ts';
 import type { ComponentSelectorValue } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { SelectorHelperContent, type SelectorTab } from './SelectorHelperContent.tsx';
+import { useAnnotationSourceState } from './annotation-source-state.ts';
 
 interface ComponentFromSourceHelperProps {
   node: UINode;
@@ -18,35 +19,18 @@ interface ComponentFromSourceHelperProps {
   onCustomChange?: (custom: unknown) => void;
 }
 
-function initFromNode(node: UINode) {
-  const p = node.params;
-  return {
-    categoryName: (p.category_name as string) ?? '',
-    fieldName: (p.field_name as string) ?? '',
-    blockIndex: p.block_index as number | undefined,
-  };
-}
-
 export function ComponentFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: ComponentFromSourceHelperProps) {
-  const init = initFromNode(node);
-  const [categoryName, setCategoryName] = useState(init.categoryName);
-  const [fieldName, setFieldName] = useState(init.fieldName);
-  const [blockIndex, setBlockIndex] = useState<number | undefined>(init.blockIndex);
+  const source = useAnnotationSourceState(node);
   const [selector, setSelector] = useState<ComponentSelectorValue | undefined>((node.params.selector as ComponentSelectorValue | undefined) ?? 'all');
   const [selectorTab, setSelectorTab] = useState<SelectorTab>('quick');
 
   const handleDialogOpen = () => {
-    const s = initFromNode(node);
-    setCategoryName(s.categoryName);
-    setFieldName(s.fieldName);
-    setBlockIndex(s.blockIndex);
+    source.reset();
     setSelector((node.params.selector as ComponentSelectorValue | undefined) ?? 'all');
   };
 
   const handleApply = (ref: string) => {
-    const params: Record<string, unknown> = { ...node.params, category_name: categoryName, field_name: fieldName };
-    if (blockIndex !== undefined) params.block_index = blockIndex;
-    else delete params.block_index;
+    const params = source.applyParams(node.params);
     if (selector !== undefined) params.selector = selector;
     else delete params.selector;
     onUpdate({ params, ...(ref ? { ref } : {}) });
@@ -73,15 +57,15 @@ export function ComponentFromSourceHelper({ node, onUpdate, open, onOpenChange, 
             <div className='flex flex-col gap-3'>
               <div className='flex flex-col gap-1'>
                 <Label className='text-xs'>Category name</Label>
-                <Input className='h-7 text-xs font-mono' placeholder='_struct' value={categoryName} onChange={(e) => setCategoryName(e.target.value)} />
+                <Input className='h-7 text-xs font-mono' placeholder='_struct' value={source.categoryName} onChange={(e) => source.setCategoryName(e.target.value)} />
               </div>
               <div className='flex flex-col gap-1'>
                 <Label className='text-xs'>Field name</Label>
-                <Input className='h-7 text-xs font-mono' placeholder='field' value={fieldName} onChange={(e) => setFieldName(e.target.value)} />
+                <Input className='h-7 text-xs font-mono' placeholder='field' value={source.fieldName} onChange={(e) => source.setFieldName(e.target.value)} />
               </div>
               <div className='flex flex-col gap-1 w-28'>
                 <Label className='text-xs'>Block index</Label>
-                <Input className='h-7 text-xs font-mono' type='number' min='0' placeholder='optional' value={blockIndex ?? ''} onChange={(e) => setBlockIndex(e.target.value === '' ? undefined : parseInt(e.target.value))} />
+                <Input className='h-7 text-xs font-mono' type='number' min='0' placeholder='optional' value={source.blockIndex ?? ''} onChange={(e) => source.setBlockIndex(e.target.value === '' ? undefined : parseInt(e.target.value))} />
               </div>
             </div>
           ),

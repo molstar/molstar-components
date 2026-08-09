@@ -16,5 +16,3 @@ export { OperationRow } from './rows/OperationRow.tsx';
 export { TreeLines } from './components/TreeLines.tsx';
 export { OperationActions } from './components/OperationActions.tsx';
 export { useStructureMetadataContext } from './state/StructureMetadataContext.tsx';
-
-export * from './components/fields/index.ts';

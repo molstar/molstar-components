@@ -1,3 +1,5 @@
+export type { LabeledValue } from './labeled-value.ts';
+
 export type { ConstantType, ConstantEntry, ConstantDefinition, ConstantRef } from './constants.ts';
 export { isConstantRef, createConstantRef, createEmptyConstant } from './constants.ts';
 

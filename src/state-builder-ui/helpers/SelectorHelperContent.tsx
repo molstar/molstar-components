@@ -26,12 +26,12 @@ import {
   LigandPanel,
   MetadataStatus,
   QuickPanel,
-  RawPanel,
   ResiduePanel,
   UnionPanel,
   type UnionEntry,
 } from './selector-helper/index.ts';
 import { useStructureMetadataContext } from '../state/StructureMetadataContext.tsx';
+import { RawJsonPanel } from '../components/RawJsonPanel.tsx';
 
 export type SelectorTab = SelectorBuilderMode;
 
@@ -343,10 +343,14 @@ export function SelectorHelperContent({
       {mode === 'quick' && <QuickPanel onSelect={quickSelect} activeValue={typeof value === 'string' ? value : undefined} />}
 
       {mode === 'raw' && (
-        <RawPanel
+        <RawJsonPanel
           value={rawInput}
           error={rawError}
           onChange={handleRawChange}
+          label='Raw Selector Expression'
+          placeholder='{ "label_asym_id": "A" }'
+          helpText='Enter JSON object or string selector (e.g., &quot;all&quot;, &quot;polymer&quot;)'
+          minHeight='6rem'
         />
       )}
 

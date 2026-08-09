@@ -26,14 +26,4 @@ export type VolumeRepresentationType = NonNullable<
   MVSNodeParams<'volume_representation'>['type']
 >;
 
-/**
- * Labeled value with optional description (matches pattern in selector/types.ts).
- * Exported (unlike the original private interface) so options.ts and guards.ts
- * can import it — this file has no other dependencies within state-builder/.
- */
-export interface LabeledValue<T extends string> {
-  value: T;
-  label: string;
-  deprecated?: boolean;
-  description?: string;
-}
+export type { LabeledValue } from '../core/index.ts';

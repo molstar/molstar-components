@@ -149,3 +149,17 @@ export const CARBON_COLOR_OPTIONS = [
 ] as const;
 
 export type CarbonColorOption = (typeof CARBON_COLOR_OPTIONS)[number]['value'];
+
+/**
+ * File formats and residue/atom-granularity schemas for annotation data loaded
+ * via URI — used by the FromUri variant of color/label/tooltip annotation nodes.
+ * Not MVS enum types (no LabeledValue wrapping — call sites use the raw string
+ * as both key and display value), so kept separate from the STRUCTURE_TYPES-style
+ * constants above.
+ */
+export const ANNOTATION_URI_FORMATS = ['cif', 'bcif', 'json'] as const;
+export const ANNOTATION_URI_SCHEMAS = [
+  'whole_structure', 'entity', 'chain', 'auth_chain',
+  'residue', 'auth_residue', 'residue_range', 'auth_residue_range',
+  'atom', 'auth_atom', 'all_atomic',
+] as const;

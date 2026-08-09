@@ -12,7 +12,6 @@ import { snapshotToCameraParams, isDefaultUp } from '../../state-builder/index.t
 import {
   VectorsPanel,
   PresetsPanel,
-  RawPanel,
   CameraPreview,
 } from './camera-helper/index.ts';
 import type { CameraParams } from './camera-helper/index.ts';

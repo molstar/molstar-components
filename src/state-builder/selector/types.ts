@@ -1,12 +1,4 @@
-/**
- * Labeled value with optional description (matches pattern in mvs-params.ts)
- */
-export interface LabeledValue<T extends string = string> {
-  value: T;
-  label: string;
-  deprecated?: boolean;
-  description?: string;
-}
+export type { LabeledValue } from '../core/index.ts';
 
 /**
  * Common properties for MVS component selector objects.

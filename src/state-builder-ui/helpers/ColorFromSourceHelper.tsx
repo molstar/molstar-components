@@ -8,6 +8,7 @@ import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { FieldRemappingSection, type RemapEntry } from '../components/FieldRemappingSection.tsx';
 import { PaletteSection, paletteFromParams, paletteToParams, type PaletteValue } from '../components/PaletteSection.tsx';
+import { useAnnotationSourceState } from './annotation-source-state.ts';
 
 interface ColorFromSourceHelperProps {
   node: UINode;
@@ -18,38 +19,23 @@ interface ColorFromSourceHelperProps {
   onCustomChange?: (custom: unknown) => void;
 }
 
-function initFromNode(node: UINode) {
-  const p = node.params as Record<string, unknown>;
-  return {
-    categoryName: (p.category_name as string) ?? '',
-    fieldName: (p.field_name as string) ?? '',
-    blockIndex: p.block_index as number | undefined,
-    fieldRemapping: Object.entries((p.field_remapping as Record<string, string>) ?? {}).map(([key, value]) => ({ key, value })),
-    palette: paletteFromParams(p),
-  };
+function fieldRemappingFromNode(node: UINode): RemapEntry[] {
+  return Object.entries((node.params.field_remapping as Record<string, string>) ?? {}).map(([key, value]) => ({ key, value }));
 }
 
 export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: ColorFromSourceHelperProps) {
-  const init = initFromNode(node);
-  const [categoryName, setCategoryName] = useState(init.categoryName);
-  const [fieldName, setFieldName] = useState(init.fieldName);
-  const [blockIndex, setBlockIndex] = useState<number | undefined>(init.blockIndex);
-  const [fieldRemapping, setFieldRemapping] = useState<RemapEntry[]>(init.fieldRemapping);
-  const [palette, setPalette] = useState<PaletteValue | null>(init.palette);
+  const source = useAnnotationSourceState(node);
+  const [fieldRemapping, setFieldRemapping] = useState<RemapEntry[]>(fieldRemappingFromNode(node));
+  const [palette, setPalette] = useState<PaletteValue | null>(paletteFromParams(node.params as Record<string, unknown>));
 
   const handleDialogOpen = () => {
-    const s = initFromNode(node);
-    setCategoryName(s.categoryName);
-    setFieldName(s.fieldName);
-    setBlockIndex(s.blockIndex);
-    setFieldRemapping(s.fieldRemapping);
-    setPalette(s.palette);
+    source.reset();
+    setFieldRemapping(fieldRemappingFromNode(node));
+    setPalette(paletteFromParams(node.params as Record<string, unknown>));
   };
 
   const handleApply = (ref: string) => {
-    const params: Record<string, unknown> = { ...node.params, category_name: categoryName, field_name: fieldName };
-    if (blockIndex !== undefined) params.block_index = blockIndex;
-    else delete params.block_index;
+    const params = source.applyParams(node.params);
     const remapping = Object.fromEntries(fieldRemapping.filter(e => e.key).map(e => [e.key, e.value]));
     if (Object.keys(remapping).length > 0) params.field_remapping = remapping;
     else delete params.field_remapping;
@@ -79,15 +65,15 @@ export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trig
           <div className='flex flex-col gap-3'>
             <div className='flex flex-col gap-1'>
               <Label className='text-xs'>Category name</Label>
-              <Input className='h-7 text-xs font-mono' placeholder='_struct' value={categoryName} onChange={(e) => setCategoryName(e.target.value)} />
+              <Input className='h-7 text-xs font-mono' placeholder='_struct' value={source.categoryName} onChange={(e) => source.setCategoryName(e.target.value)} />
             </div>
             <div className='flex flex-col gap-1'>
               <Label className='text-xs'>Field name</Label>
-              <Input className='h-7 text-xs font-mono' placeholder='color' value={fieldName} onChange={(e) => setFieldName(e.target.value)} />
+              <Input className='h-7 text-xs font-mono' placeholder='color' value={source.fieldName} onChange={(e) => source.setFieldName(e.target.value)} />
             </div>
             <div className='flex flex-col gap-1 w-28'>
               <Label className='text-xs'>Block index</Label>
-              <Input className='h-7 text-xs font-mono' type='number' min='0' placeholder='optional' value={blockIndex ?? ''} onChange={(e) => setBlockIndex(e.target.value === '' ? undefined : parseInt(e.target.value))} />
+              <Input className='h-7 text-xs font-mono' type='number' min='0' placeholder='optional' value={source.blockIndex ?? ''} onChange={(e) => source.setBlockIndex(e.target.value === '' ? undefined : parseInt(e.target.value))} />
             </div>
             <PaletteSection value={palette} onChange={setPalette} />
             <FieldRemappingSection entries={fieldRemapping} onChange={setFieldRemapping} />

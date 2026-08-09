@@ -37,6 +37,7 @@ import { ImportMvsTreeDialog } from './components/ImportMvsTreeDialog.tsx';
 import { useCodeGeneration } from './hooks/ui-builder/useCodeGeneration.ts';
 import { useUndoableSceneState } from './hooks/ui-builder/useUndoableSceneState.ts';
 import { useNodeTreeOperations } from './hooks/ui-builder/useNodeTreeOperations.ts';
+import { withImplementedHelpersOnly } from './node-categories.ts';
 
 /**
  * Visual MVS node-tree builder UI.
@@ -324,7 +325,7 @@ export function UIBuilder(): React.ReactElement {
               onMoveUp={() => nodeOps.moveNodeUp(node.id)}
               onMoveDown={() => nodeOps.moveNodeDown(node.id)}
               availableConstants={allAvailableConstants}
-              allowedKinds={getValidChildren('root')}
+              allowedKinds={withImplementedHelpersOnly(getValidChildren('root'))}
               allNodes={scene.nodes}
             />
           ))

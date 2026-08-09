@@ -18,6 +18,7 @@ import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../lib/utils.ts';
 import { TreeLines } from '../components/TreeLines.tsx';
+import { withImplementedHelpersOnly } from '../node-categories.ts';
 import { KindLabel } from '../components/KindLabel.tsx';
 import { OperationActions } from '../components/OperationActions.tsx';
 import { CompositeRow } from './CompositeRow.tsx';
@@ -241,7 +242,7 @@ export function OperationRow({
           isFirst={index === 0}
           isLast={index === (node.children?.length ?? 0) - 1}
           availableConstants={availableConstants}
-          allowedKinds={node.kind ? getValidChildren(node.kind as MVSKind) : undefined}
+          allowedKinds={node.kind ? withImplementedHelpersOnly(getValidChildren(node.kind as MVSKind)) : undefined}
           allNodes={allNodes}
         />
       ))}
@@ -311,7 +312,7 @@ export function OperationRow({
           onAddTemplateChildren={onAddTemplateChildren}
           onCopy={onCopy}
           onRemove={handleRemove}
-          validChildKinds={node.kind ? getValidChildren(node.kind as MVSKind) : undefined}
+          validChildKinds={node.kind ? withImplementedHelpersOnly(getValidChildren(node.kind as MVSKind)) : undefined}
         />
 
         {/* Helper modal */}

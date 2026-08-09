@@ -14,7 +14,7 @@ import { TreeLines } from '../components/TreeLines.tsx';
 import { OperationActions } from '../components/OperationActions.tsx';
 import { OperationRow } from './OperationRow.tsx';
 import { CompositeHelper } from '../helpers/CompositeHelper.tsx';
-import { getColorForKind } from '../node-categories.ts';
+import { getColorForKind, withImplementedHelpersOnly } from '../node-categories.ts';
 
 function truncateUrl(url: string): string {
   try {
@@ -214,7 +214,7 @@ export function CompositeRow({
     });
   };
 
-  const validChildKinds = getCompositeValidChildren(sequence);
+  const validChildKinds = withImplementedHelpersOnly(getCompositeValidChildren(sequence));
   const hasChildren = exitNode.children && exitNode.children.length > 0;
   const dotColor = getColorForKind('download');
 

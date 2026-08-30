@@ -32,82 +32,81 @@ automatically and can be overridden — see the Theming section below.
 
 ---
 
-## Local file: development (active editing of both repos)
+## Testing a local npm-packed build against mol-view-stories
 
-Use this only when actively editing `molstar-components` and `mol-view-stories`
-in parallel. Normal consumption uses JSR above.
+Use this to verify a real npm-registry-shaped build (compiled JS + `.d.ts` +
+`package.json` with proper `peerDependencies`, built via `deno pack`) actually
+works through a real Next.js/webpack consumer, before publishing to npmjs.com.
+This is different from the JSR path above — JSR ships raw TS source, this
+ships what npm consumers would actually receive.
 
-### Step 1 — Create a local `package.json`
-
-`package.json` is gitignored in this repo. Create it manually at the repo root:
-
-```json
-{
-  "name": "@molstar/molstar-components",
-  "version": "0.6.0-experimental.1",
-  "type": "module",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./src/mod.ts"
-    }
-  },
-  "files": ["dist", "src"],
-  "peerDependencies": {
-    "react": ">=19",
-    "react-dom": ">=19",
-    "molstar": ">=5.0.0",
-    "jotai": ">=2.0.0",
-    "monaco-editor": ">=0.55.0"
-  }
-}
-```
-
-### Step 2 — Build the dist bundle
+### Step 1 — Build
 
 ```bash
 cd ~/dev/molstar-components
-deno task build:dist
-# produces dist/index.js, dist/state-builder-ui.css, dist/molstar.css
+deno task pack:npm
+# produces dist/npm/ — a ready-to-publish directory (package.json, compiled
+# JS, .d.ts). During local iteration with uncommitted changes, deno pack
+# refuses a dirty git tree by design (reproducible releases from a commit
+# hash) — pass extra flags through: deno task pack:npm -- --allow-dirty
 ```
 
-### Step 3 — Add the file: dependency
+### Step 2 — Point mol-view-stories at it
 
-In the consuming workspace package (e.g. `@mol-view-stories/webapp`), set:
+In `mol-view-stories/@mol-view-stories/webapp/package.json`, temporarily replace the `jsr:...` line:
 
-```json
-"@molstar/molstar-components": "file:../../../molstar-components"
+```diff
+-"@molstar/molstar-components": "jsr:0.6.0-experimental.16",
++"@molstar/molstar-components": "file:../../../molstar-components/dist/npm",
 ```
-
-Then install:
 
 ```bash
 cd ~/dev/mol-view-stories
 pnpm install
 ```
 
-### Step 4 — TypeScript paths (optional)
+> pnpm `file:` installs a copy, not a symlink, so `pnpm install` is required
+> again after every `deno task pack:npm` rebuild.
 
-For type resolution directly into library source, add to `tsconfig.json`:
+### Step 3 — The JSR-specific workarounds are harmless no-ops here
+
+`mol-view-stories`' `next.config.ts`/`tsconfig.json`/`jsr-npm-shims.d.ts`
+currently carry several workarounds needed only for JSR's mangled package
+name and raw `npm:`-prefixed specifiers:
+
+- `transpilePackages: ["@jsr/molstar__molstar-components"]` — targets JSR's
+  npm-proxy package name, won't match the locally-linked package. Not needed
+  anyway: `deno pack` ships pre-compiled JS, nothing to transpile.
+- `NormalModuleReplacementPlugin(/^npm:/, ...)` — has nothing to rewrite; a
+  real npm/pack build has zero `npm:`-prefixed specifiers.
+- `jsr-npm-shims.d.ts` (`declare module 'npm:*';`) and the `tsconfig.json`
+  `npm:pkg@version/*` path mappings — same reasoning.
+
+Leave all of these in place during testing — no need to strip and restore
+them around a test session, they simply won't trigger.
+
+### Step 4 — Verify
+
+- `pnpm dev:web` starts cleanly.
+- The builder/editor/viewer render.
+- Hover an imported component's props in an editor and confirm real types
+  show (not `any`) — this proves `.d.ts` resolution works through
+  webpack/Turbopack, not just `deno check` in this repo.
+- Tailwind utility classes still generate: `globals.css`'s
+  `@source "../../../node_modules/@molstar/molstar-components/src/state-builder-ui";`
+  should keep resolving unchanged, since `deno pack` preserves the `src/`
+  directory structure (only extensions change, `.tsx` → `.js`). If any
+  utility classes go missing, that's a real signal worth investigating.
+
+### Step 5 — Revert
 
 ```json
-"@molstar/state-builder": ["../../../molstar-components/src/state-builder/index.ts"],
-"@molstar/state-builder/*": ["../../../molstar-components/src/state-builder/*"]
+"@molstar/molstar-components": "jsr:0.6.0-experimental.16",
 ```
-
-### Day-to-day workflow
-
-After editing source in `molstar-components`:
 
 ```bash
-cd ~/dev/molstar-components
-deno task build:dist
-cd ~/dev/mol-view-stories && pnpm install
-# restart Next.js dev server
+pnpm install
 ```
-
-> pnpm `file:` installs a copy into the virtual store (not a symlink), so
-> `pnpm install` is required after every rebuild.
 
 ---
 

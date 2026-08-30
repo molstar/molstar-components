@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
 import { MVS_KIND_LABELS, MVS_SELECTABLE_KINDS, DOWNLOAD_PARSE_SEQUENCE } from '../../state-builder/index.ts';
 import { createDownloadParseNodes } from '../../state-builder/index.ts';
+import { withImplementedHelpersOnly } from '../node-categories.ts';
 
 interface KindSelectProps {
   value: MVSKind | '';
@@ -14,7 +15,7 @@ interface KindSelectProps {
 export function KindSelect({ value, onChange, onCompositeSelect, allowedKinds }: KindSelectProps) {
   // Use allowed kinds if provided, otherwise show all selectable kinds
   // Camera is always filtered out — it's managed by the dedicated CameraSection
-  const kindsToShow = (allowedKinds ?? MVS_SELECTABLE_KINDS).filter((k) => k !== 'camera');
+  const kindsToShow = (allowedKinds ?? withImplementedHelpersOnly(MVS_SELECTABLE_KINDS)).filter((k) => k !== 'camera');
 
   const showCompositeOption = kindsToShow.includes('download');
 

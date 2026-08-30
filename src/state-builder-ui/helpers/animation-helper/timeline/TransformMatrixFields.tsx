@@ -4,9 +4,32 @@ import { useState } from 'react';
 import { SliderAngleRow } from '../../../components/SliderAngleRow.tsx';
 import { SliderVec3Row } from '../../../components/SliderVec3Row.tsx';
 import { IDENTITY_3x3 } from '../../../../state-builder/index.ts';
-import type { TransformMatrixInterpolationStep } from '../../../../state-builder/index.ts';
+import type { EasingType, TransformMatrixInterpolationStep } from '../../../../state-builder/index.ts';
 import { toVec3 } from './utils.ts';
 import { ChannelSection } from './ChannelSection.tsx';
+
+type Channel = 'rotation' | 'translation' | 'scale';
+
+/** Reads/writes the `{channel}_easing`/`_frequency`/`_alternate_direction`
+ * trio that every channel carries, so the 3 <ChannelSection> call sites
+ * below don't each hand-wire the same 6 props. */
+function channelProps(
+  step: TransformMatrixInterpolationStep,
+  channel: Channel,
+  onUpdate: (updates: Partial<TransformMatrixInterpolationStep>) => void,
+) {
+  const easingKey = `${channel}_easing` as const;
+  const frequencyKey = `${channel}_frequency` as const;
+  const alternateKey = `${channel}_alternate_direction` as const;
+  return {
+    easing: step[easingKey],
+    frequency: step[frequencyKey],
+    alternateDirection: step[alternateKey],
+    onEasingChange: (v: EasingType) => onUpdate({ [easingKey]: v } as Partial<TransformMatrixInterpolationStep>),
+    onFrequencyChange: (v: number | undefined) => onUpdate({ [frequencyKey]: v } as Partial<TransformMatrixInterpolationStep>),
+    onAlternateDirectionChange: (v: boolean) => onUpdate({ [alternateKey]: v } as Partial<TransformMatrixInterpolationStep>),
+  };
+}
 
 export function TransformMatrixFields({
   step,
@@ -15,9 +38,8 @@ export function TransformMatrixFields({
   step: TransformMatrixInterpolationStep;
   onUpdate: (updates: Partial<TransformMatrixInterpolationStep>) => void;
 }) {
-  const [rotOpen, setRotOpen] = useState(false);
-  const [transOpen, setTransOpen] = useState(false);
-  const [scaleOpen, setScaleOpen] = useState(false);
+  const [openChannel, setOpenChannel] = useState<Channel | null>(null);
+  const toggle = (channel: Channel) => setOpenChannel(openChannel === channel ? null : channel);
 
   return (
     <div className='space-y-1'>
@@ -33,14 +55,9 @@ export function TransformMatrixFields({
       {/* Rotation channel */}
       <ChannelSection
         label='Rotation'
-        open={rotOpen}
-        onToggle={() => setRotOpen(!rotOpen)}
-        easing={step.rotation_easing}
-        frequency={step.rotation_frequency}
-        alternateDirection={step.rotation_alternate_direction}
-        onEasingChange={(v) => onUpdate({ rotation_easing: v })}
-        onFrequencyChange={(v) => onUpdate({ rotation_frequency: v })}
-        onAlternateDirectionChange={(v) => onUpdate({ rotation_alternate_direction: v })}
+        open={openChannel === 'rotation'}
+        onToggle={() => toggle('rotation')}
+        {...channelProps(step, 'rotation', onUpdate)}
       >
         <SliderAngleRow
           label='Start'
@@ -57,14 +74,9 @@ export function TransformMatrixFields({
       {/* Translation channel */}
       <ChannelSection
         label='Translation'
-        open={transOpen}
-        onToggle={() => setTransOpen(!transOpen)}
-        easing={step.translation_easing}
-        frequency={step.translation_frequency}
-        alternateDirection={step.translation_alternate_direction}
-        onEasingChange={(v) => onUpdate({ translation_easing: v })}
-        onFrequencyChange={(v) => onUpdate({ translation_frequency: v })}
-        onAlternateDirectionChange={(v) => onUpdate({ translation_alternate_direction: v })}
+        open={openChannel === 'translation'}
+        onToggle={() => toggle('translation')}
+        {...channelProps(step, 'translation', onUpdate)}
       >
         <SliderVec3Row
           label='Start'
@@ -81,14 +93,9 @@ export function TransformMatrixFields({
       {/* Scale channel */}
       <ChannelSection
         label='Scale'
-        open={scaleOpen}
-        onToggle={() => setScaleOpen(!scaleOpen)}
-        easing={step.scale_easing}
-        frequency={step.scale_frequency}
-        alternateDirection={step.scale_alternate_direction}
-        onEasingChange={(v) => onUpdate({ scale_easing: v })}
-        onFrequencyChange={(v) => onUpdate({ scale_frequency: v })}
-        onAlternateDirectionChange={(v) => onUpdate({ scale_alternate_direction: v })}
+        open={openChannel === 'scale'}
+        onToggle={() => toggle('scale')}
+        {...channelProps(step, 'scale', onUpdate)}
       >
         <SliderVec3Row
           label='Start'

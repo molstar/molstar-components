@@ -1,5 +1,11 @@
 import { useState } from 'react';
 import type { UINode } from '../../state-builder/index.ts';
+import type { RemapEntry } from '../components/FieldRemappingSection.tsx';
+
+/** Shared by the Color/Label/Tooltip FromSource helpers, whose field_remapping shape is identical. */
+export function fieldRemappingFromNode(node: UINode): RemapEntry[] {
+  return Object.entries((node.params.field_remapping as Record<string, string>) ?? {}).map(([key, value]) => ({ key, value }));
+}
 
 function sourceFieldsFromNode(node: UINode) {
   const p = node.params;

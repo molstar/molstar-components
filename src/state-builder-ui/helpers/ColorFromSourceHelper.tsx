@@ -8,7 +8,7 @@ import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { FieldRemappingSection, type RemapEntry } from '../components/FieldRemappingSection.tsx';
 import { PaletteSection, paletteFromParams, paletteToParams, type PaletteValue } from '../components/PaletteSection.tsx';
-import { useAnnotationSourceState } from './annotation-source-state.ts';
+import { useAnnotationSourceState, fieldRemappingFromNode } from './annotation-source-state.ts';
 
 interface ColorFromSourceHelperProps {
   node: UINode;
@@ -17,10 +17,6 @@ interface ColorFromSourceHelperProps {
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
   onCustomChange?: (custom: unknown) => void;
-}
-
-function fieldRemappingFromNode(node: UINode): RemapEntry[] {
-  return Object.entries((node.params.field_remapping as Record<string, string>) ?? {}).map(([key, value]) => ({ key, value }));
 }
 
 export function ColorFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: ColorFromSourceHelperProps) {

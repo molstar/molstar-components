@@ -32,12 +32,6 @@ export interface LigandPanelState {
   chain: string;
 }
 
-/** Raw panel state */
-export interface RawPanelState {
-  input: string;
-  error: string;
-}
-
 /** Entry in the union selector panel */
 export interface UnionEntry {
   id: string;

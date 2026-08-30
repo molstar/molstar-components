@@ -2,9 +2,8 @@
 
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { Label } from '../../../base/label.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../base/select.tsx';
 import { NumericInput } from '../../../components/NumericInput.tsx';
-import { EASING_OPTIONS } from '../../../../state-builder/index.ts';
+import { EasingSelect } from './EasingSelect.tsx';
 import type { EasingType } from '../../../../state-builder/index.ts';
 
 export function ChannelSection({
@@ -45,16 +44,7 @@ export function ChannelSection({
           <div className='flex gap-2 items-end'>
             <div className='w-28'>
               <Label className='text-[10px] text-muted-foreground'>Easing</Label>
-              <Select value={easing || 'linear'} onValueChange={(v) => onEasingChange(v as EasingType)}>
-                <SelectTrigger className='h-7 text-xs'>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {EASING_OPTIONS.map((e) => (
-                    <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <EasingSelect value={easing} onChange={onEasingChange} />
             </div>
             <div className='w-16'>
               <Label className='text-[10px] text-muted-foreground'>Freq</Label>

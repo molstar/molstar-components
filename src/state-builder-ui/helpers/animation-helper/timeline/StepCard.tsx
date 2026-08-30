@@ -6,9 +6,8 @@ import { Label } from '../../../base/label.tsx';
 import { NumericInput } from '../../../components/NumericInput.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../base/select.tsx';
 import { ArrowDownIcon, ArrowUpIcon, ChevronDownIcon, ChevronRightIcon, Trash2Icon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  EASING_OPTIONS,
   INTERPOLATION_KINDS,
   KIND_COLORS,
   PROPERTY_KIND_MAP,
@@ -18,7 +17,6 @@ import {
 import type {
   InterpolationStep,
   InterpolationKind,
-  EasingType,
   SimpleInterpolationStep,
   TransformMatrixInterpolationStep,
   RefInfo,
@@ -26,6 +24,7 @@ import type {
 import { SimpleValueFields } from './SimpleValueFields.tsx';
 import { TransformMatrixFields } from './TransformMatrixFields.tsx';
 import { AdvancedOptions } from './AdvancedOptions.tsx';
+import { EasingSelect } from './EasingSelect.tsx';
 
 interface StepCardProps {
   step: InterpolationStep;
@@ -56,15 +55,22 @@ export function StepCard({
   const kindColor = KIND_COLORS[step.kind];
   const filteredRefs = filterRefsForKind(availableRefs, step.kind);
   const selectedRefInfo = availableRefs.find((r) => r.ref === step.target_ref);
-  const propertySuggestions = getAnimatableProperties(selectedRefInfo?.kind, step.kind);
+  const propertySuggestions = useMemo(
+    () => getAnimatableProperties(selectedRefInfo?.kind, step.kind),
+    [selectedRefInfo?.kind, step.kind],
+  );
   const singleProperty = propertySuggestions.length === 1;
+  const onlySuggestedValue = propertySuggestions[0]?.value;
 
   // Auto-select property when there's only one option
   useEffect(() => {
-    if (singleProperty && step.property !== propertySuggestions[0].value) {
-      onUpdate({ property: propertySuggestions[0].value });
+    if (singleProperty && onlySuggestedValue && step.property !== onlySuggestedValue) {
+      onUpdate({ property: onlySuggestedValue });
     }
-  }, [singleProperty, propertySuggestions, step.property, onUpdate]);
+    // onUpdate is a fresh callback from the parent every render; only the
+    // step's own kind/ref-derived state should retrigger this effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [singleProperty, onlySuggestedValue, step.property]);
 
   // Timeline bar calculations
   const startMs = step.start_ms || 0;
@@ -182,19 +188,10 @@ export function StepCard({
         {step.kind !== 'transform_matrix' && (
           <div className='w-36'>
             <Label className='text-[10px] text-muted-foreground'>Easing</Label>
-            <Select
-              value={(step as SimpleInterpolationStep).easing || 'linear'}
-              onValueChange={(v) => onUpdate({ easing: v as EasingType } as Partial<SimpleInterpolationStep>)}
-            >
-              <SelectTrigger className='h-7 text-xs'>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {EASING_OPTIONS.map((e) => (
-                  <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <EasingSelect
+              value={(step as SimpleInterpolationStep).easing}
+              onChange={(v) => onUpdate({ easing: v } as Partial<SimpleInterpolationStep>)}
+            />
           </div>
         )}
       </div>

@@ -16,13 +16,6 @@ export interface PresetsPanelProps {
   onSelect: (params: import('../../../state-builder/index.ts').CameraParams) => void;
 }
 
-/** Raw panel props */
-export interface RawPanelProps {
-  value: string;
-  error: string;
-  onChange: (value: string) => void;
-}
-
 /** Camera preview props */
 export interface CameraPreviewProps {
   position: [number, number, number];

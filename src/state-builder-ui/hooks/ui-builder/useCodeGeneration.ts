@@ -63,8 +63,6 @@ export function useCodeGeneration({ nodes, constants, camera, animation, storyCo
         },
       };
 
-      console.log('MVS Data:', JSON.stringify(mvsData, null, 2));
-
       // Pass directly to compiler
       const ast = ASTFactory.fromMVSData(mvsData);
 
@@ -81,8 +79,6 @@ export function useCodeGeneration({ nodes, constants, camera, animation, storyCo
       });
 
       const code = generator.generate(ast);
-
-      console.log('Generated code:', code);
 
       // Call the callback if provided
       if (onCodeGenerated) {

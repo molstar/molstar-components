@@ -7,7 +7,7 @@ import { Label } from '../base/label.tsx';
 import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { FieldRemappingSection, type RemapEntry } from '../components/FieldRemappingSection.tsx';
-import { useAnnotationSourceState } from './annotation-source-state.ts';
+import { useAnnotationSourceState, fieldRemappingFromNode } from './annotation-source-state.ts';
 
 interface LabelFromSourceHelperProps {
   node: UINode;
@@ -16,10 +16,6 @@ interface LabelFromSourceHelperProps {
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
   onCustomChange?: (custom: unknown) => void;
-}
-
-function fieldRemappingFromNode(node: UINode): RemapEntry[] {
-  return Object.entries((node.params.field_remapping as Record<string, string>) ?? {}).map(([key, value]) => ({ key, value }));
 }
 
 export function LabelFromSourceHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: LabelFromSourceHelperProps) {

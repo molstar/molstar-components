@@ -46,13 +46,6 @@ export interface MatrixPanelProps {
   onChange: (matrix: number[] | null) => void;
 }
 
-/** Raw panel props */
-export interface RawPanelProps {
-  value: string;
-  error: string;
-  onChange: (value: string) => void;
-}
-
 /** SVG transform preview props */
 export interface TransformPreviewProps {
   /** 9-element column-major rotation matrix */

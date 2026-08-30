@@ -60,11 +60,11 @@ export function useUndoableSceneState(sceneKey: string) {
     setAnimation(snap.animation);
   };
 
-  const applyImportedState = (imported: { nodes: UINode[]; camera?: CameraParams | null; animation?: AnimationParams | null }) => {
+  const applyImportedState = (imported: { nodes: UINode[]; camera: CameraParams | null; animation: AnimationParams | null }) => {
     push(stateRef.current);
     setNodes(imported.nodes);
-    if (imported.camera) setCamera(imported.camera);
-    if (imported.animation) setAnimation(imported.animation);
+    setCamera(imported.camera);
+    setAnimation(imported.animation);
   };
 
   return {

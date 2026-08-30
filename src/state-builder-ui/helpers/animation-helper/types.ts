@@ -25,10 +25,4 @@ export interface TimelinePanelProps {
   onStepsChange: (steps: InterpolationStep[]) => void;
 }
 
-export interface RawPanelProps {
-  value: string;
-  error: string;
-  onChange: (value: string) => void;
-}
-
 export type { AnimationParams, InterpolationStep, TrackballSpin };

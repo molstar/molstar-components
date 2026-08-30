@@ -19,8 +19,18 @@ and editor and want a stable API.
 **0.6.x** is an experimental React migration that adds the visual State Builder.
 The API may still change before a stable release.
 
-For installation, bundler setup, and component usage see the
+For bundler setup and component usage see the
 [Installation docs →](https://molstar.org/molstar-components/state-builder-docs.html#installation)
+
+## Installation
+
+```bash
+# JSR (Deno-native; Node/pnpm consumers need bundler glue — see DEV.md)
+pnpm add jsr:@molstar/molstar-components
+
+# npm (Node/bundler projects — no JSR-specific glue needed)
+npm install @molstar/molstar-components
+```
 
 ## Development
 
@@ -37,15 +47,15 @@ browser.
 
 ## Cross-repo / pnpm development
 
-To use these components inside another project (e.g. a pnpm monorepo) during
-development, build the npm-compatible dist bundle first:
+To test a local build against another project (e.g. a pnpm monorepo) before
+publishing, build the npm-compatible package first:
 
 ```bash
-deno task build:dist
+deno task pack:npm
 ```
 
-This produces `dist/index.js` (React, Molstar, etc. marked external) and
-`dist/state-builder-ui.css` (Tailwind utilities). See [DEV.md](./DEV.md) for the full cross-repo setup guide.
+This produces `dist/npm/` (compiled JS + `.d.ts` + `package.json` with proper
+`peerDependencies`). See [DEV.md](./DEV.md) for the full cross-repo setup guide.
 
 ## Updating molstar
 

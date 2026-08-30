@@ -8,7 +8,7 @@ import {
   createConstantRef,
   createEmptyConstant,
   isConstantRef,
-} from '../../../types/ui-builder.ts';
+} from '../../../core/index.ts';
 
 describe('Constants Feature', () => {
   describe('Type Guards and Helpers', () => {

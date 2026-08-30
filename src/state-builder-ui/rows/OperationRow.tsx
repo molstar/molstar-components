@@ -1,0 +1,342 @@
+'use client';
+
+import { Button } from '../base/button.tsx';
+import type { UINode, ConstantDefinition, ComponentSelectorValue, ConstantRef } from '../../state-builder/index.ts';
+import { AncestorComponentProvider } from '../state/AncestorComponentContext.tsx';
+import {
+  getValidChildren,
+  isTerminalKind,
+  countSubtreeNodes,
+  deepCopyNode,
+  generateDefaultRef,
+  isConstantRef,
+} from '../../state-builder/index.ts';
+import { ConfirmDialog } from '../base/confirm-dialog.tsx';
+import { detectCompositeSequence } from '../../state-builder/index.ts';
+import type { MVSKind } from 'molstar/lib/extensions/mvs/tree/mvs/mvs-tree';
+import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '../lib/utils.ts';
+import { TreeLines } from '../components/TreeLines.tsx';
+import { withImplementedHelpersOnly } from '../node-categories.ts';
+import { KindLabel } from '../components/KindLabel.tsx';
+import { OperationActions } from '../components/OperationActions.tsx';
+import { CompositeRow } from './CompositeRow.tsx';
+import { PrimitivesRow } from './PrimitivesRow.tsx';
+import { getNodeSummary } from '../node-summary.ts';
+import { DownloadHelper } from '../helpers/DownloadHelper.tsx';
+import { ParseHelper } from '../helpers/ParseHelper.tsx';
+import { StructureHelper } from '../helpers/StructureHelper.tsx';
+import { RepresentationHelper } from '../helpers/RepresentationHelper.tsx';
+import { ColorHelper } from '../helpers/ColorHelper.tsx';
+import { TransformHelper } from '../helpers/TransformHelper.tsx';
+import { OpacityHelper } from '../helpers/OpacityHelper.tsx';
+import { LabelHelper } from '../helpers/LabelHelper.tsx';
+import { TooltipHelper } from '../helpers/TooltipHelper.tsx';
+import { CanvasHelper } from '../helpers/CanvasHelper.tsx';
+import { ClipHelper } from '../helpers/ClipHelper.tsx';
+import { VolumeHelper } from '../helpers/VolumeHelper.tsx';
+import { VolumeRepresentationHelper } from '../helpers/VolumeRepresentationHelper.tsx';
+import { SelectorHelper } from '../helpers/SelectorHelper.tsx';
+import { PrimitiveHelper } from '../helpers/PrimitiveHelper.tsx';
+import { FocusHelper } from '../helpers/FocusHelper.tsx';
+import { ColorFromUriHelper } from '../helpers/ColorFromUriHelper.tsx';
+import { ColorFromSourceHelper } from '../helpers/ColorFromSourceHelper.tsx';
+import { LabelFromUriHelper } from '../helpers/LabelFromUriHelper.tsx';
+import { LabelFromSourceHelper } from '../helpers/LabelFromSourceHelper.tsx';
+import { TooltipFromUriHelper } from '../helpers/TooltipFromUriHelper.tsx';
+import { TooltipFromSourceHelper } from '../helpers/TooltipFromSourceHelper.tsx';
+import { ComponentFromUriHelper } from '../helpers/ComponentFromUriHelper.tsx';
+import { ComponentFromSourceHelper } from '../helpers/ComponentFromSourceHelper.tsx';
+import { InterpolateHelper } from '../helpers/InterpolateHelper.tsx';
+
+interface OperationRowProps {
+  node: UINode;
+  onUpdate: (updates: Partial<UINode>) => void;
+  onRemove: () => void;
+  onAddChild?: () => void;
+  onAddTemplateChildren?: (nodes: UINode[]) => void;
+  onCopy?: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  depth?: number;
+  isLast?: boolean;
+  isFirst?: boolean;
+  availableConstants?: ConstantDefinition[];
+  allowedKinds?: readonly MVSKind[];
+  allNodes?: UINode[];
+}
+
+export function OperationRow({
+  node,
+  onUpdate,
+  onRemove,
+  onAddChild,
+  onAddTemplateChildren,
+  onCopy,
+  onMoveUp,
+  onMoveDown,
+  depth = 0,
+  isLast = false,
+  isFirst = false,
+  availableConstants = [],
+  allowedKinds,
+  allNodes = [],
+}: OperationRowProps) {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [helperOpen, setHelperOpen] = useState(false);
+
+  const [pendingAction, setPendingAction] = useState<{ type: 'delete' } | null>(null);
+
+  const childCount = node.children?.length || 0;
+  const subtreeCount = countSubtreeNodes(node);
+  const compositeMatch = detectCompositeSequence(node);
+
+  if (compositeMatch) {
+    return (
+      <CompositeRow
+        sequence={compositeMatch.sequence}
+        rootNode={node}
+        exitNode={compositeMatch.exitNode}
+        onUpdate={onUpdate}
+        onRemove={onRemove}
+        onCopy={onCopy}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        depth={depth}
+        isFirst={isFirst}
+        isLast={isLast}
+        availableConstants={availableConstants}
+        allowedKinds={allowedKinds}
+        allNodes={allNodes}
+      />
+    );
+  }
+
+  if (node.kind === 'primitives') {
+    return (
+      <PrimitivesRow
+        node={node}
+        onUpdate={onUpdate}
+        onRemove={onRemove}
+        onCopy={onCopy}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        depth={depth}
+        isFirst={isFirst}
+        isLast={isLast}
+        availableConstants={availableConstants}
+        allowedKinds={allowedKinds}
+        allNodes={allNodes}
+      />
+    );
+  }
+
+  const handleRemove = () => {
+    if (childCount > 0) setPendingAction({ type: 'delete' });
+    else onRemove();
+  };
+
+  const handleConfirmAction = () => {
+    if (!pendingAction) {
+      return;
+    }
+    if (pendingAction.type === 'delete') {
+      onRemove();
+    }
+    setPendingAction(null);
+  };
+
+  const canHaveChildren = !isTerminalKind(node.kind);
+  const summary = getNodeSummary(node);
+  const isUnconfigured = !node.kind;
+
+  // For color nodes: resolve a CSS color string for the inline swatch, or null if unavailable.
+  const summarySwatchColor = (() => {
+    if (node.kind !== 'color') return null;
+    const color = node.params.color;
+    if (typeof color === 'string') return color;
+    if (typeof color === 'number') return '#' + color.toString(16).padStart(6, '0');
+    if (isConstantRef(color)) {
+      const ref = color as ConstantRef;
+      const entry = availableConstants
+        .find((c) => c.name === ref.constantName)
+        ?.entries.find((e) => e.key === ref.entryKey);
+      return entry?.value ?? null;
+    }
+    return null;
+  })();
+
+  const renderHelper = () => {
+    const helperProps = { node, onUpdate, open: helperOpen, onOpenChange: setHelperOpen, onCustomChange: (custom: unknown) => onUpdate({ custom: custom as Record<string, unknown> | undefined }) };
+    switch (node.kind as string) {
+      case 'download': return <DownloadHelper {...helperProps} />;
+      case 'parse': return <ParseHelper {...helperProps} />;
+      case 'structure': return <StructureHelper {...helperProps} />;
+      case 'representation': return <RepresentationHelper {...helperProps} />;
+      case 'color': return <ColorHelper {...helperProps} availableConstants={availableConstants} />;
+      case 'transform': return <TransformHelper {...helperProps} />;
+      case 'component': return <SelectorHelper {...helperProps} />;
+      case 'opacity': return <OpacityHelper {...helperProps} />;
+      case 'label': return <LabelHelper {...helperProps} />;
+      case 'tooltip': return <TooltipHelper {...helperProps} />;
+      case 'canvas': return <CanvasHelper {...helperProps} />;
+      case 'clip': return <ClipHelper {...helperProps} />;
+      case 'volume': return <VolumeHelper {...helperProps} />;
+      case 'volume_representation': return <VolumeRepresentationHelper {...helperProps} />;
+      case 'primitives': return <PrimitiveHelper {...helperProps} />;
+      case 'focus': return <FocusHelper {...helperProps} />;
+      case 'color_from_uri': return <ColorFromUriHelper {...helperProps} />;
+      case 'color_from_source': return <ColorFromSourceHelper {...helperProps} />;
+      case 'label_from_uri': return <LabelFromUriHelper {...helperProps} />;
+      case 'label_from_source': return <LabelFromSourceHelper {...helperProps} />;
+      case 'tooltip_from_uri': return <TooltipFromUriHelper {...helperProps} />;
+      case 'tooltip_from_source': return <TooltipFromSourceHelper {...helperProps} />;
+      case 'component_from_uri': return <ComponentFromUriHelper {...helperProps} />;
+      case 'component_from_source': return <ComponentFromSourceHelper {...helperProps} />;
+      case 'interpolate': return <InterpolateHelper {...helperProps} />;
+      default: return null;
+    }
+  };
+
+  const childRows = isExpanded && node.children && node.children.length > 0 ? (
+    <div className='mt-2 space-y-2'>
+      {node.children.map((child, index) => (
+        <OperationRow
+          key={child.id}
+          node={child}
+          onUpdate={(updates) => {
+            const newChildren = [...(node.children ?? [])];
+            newChildren[index] = { ...child, ...updates };
+            onUpdate({ children: newChildren });
+          }}
+          onRemove={() => {
+            const newChildren = (node.children ?? []).filter((_, i) => i !== index);
+            onUpdate({ children: newChildren });
+          }}
+          onAddChild={() => {
+            const newChildren = [...(node.children ?? []), { id: crypto.randomUUID(), kind: '' as MVSKind, params: {}, children: [] }];
+            onUpdate({ children: newChildren });
+          }}
+          onAddTemplateChildren={(nodes) => {
+            const newChildren = [...(node.children ?? []), ...nodes];
+            onUpdate({ children: newChildren });
+          }}
+          onCopy={() => {
+            const copy = deepCopyNode(child);
+            const newChildren = [...(node.children ?? [])];
+            newChildren.splice(index + 1, 0, copy);
+            onUpdate({ children: newChildren });
+          }}
+          onMoveUp={index > 0 ? () => {
+            const newChildren = [...(node.children ?? [])];
+            [newChildren[index - 1], newChildren[index]] = [newChildren[index], newChildren[index - 1]];
+            onUpdate({ children: newChildren });
+          } : undefined}
+          onMoveDown={index < (node.children?.length ?? 0) - 1 ? () => {
+            const newChildren = [...(node.children ?? [])];
+            [newChildren[index], newChildren[index + 1]] = [newChildren[index + 1], newChildren[index]];
+            onUpdate({ children: newChildren });
+          } : undefined}
+          depth={(depth ?? 0) + 1}
+          isFirst={index === 0}
+          isLast={index === (node.children?.length ?? 0) - 1}
+          availableConstants={availableConstants}
+          allowedKinds={node.kind ? withImplementedHelpersOnly(getValidChildren(node.kind as MVSKind)) : undefined}
+          allNodes={allNodes}
+        />
+      ))}
+    </div>
+  ) : null;
+
+  return (
+    <div className='relative' style={{ marginLeft: depth > 0 ? '20px' : '0' }}>
+      <TreeLines depth={depth} isLast={isLast} />
+
+      <div className={cn('border rounded-lg px-3 py-2 bg-card shadow-sm flex items-center gap-2', isUnconfigured && 'border-dashed opacity-70')}>
+        {/* Expand/collapse */}
+        {canHaveChildren && (
+          <Button
+            variant='ghost'
+            size='sm'
+            onClick={() => setIsExpanded(!isExpanded)}
+            className='h-6 w-6 p-0 shrink-0'
+          >
+            {isExpanded ? <ChevronDownIcon className='size-3' /> : <ChevronRightIcon className='size-3' />}
+          </Button>
+        )}
+
+        {/* Kind label / selector (selector shown only when no kind set yet) */}
+        <KindLabel
+          value={node.kind}
+          onChange={isUnconfigured ? (kind) => onUpdate({ kind, params: {}, children: [] }) : undefined}
+          onCompositeSelect={isUnconfigured ? (compositeNode) => onUpdate({ kind: compositeNode.kind, params: compositeNode.params, children: compositeNode.children }) : undefined}
+          allowedKinds={allowedKinds}
+        />
+
+        {/* Summary button */}
+        <button
+          type='button'
+          onClick={() => node.kind && setHelperOpen(true)}
+          disabled={!node.kind}
+          className={cn(
+            'flex-1 min-w-0 text-left text-xs px-2 py-1 rounded-md border bg-muted/40 truncate transition-colors flex items-center gap-1.5',
+            node.kind
+              ? 'hover:bg-muted hover:border-border cursor-pointer text-foreground'
+              : 'text-muted-foreground italic cursor-default border-transparent bg-transparent'
+          )}
+        >
+          {summarySwatchColor && (
+            <span
+              className='w-3 h-3 rounded-sm border border-black/10 shrink-0'
+              style={{ backgroundColor: summarySwatchColor }}
+            />
+          )}
+          <span className='truncate'>{summary ?? (node.kind ? 'click to configure…' : 'select kind first…')}</span>
+        </button>
+
+        {/* Actions dropdown */}
+        <OperationActions
+          canHaveChildren={canHaveChildren}
+          isFirst={isFirst}
+          isLast={isLast}
+          parentKind={node.kind}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+          onAddChild={onAddChild}
+          onAddChildWithKind={(kind: MVSKind) => {
+            const ref = generateDefaultRef(kind, allNodes);
+            const newChild = { id: crypto.randomUUID(), kind, params: {}, children: [], ref };
+            onUpdate({ children: [...(node.children ?? []), newChild] });
+          }}
+          onAddTemplateChildren={onAddTemplateChildren}
+          onCopy={onCopy}
+          onRemove={handleRemove}
+          validChildKinds={node.kind ? withImplementedHelpersOnly(getValidChildren(node.kind as MVSKind)) : undefined}
+        />
+
+        {/* Helper modal */}
+        {renderHelper()}
+      </div>
+
+      <ConfirmDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => !open && setPendingAction(null)}
+        title='Delete Node?'
+        description={`This will delete this node and ${subtreeCount} child node${subtreeCount !== 1 ? 's' : ''}. This cannot be undone.`}
+        confirmText='Delete'
+        onConfirm={handleConfirmAction}
+        isDestructive
+      />
+
+      {node.kind === 'component'
+        ? (
+          <AncestorComponentProvider value={node.params.selector as ComponentSelectorValue | undefined}>
+            {childRows}
+          </AncestorComponentProvider>
+        )
+        : childRows
+      }
+    </div>
+  );
+}

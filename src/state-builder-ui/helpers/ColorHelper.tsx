@@ -11,9 +11,9 @@ import type { UINode, ConstantDefinition, ConstantRef, ComponentSelectorValue } 
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import { SimplePanel, ThemePanel, ConstantPanel } from './color-helper/index.ts';
 import { SelectorHelperContent } from './SelectorHelperContent.tsx';
-import { useAncestorComponentSelector } from '../AncestorComponentContext.tsx';
+import { useAncestorComponentSelector } from '../state/AncestorComponentContext.tsx';
 import { filterMetadataBySelector } from '../../state-builder/index.ts';
-import { useStructureMetadataContext } from '../StructureMetadataContext.tsx';
+import { useStructureMetadataContext } from '../state/StructureMetadataContext.tsx';
 import { ChevronRightIcon } from 'lucide-react';
 import { cn } from '../lib/utils.ts';
 

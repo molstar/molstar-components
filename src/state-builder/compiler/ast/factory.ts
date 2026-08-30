@@ -3,7 +3,7 @@ import { MVSNode } from './node.ts';
 import type { AST, CustomProps, NodeParams } from './types.ts';
 import { ASTError } from './types.ts';
 import { VALID_MVS_KINDS } from '../constants.ts';
-import { canHaveChild } from '../../types/mvs-tree-grammar.ts';
+import { canHaveChild } from '../../core/index.ts';
 
 
 function isValidNodeStructure(value: unknown): value is {

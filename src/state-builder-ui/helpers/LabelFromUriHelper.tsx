@@ -1,16 +1,13 @@
 'use client';
 
-// TODO: ColorFromUriHelper, TooltipFromUriHelper, and LabelFromUriHelper share the same
-// uri/format/schema/category_name/field_name form shape. Consider extracting a shared
-// FromUriHelperForm component to avoid the duplication.
-
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Input } from '../base/input.tsx';
 import { Label } from '../base/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../base/select.tsx';
 import type { UINode } from '../../state-builder/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
+import { useAnnotationUriState } from './annotation-source-state.ts';
+import { ANNOTATION_URI_FORMATS, ANNOTATION_URI_SCHEMAS } from '../../state-builder/index.ts';
 
 interface LabelFromUriHelperProps {
   node: UINode;
@@ -21,50 +18,15 @@ interface LabelFromUriHelperProps {
   onCustomChange?: (custom: unknown) => void;
 }
 
-const FORMATS = ['cif', 'bcif', 'json'] as const;
-const SCHEMAS = [
-  'whole_structure', 'entity', 'chain', 'auth_chain',
-  'residue', 'auth_residue', 'residue_range', 'auth_residue_range',
-  'atom', 'auth_atom', 'all_atomic',
-] as const;
-
-function initFromNode(node: UINode) {
-  const p = node.params;
-  return {
-    uri: (p.uri as string) ?? '',
-    format: (p.format as string) ?? 'cif',
-    schema: (p.schema as string) ?? 'all_atomic',
-    categoryName: (p.category_name as string) ?? '',
-    fieldName: (p.field_name as string) ?? '',
-  };
-}
-
 export function LabelFromUriHelper({ node, onUpdate, open, onOpenChange, trigger, onCustomChange }: LabelFromUriHelperProps) {
-  const init = initFromNode(node);
-  const [uri, setUri] = useState(init.uri);
-  const [format, setFormat] = useState(init.format);
-  const [schema, setSchema] = useState(init.schema);
-  const [categoryName, setCategoryName] = useState(init.categoryName);
-  const [fieldName, setFieldName] = useState(init.fieldName);
+  const uriState = useAnnotationUriState(node);
 
   const handleDialogOpen = () => {
-    const s = initFromNode(node);
-    setUri(s.uri);
-    setFormat(s.format);
-    setSchema(s.schema);
-    setCategoryName(s.categoryName);
-    setFieldName(s.fieldName);
+    uriState.reset();
   };
 
   const handleApply = (ref: string) => {
-    const params: Record<string, unknown> = {
-      ...node.params,
-      uri,
-      format,
-      schema,
-      category_name: categoryName || undefined,
-      field_name: fieldName || undefined,
-    };
+    const params = uriState.applyParams(node.params);
     onUpdate({ params, ...(ref ? { ref } : {}) });
   };
 
@@ -88,32 +50,32 @@ export function LabelFromUriHelper({ node, onUpdate, open, onOpenChange, trigger
           <div className='flex flex-col gap-3'>
             <div className='flex flex-col gap-1'>
               <Label className='text-xs'>URI</Label>
-              <Input className='h-7 text-sm font-mono' placeholder='https://...' value={uri} onChange={(e) => setUri(e.target.value)} />
+              <Input className='h-7 text-sm font-mono' placeholder='https://...' value={uriState.uri} onChange={(e) => uriState.setUri(e.target.value)} />
             </div>
             <div className='flex gap-3'>
               <div className='flex flex-col gap-1 flex-1'>
                 <Label className='text-xs'>Format</Label>
-                <Select value={format} onValueChange={setFormat}>
+                <Select value={uriState.format} onValueChange={uriState.setFormat}>
                   <SelectTrigger size='sm'><SelectValue /></SelectTrigger>
-                  <SelectContent>{FORMATS.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
+                  <SelectContent>{ANNOTATION_URI_FORMATS.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className='flex flex-col gap-1 flex-1'>
                 <Label className='text-xs'>Schema</Label>
-                <Select value={schema} onValueChange={setSchema}>
+                <Select value={uriState.schema} onValueChange={uriState.setSchema}>
                   <SelectTrigger size='sm'><SelectValue /></SelectTrigger>
-                  <SelectContent>{SCHEMAS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  <SelectContent>{ANNOTATION_URI_SCHEMAS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
             <div className='flex gap-3'>
               <div className='flex flex-col gap-1 flex-1'>
                 <Label className='text-xs'>Category name <span className='text-muted-foreground font-normal'>(optional)</span></Label>
-                <Input className='h-7 text-xs font-mono' placeholder='annotations' value={categoryName} onChange={(e) => setCategoryName(e.target.value)} />
+                <Input className='h-7 text-xs font-mono' placeholder='annotations' value={uriState.categoryName} onChange={(e) => uriState.setCategoryName(e.target.value)} />
               </div>
               <div className='flex flex-col gap-1 flex-1'>
                 <Label className='text-xs'>Field name <span className='text-muted-foreground font-normal'>(optional)</span></Label>
-                <Input className='h-7 text-xs font-mono' placeholder='label' value={fieldName} onChange={(e) => setFieldName(e.target.value)} />
+                <Input className='h-7 text-xs font-mono' placeholder='label' value={uriState.fieldName} onChange={(e) => uriState.setFieldName(e.target.value)} />
               </div>
             </div>
           </div>

@@ -12,9 +12,7 @@ export { TransformHelper } from './helpers/TransformHelper.tsx';
 export { ColorHelper } from './helpers/ColorHelper.tsx';
 export { FocusHelper } from './helpers/FocusHelper.tsx';
 export { AnnotationHelper } from './helpers/AnnotationHelper.tsx';
-export { OperationRow } from './OperationRow.tsx';
+export { OperationRow } from './rows/OperationRow.tsx';
 export { TreeLines } from './components/TreeLines.tsx';
 export { OperationActions } from './components/OperationActions.tsx';
-export { useStructureMetadataContext } from './StructureMetadataContext.tsx';
-
-export * from './components/fields/index.ts';
+export { useStructureMetadataContext } from './state/StructureMetadataContext.tsx';

@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { useEffect, useRef, useState } from "react";
 import type { JSX } from "react";
-import { MVSTypes } from "./utils/mvs-types.ts";
-import { setupMonacoCodeCompletion, clearMonacoEditHistory } from "./utils/monaco-utils.ts";
+import { MVSTypes } from "./utils/monaco/mvs-types.ts";
+import { setupMonacoCodeCompletion, clearMonacoEditHistory } from "./utils/monaco/monaco-utils.ts";
 import * as monaco from "monaco-editor";
 
 // Import TypeScript language defaults directly from contribution module
@@ -23,7 +23,7 @@ import {
   parseParamsText,
   injectNodeParams,
   HYBRID_HELPER_METHODS,
-} from './utils/hybrid-editor-utils.ts';
+} from './utils/monaco/hybrid-editor-utils.ts';
 
 /**
  * Props for the MolViewEditor component.

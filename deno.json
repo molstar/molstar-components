@@ -48,12 +48,15 @@
     "tailwind-merge": "npm:tailwind-merge@3.3.0",
     "tailwindcss": "npm:tailwindcss@4.2.2",
     "vitest": "npm:vitest@2",
+    "@playwright/test": "npm:@playwright/test@1",
     "esbuild": "npm:esbuild@0.28.0",
     "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@0.11.1",
     "@std/path": "jsr:@std/path@^1.1.4"
   },
   "tasks": {
     "test": "deno run --allow-all npm:vitest run src/state-builder",
+    "test:e2e:install": "deno run --allow-all npm:playwright@1 install chromium",
+    "test:e2e": "deno run --allow-all npm:@playwright/test@1 test",
     "generate-aliases": "deno run --allow-read --allow-write scripts/generate-aliases.ts",
     "mvs-types": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-sys npm:rollup@4 -c scripts/rollup-mvs-data-bundle.config.mjs && deno run --allow-read --allow-write scripts/process-mvs-types.mjs",
     "clean": "rm -f docs/bundle.js docs/bundle.js.map docs/bundle.css docs/docs.bundle.js docs/docs.bundle.css docs/molstar-components.js docs/molstar-components.js.map docs/molstar-components.css docs/editor.worker.js docs/ts.worker.js docs/state-builder-ui.css docs/molstar.css docs/*.d.ts && rm -rf docs/assets",
@@ -62,7 +65,7 @@
     "dev": "deno task build && deno task serve"
   },
   "exclude": ["docs/", ".github/", "context/", ".claude/", "CLAUDE.md", "docs/superpowers/",
-    "src/state-builder/compiler/__tests__", "src/state-builder/types/__tests__"],
+    "src/state-builder/**/__tests__"],
   "publish": {
     "include": ["src/", "deno.json", "LICENSE", "README.md"]
   },

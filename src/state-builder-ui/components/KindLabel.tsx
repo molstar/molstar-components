@@ -7,7 +7,7 @@ import {
   MVS_SELECTABLE_KINDS,
 } from '../../state-builder/index.ts';
 import type { UINode } from '../../state-builder/index.ts';
-import { DOWNLOAD_PARSE_SEQUENCE, createDownloadParseNodes } from '../../state-builder/types/composite-sequences.ts';
+import { DOWNLOAD_PARSE_SEQUENCE, createDownloadParseNodes } from '../../state-builder/index.ts';
 import { getColorForKind } from '../node-categories.ts';
 import { cn } from '../lib/utils.ts';
 

@@ -80,3 +80,16 @@ export function getColorForKind(kind: MVSKind | ''): string {
   const cat = getCategoryForKind(kind);
   return cat ? NODE_CATEGORIES[cat].color : '#94a3b8';
 }
+
+/**
+ * Node kinds with no implemented editing helper — OperationRow's kind→Helper
+ * switch falls through to `default: return null` for these, so clicking such
+ * a node currently opens nothing. Hidden from kind pickers ("Add child" menus,
+ * empty-node kind selection) until helpers exist.
+ * See context/plans/2026-08-09-unimplemented-node-helpers.md.
+ */
+export const UNIMPLEMENTED_HELPER_KINDS: readonly MVSKind[] = ['coordinates', 'instance', 'primitives_from_uri'];
+
+export function withImplementedHelpersOnly<T extends readonly MVSKind[]>(kinds: T): MVSKind[] {
+  return kinds.filter((k) => !UNIMPLEMENTED_HELPER_KINDS.includes(k));
+}

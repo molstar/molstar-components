@@ -48,7 +48,7 @@ const final = [
   '`;',
 ];
 
-fs.writeFileSync('./src/utils/mvs-types.ts', final.join('\n'), 'utf-8');
+fs.writeFileSync('./src/utils/monaco/mvs-types.ts', final.join('\n'), 'utf-8');
 fs.rmSync(rawPath);
 
-console.log(`Generated src/utils/mvs-types.ts from molstar@${molstarVersion}`);
+console.log(`Generated src/utils/monaco/mvs-types.ts from molstar@${molstarVersion}`);

@@ -8,10 +8,11 @@ import { useState } from 'react';
 import { PRIMITIVE_KINDS } from '../../state-builder/index.ts';
 import type { PrimitiveKind } from '../../state-builder/index.ts';
 import type { UINode } from '../../state-builder/index.ts';
-import { PrimitiveItemEditor, RawPanel, PrimitivesConfigPanel } from './primitive-helper/index.ts';
+import { PrimitiveItemEditor, PrimitivesConfigPanel } from './primitive-helper/index.ts';
 import type { PrimitivesConfig } from './primitive-helper/index.ts';
 import { NodeHelperBase } from './NodeHelperBase.tsx';
 import type { HelperTab } from './NodeHelperBase.tsx';
+import { RawJsonPanel } from '../components/RawJsonPanel.tsx';
 
 export interface PrimitiveHelperProps {
   node: UINode;
@@ -280,7 +281,7 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
       id: 'prim-raw',
       label: 'Raw',
       content: (
-        <RawPanel
+        <RawJsonPanel
           value={rawJson}
           error={rawError}
           onChange={(v) => {
@@ -293,6 +294,16 @@ export function PrimitiveHelper({ node, onUpdate, open, onOpenChange, trigger, o
               setRawError('Invalid JSON');
             }
           }}
+          label='Primitives JSON'
+          placeholder={`[
+  {
+    "kind": "label",
+    "position": [0, 0, 0],
+    "text": "Label"
+  }
+]`}
+          helpText={<>Type out the primitives array JSON. Each object must include a <code>kind</code> field.</>}
+          minHeight='300px'
         />
       ),
     },

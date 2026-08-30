@@ -24,3 +24,8 @@ molstar-components-*.tar.gz
 
 .idea/
 .vite/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/

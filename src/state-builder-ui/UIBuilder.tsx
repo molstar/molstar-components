@@ -34,8 +34,8 @@ import { StructureMetadataProvider } from './state/StructureMetadataContext.tsx'
 import { SetupWizard } from './SetupWizard.tsx';
 import { AfterApplyContext } from './state/after-apply-context.ts';
 import { ImportMvsTreeDialog } from './components/ImportMvsTreeDialog.tsx';
-import { useCodeGeneration } from './hooks/ui-builder/useCodeGeneration.ts';
-import { useUndoableSceneState } from './hooks/ui-builder/useUndoableSceneState.ts';
+import { useCodeGeneration } from './hooks/ui-builder/useCodeGeneration.tsx';
+import { useUndoableSceneState } from './hooks/ui-builder/useUndoableSceneState.tsx';
 import { useNodeTreeOperations } from './hooks/ui-builder/useNodeTreeOperations.ts';
 import { withImplementedHelpersOnly } from './node-categories.ts';
 

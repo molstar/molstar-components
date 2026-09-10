@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.6.0-experimental.29 (2026-09-10)
+
+### Fixes
+
+- **Fixed `UIBuilderHandle` imperative calls (`setState`, `setCamera`, `getState`)
+  silently no-oping against `UIBuilder`'s rendered state** — broken since
+  `.28`'s internal refactor. `useUndoableSceneState.ts` and `useCodeGeneration.ts`
+  (extracted from `UIBuilder.tsx` into standalone `.ts` files) imported the shared
+  `state/atoms.ts`/`auto-generate-context.ts` modules with the same extension as
+  `provider.tsx`/`UIBuilder.tsx` in source, but JSR's publish pipeline rewrites
+  relative import extensions inside plain `.ts` files (`.ts` → `.js`, pointing at
+  the compiled sibling) while leaving `.tsx` files untouched. That meant the
+  imperative side (`provider.tsx`) and the render side (`UIBuilder.tsx`, via the
+  extracted hooks) ended up reading/writing two different physical modules after
+  publish — two disconnected Jotai atom instances for the same conceptual state.
+  In practice: any host app driving the builder imperatively (`useSyncToBuilder`'s
+  "Sync to Builder", camera capture via `setCamera`) would appear to succeed with
+  no error, but the builder UI would never reflect the change. Internal-only
+  interactions (e.g. the setup wizard) were unaffected, since they read and write
+  through the same module entirely inside `UIBuilder.tsx`'s own import graph.
+- Fix: renamed `useUndoableSceneState.ts` → `.tsx` and `useCodeGeneration.ts` →
+  `.tsx` (no JSX added) so JSR's publish step treats them like the other
+  `state-builder-ui` files and doesn't rewrite their shared-module imports.
+
 ## 0.6.0-experimental.28 (2026-09-10)
 
 First release since `.27` — also picks up everything merged to `main` since May

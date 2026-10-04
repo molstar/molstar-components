@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Label } from '../base/label.tsx';
+import { Input } from '../base/input.tsx';
 import { Button } from '../base/button.tsx';
 import { ChevronRightIcon } from 'lucide-react';
 import { cn } from '../lib/utils.ts';
@@ -12,11 +13,13 @@ import {
   buildUnionSelector,
   getAvailableChains,
   getAvailableLigands,
+  parseMolqlInput,
   parseRawSelectorInput,
   parseSelector,
   selectorToString,
   type ComponentSelectorObject,
   type ComponentSelectorValue,
+  type MolqlSelectorValue,
   type SelectorBuilderMode,
   type StructureMetadata,
 } from '../../state-builder/index.ts';
@@ -45,6 +48,8 @@ export interface SelectorHelperContentProps {
   hideMetadataStatus?: boolean;
   /** Hide the selector preview. Use when embedded inline (not in a dedicated selector dialog). */
   hidePreview?: boolean;
+  /** Show an optional "Structure ref" field alongside the MolQL textarea — only valid for primitive positions. */
+  allowMolqlStructureRef?: boolean;
 }
 
 const MODE_LABELS: { mode: SelectorBuilderMode; label: string }[] = [
@@ -55,6 +60,7 @@ const MODE_LABELS: { mode: SelectorBuilderMode; label: string }[] = [
   { mode: 'expression', label: 'Expression' },
   { mode: 'union', label: 'Union' },
   { mode: 'raw', label: 'Raw' },
+  { mode: 'molql', label: 'MolQL' },
 ];
 
 export function SelectorHelperContent({
@@ -65,6 +71,7 @@ export function SelectorHelperContent({
   onTabChange,
   hideMetadataStatus = false,
   hidePreview = false,
+  allowMolqlStructureRef = false,
 }: SelectorHelperContentProps) {
   // Initialize to undefined (not value) so the initial mount sync always runs
   // and pre-populates the correct tab from the incoming value.
@@ -89,6 +96,9 @@ export function SelectorHelperContent({
     { id: '1', chain: '', from: '', to: '' },
   ]);
   const [expressionValue, setExpressionValue] = useState<ComponentSelectorObject>({});
+  const [molqlInput, setMolqlInput] = useState('');
+  const [molqlError, setMolqlError] = useState('');
+  const [molqlStructureRef, setMolqlStructureRef] = useState('');
 
   // Context and derived state
   const metadataContext = useStructureMetadataContext();
@@ -134,6 +144,11 @@ export function SelectorHelperContent({
       case 'expression':
         setExpressionValue(parsed.expressionValue ?? {});
         break;
+      case 'molql':
+        setMolqlInput(parsed.molqlValue !== undefined ? JSON.stringify(parsed.molqlValue, null, 2) : '');
+        setMolqlStructureRef(parsed.molqlStructureRef ?? '');
+        setMolqlError('');
+        break;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
@@ -146,6 +161,7 @@ export function SelectorHelperContent({
     raw?: string;
     union?: UnionEntry[];
     expr?: ComponentSelectorObject;
+    molql?: string; molqlRef?: string;
     currentMode?: SelectorBuilderMode;
   }) => {
     const m = overrides?.currentMode ?? mode;
@@ -158,6 +174,8 @@ export function SelectorHelperContent({
     const raw = overrides?.raw ?? rawInput;
     const union = overrides?.union ?? unionEntries;
     const expr = overrides?.expr ?? expressionValue;
+    const molql = overrides?.molql ?? molqlInput;
+    const molqlRef = overrides?.molqlRef ?? molqlStructureRef;
 
     const emit = (v: ComponentSelectorValue | undefined) => {
       lastEmittedRef.current = v;
@@ -216,6 +234,25 @@ export function SelectorHelperContent({
         emit(hasAnyField ? expr : undefined);
         break;
       }
+      case 'molql': {
+        if (molql.trim()) {
+          const result = parseMolqlInput(molql);
+          if (result.error) {
+            setMolqlError(result.error);
+            emit(undefined);
+          } else {
+            setMolqlError('');
+            const wrapped: MolqlSelectorValue = {
+              molql: result.value,
+              ...(molqlRef.trim() ? { structure_ref: molqlRef.trim() } : {}),
+            };
+            emit(wrapped);
+          }
+        } else {
+          emit(undefined);
+        }
+        break;
+      }
       case 'quick':
         // Quick mode emits on quickSelect below
         break;
@@ -257,6 +294,14 @@ export function SelectorHelperContent({
   const handleExpressionChange = (expr: ComponentSelectorObject) => {
     setExpressionValue(expr);
     buildAndEmit({ expr });
+  };
+  const handleMolqlChange = (v: string) => {
+    setMolqlInput(v);
+    buildAndEmit({ molql: v });
+  };
+  const handleMolqlStructureRefChange = (v: string) => {
+    setMolqlStructureRef(v);
+    buildAndEmit({ molqlRef: v });
   };
 
   const handleModeChange = (m: SelectorBuilderMode) => {
@@ -364,6 +409,48 @@ export function SelectorHelperContent({
 
       {mode === 'expression' && (
         <ExpressionPanel value={expressionValue} onChange={handleExpressionChange} />
+      )}
+
+      {mode === 'molql' && (
+        <div className='space-y-2'>
+          <RawJsonPanel
+            value={molqlInput}
+            error={molqlError}
+            onChange={handleMolqlChange}
+            label='MolQL Expression'
+            placeholder='{ "head": { "name": "structure-query.generator.atom-groups" }, "args": { ... } }'
+            helpText={
+              <>
+                MolQL expressions are JSON, generated elsewhere — not written by hand here. Build one
+                with Mol*&apos;s{' '}
+                <a href='https://github.com/molstar/molstar/tree/master/src/mol-script' target='_blank' rel='noreferrer' className='underline'>
+                  mol-script
+                </a>{' '}
+                builder, or convert an existing PyMOL / VMD / Jmol selection via its{' '}
+                <a href='https://github.com/molstar/molstar/tree/master/src/mol-script/transpilers' target='_blank' rel='noreferrer' className='underline'>
+                  transpilers
+                </a>
+                . See the{' '}
+                <a href='https://molql.org' target='_blank' rel='noreferrer' className='underline'>
+                  MolQL spec
+                </a>{' '}
+                for the underlying language. Paste the resulting JSON expression tree below.
+              </>
+            }
+            minHeight='8rem'
+          />
+          {allowMolqlStructureRef && (
+            <div>
+              <Label className='text-xs'>Structure ref (optional)</Label>
+              <Input
+                className='h-8 text-xs font-mono'
+                placeholder='other-structure-ref'
+                value={molqlStructureRef}
+                onChange={(e) => handleMolqlStructureRefChange(e.target.value)}
+              />
+            </div>
+          )}
+        </div>
       )}
 
       {/* Preview - not shown for quick mode or when explicitly hidden */}

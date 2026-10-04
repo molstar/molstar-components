@@ -116,6 +116,7 @@ export function PositionEditor({ label, state, onChange }: PositionEditorProps) 
           metadata={metadataCtx?.metadata ?? undefined}
           hideMetadataStatus
           hidePreview
+          allowMolqlStructureRef
         />
       )}
 

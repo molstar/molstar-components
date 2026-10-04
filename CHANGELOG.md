@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.0-experimental.30 (2026-10-04)
+
+### Added
+
+- **MolQL selector support.** Every selector-editing helper (component, color,
+  `*_from_uri`/`*_from_source`, and primitive positions) now has a `MolQL` tab
+  accepting a pre-compiled MolQL expression tree (as produced by Mol*'s
+  `MolScriptBuilder` or its PyMOL/VMD/Jmol transpilers), wrapped automatically
+  as `{ molql: ... }`. Primitive positions additionally accept an optional
+  `structure_ref` to address a different loaded structure.
+
+### Breaking changes
+
+- **`molstar` peer dependency bumped to `5.12+`.** Required for MolQL selector
+  support (molstar/molstar#1923). Consuming apps should upgrade their own
+  `molstar` dependency to `^5.12.0`.
+
 ## 0.6.0-experimental.29 (2026-09-10)
 
 ### Fixes

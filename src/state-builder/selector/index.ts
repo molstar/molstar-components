@@ -2,6 +2,7 @@ export type {
   LabeledValue,
   ComponentSelectorObject,
   ComponentSelectorValue,
+  MolqlSelectorValue,
   SelectorBuilderMode,
   StructureMetadata,
   ChainInfo,
@@ -23,6 +24,7 @@ export {
   selectorToString,
   parseRawSelectorInput,
   formatSelectorPreview,
+  parseMolqlInput,
 } from './parsing.ts';
 
 export { getAvailableChains, getAvailableLigands, getResidueRange } from './queries.ts';

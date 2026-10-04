@@ -14,6 +14,18 @@ export interface ParsedSelector {
   rawValue?: string;
   unionEntries?: { chain: string; from?: number; to?: number }[];
   expressionValue?: ComponentSelectorObject;
+  molqlValue?: unknown;
+  molqlStructureRef?: string;
+}
+
+function isMolqlSelectorValue(value: unknown): value is { molql: unknown; structure_ref?: string } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    'molql' in value &&
+    Object.keys(value).every((k) => k === 'molql' || k === 'structure_ref')
+  );
 }
 
 /**
@@ -43,6 +55,16 @@ export function parseSelector(value: unknown): ParsedSelector {
   // Object selector
   if (typeof value === 'object' && value !== null) {
     const obj = value as ComponentSelectorObject;
+
+    // MolQL expression wrapper (and legacy-shape checks below wouldn't match it anyway,
+    // but without this it would fall through to the generic expression branch)
+    if (isMolqlSelectorValue(obj)) {
+      return {
+        mode: 'molql',
+        molqlValue: obj.molql,
+        molqlStructureRef: obj.structure_ref,
+      };
+    }
 
     // Ligand selector (has label_comp_id, no residue fields)
     if (obj.label_comp_id && !obj.beg_label_seq_id && !obj.label_seq_id) {
@@ -129,6 +151,9 @@ export function formatSelectorPreview(selector: unknown): string {
   if (typeof selector === 'string') return selector;
   if (typeof selector === 'object' && !Array.isArray(selector)) {
     const obj = selector as ComponentSelectorObject;
+    if (isMolqlSelectorValue(obj)) {
+      return 'MolQL Selection';
+    }
     if (obj.label_asym_id && obj.label_comp_id) {
       return `Chain ${obj.label_asym_id}: ${obj.label_comp_id}`;
     }
@@ -150,4 +175,30 @@ export function formatSelectorPreview(selector: unknown): string {
     return `Union (${selector.length} selectors)`;
   }
   return String(selector);
+}
+
+/**
+ * Parse a MolQL expression textarea input — the inner expression tree, not the `{ molql }`
+ * wrapper. Only checks the minimal shape Mol* requires (an `Apply` node with a `head`
+ * property); full semantic validation happens when Mol* compiles the expression at
+ * story-load time, not here.
+ */
+export function parseMolqlInput(input: string): { value: unknown; error?: string } {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return { value: undefined, error: 'Empty input' };
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    return { value: undefined, error: 'Invalid JSON syntax' };
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed) || !('head' in parsed)) {
+    return {
+      value: undefined,
+      error: 'Expected a MolQL expression object with a "head" property, e.g. { "head": { "name": "..." }, "args": [...] }',
+    };
+  }
+  return { value: parsed };
 }

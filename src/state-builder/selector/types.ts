@@ -23,12 +23,23 @@ export interface ComponentSelectorObject {
  * - object selector (e.g., { label_asym_id: 'A' })
  * - array of selectors for union (e.g., [{ label_asym_id: 'A' }, { label_asym_id: 'B' }])
  */
-export type ComponentSelectorValue = string | ComponentSelectorObject | ComponentSelectorObject[];
+export type ComponentSelectorValue = string | ComponentSelectorObject | ComponentSelectorObject[] | MolqlSelectorValue;
+
+/**
+ * Pre-compiled MolQL expression wrapper, as introduced by Mol* for MolViewSpec selectors.
+ * `molql` holds a serialized MolScript `Expression` (an `Apply` node) generated externally
+ * (via `MolScriptBuilder` or a transpiler) — never hand-written in this UI.
+ * `structure_ref` is only meaningful on primitive positions, referencing a different loaded structure.
+ */
+export interface MolqlSelectorValue {
+  molql: unknown;
+  structure_ref?: string;
+}
 
 /**
  * Selection mode for the selector builder UI
  */
-export type SelectorBuilderMode = 'chain' | 'residue' | 'ligand' | 'quick' | 'raw' | 'union' | 'expression';
+export type SelectorBuilderMode = 'chain' | 'residue' | 'ligand' | 'quick' | 'raw' | 'union' | 'expression' | 'molql';
 
 /**
  * Structure metadata for dynamic selector population.

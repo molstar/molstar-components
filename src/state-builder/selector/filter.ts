@@ -21,6 +21,8 @@ export function filterMetadataBySelector(
 ): StructureMetadata {
   if (typeof selector === 'string') return filterByPreset(metadata, selector);
   if (Array.isArray(selector)) return mergeResults(selector.map(obj => filterByObject(metadata, obj)));
+  // MolQL expressions are opaque pre-compiled queries — cannot be narrowed statically.
+  if ('molql' in selector) return metadata;
   return filterByObject(metadata, selector);
 }
 
